@@ -3,6 +3,8 @@ Early-stage research related to the Anoma protocols. Everything in this reposito
 ---
 
 - [Cryptography](./cryptography)
+- [Cryptography/recursive-proofs](./cryptography/recursive-proofs)
+
 
 ---
 
