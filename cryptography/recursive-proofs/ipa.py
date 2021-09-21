@@ -50,7 +50,7 @@ class IPACommitment():
 
     def rho(self, *arg):
         return int(hashlib.sha256((str(arg)).encode()).hexdigest(),16)
-                
+    
     def create(self, polynomial, rand):
         # `polynomial` is an element of Fr[X] of degree \leq d
         # `rand` is a random element of Fr.
@@ -156,10 +156,7 @@ class IPACommitment():
         T += ZZ(iota) * C_s
         z = self.Fr(self.rho(iota))
 
-        # bb = [x**i for i in range(1<<len(L))]
-        bb = [1]
-        for i in range(1, 1<<len(L)):
-            bb.append(bb[-1]*x)
+        pow_x = x
         powFrX = self.FrX.gen()
         for i in range(len(L)):
             l = L[i]
@@ -169,8 +166,9 @@ class IPACommitment():
             T += ZZ(challenge_inverse) * l
             T += ZZ(challenge) * r
             # computation of b and sX, useful for getting G
-            b *= (1 + challenge * bb[1<<i])
-            sX *=  (1 + challenge * powFrX)
+            b  *= (1 + challenge * pow_x)
+            sX *= (1 + challenge * powFrX)
+            pow_x  **= 2
             powFrX **= 2
             
         # computation of G with O(d) complexity
