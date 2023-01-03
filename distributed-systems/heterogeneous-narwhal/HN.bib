@@ -1,0 +1,76 @@
+@inproceedings{podc18Herlihy,
+author = {Herlihy, Maurice},
+title = {Atomic Cross-Chain Swaps},
+year = {2018},
+isbn = {9781450357951},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3212734.3212736},
+doi = {10.1145/3212734.3212736},
+abstract = {An atomic cross-chain swap is a distributed coordination task where multiple parties exchange assets across multiple blockchains, for example, trading bitcoin for ether.An atomic swap protocol guarantees (1) if all parties conform to the protocol, then all swaps take place, (2) if some coalition deviates from the protocol, then no conforming party ends up worse off, and (3) no coalition has an incentive to deviate from the protocol.A cross-chain swap is modeled as a directed graph D, whose vertexes are parties and whose arcs are proposed asset transfers. For any pair (D, L), where D = (V,A) is a strongly-connected directed graph and L ⊂ V a feedback vertex set for D, we give an atomic cross-chain swap protocol for D, using a form of hashed timelock contracts, where the vertexes in L generate the hashlocked secrets. We show that no such protocol is possible if D is not strongly connected, or if D is strongly connected but L is not a feedback vertex set. The protocol has time complexityO(diam(D)) and space complexity (bits stored on all blockchains) O(|A|2).},
+booktitle = {Proceedings of the 2018 ACM Symposium on Principles of Distributed Computing},
+pages = {245–254},
+numpages = {10},
+keywords = {blockchain, atomic swap},
+location = {Egham, United Kingdom},
+series = {PODC '18}
+}
+
+@InProceedings{opodis20HPaxos,
+  author =	{Isaac Sheff and Xinwen Wang and Robbert van Renesse and Andrew C. Myers},
+  title =	{{Heterogeneous Paxos}},
+  booktitle =	{24th International Conference on Principles of Distributed Systems (OPODIS 2020)},
+  pages =	{5:1--5:17},
+  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
+  ISBN =	{978-3-95977-176-4},
+  ISSN =	{1868-8969},
+  year =	{2021},
+  volume =	{184},
+  editor =	{Quentin Bramas and Rotem Oshman and Paolo Romano},
+  publisher =	{Schloss Dagstuhl--Leibniz-Zentrum f{\"u}r Informatik},
+  address =	{Dagstuhl, Germany},
+  URL =		{https://drops.dagstuhl.de/opus/volltexte/2021/13490},
+  URN =		{urn:nbn:de:0030-drops-134909},
+  doi =		{10.4230/LIPIcs.OPODIS.2020.5},
+  annote =	{Keywords: Consensus, Trust, Heterogeneous Trust}
+}
+
+@inproceedings{NT,
+  author    = {George Danezis and
+               Lefteris Kokoris{-}Kogias and
+               Alberto Sonnino and
+               Alexander Spiegelman},
+  editor    = {Y{\'{e}}rom{-}David Bromberg and
+               Anne{-}Marie Kermarrec and
+               Christos Kozyrakis},
+  title     = {Narwhal and Tusk: a DAG-based mempool and efficient {BFT} consensus},
+  booktitle = {EuroSys '22: Seventeenth European Conference on Computer Systems,
+               Rennes, France, April 5 - 8, 2022},
+  pages     = {34--50},
+  publisher = {{ACM}},
+  year      = {2022},
+  url       = {https://doi.org/10.1145/3492321.3519594},
+  doi       = {10.1145/3492321.3519594},
+  timestamp = {Wed, 13 Apr 2022 13:48:01 +0200},
+  biburl    = {https://dblp.org/rec/conf/eurosys/DanezisKSS22.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{RedBelly,
+
+  author={Crain, Tyler and Natoli, Christopher and Gramoli, Vincent},
+
+  booktitle={2021 IEEE Symposium on Security and Privacy (SP)}, 
+
+  title={Red Belly: A Secure, Fair and Scalable Open Blockchain}, 
+
+  year={2021},
+
+  volume={},
+
+  number={},
+
+  pages={466-483},
+
+  doi={10.1109/SP40001.2021.00087}
+}
