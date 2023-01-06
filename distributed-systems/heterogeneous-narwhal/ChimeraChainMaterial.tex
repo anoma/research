@@ -1,0 +1,159 @@
+\section{Motivation / Background / Context}
+
+\subsection{Atomic cross-chain swaps}
+\label{sec:atom-trans-across}
+
+\begin{quote}
+  An atomic cross-chain swap is 
+  a distributed coordination task 
+  where multiple parties exchange assets across multiple blockchains, 
+  for example, trading bitcoin for ether.
+
+  An atomic swap protocol guarantees 
+  (1) if all parties conform to the protocol, 
+  then all swaps take place, 
+  (2) if some coalition deviates from the protocol, 
+  then no conforming party ends up worse off, and 
+  (3) no coalition has an incentive to deviate from the protocol.
+\hfill\cite{podc18Herlihy} 
+\end{quote}
+
+\subsection{Let's start in the land of naïveté}
+\label{sec:naivities}
+
+\subsubsection{The impossible}
+\label{sec:impossible-concurrency}
+
+One simple ``ideal'' solution for cross-chain swaps is 
+``concurrent''  inclusion of 
+transactions in two blocks, one on each chain, 
+which refer to each other reciprocally.
+However, 
+this simply cannot be accomplished with hash links.
+
+\subsubsection{A seemingly good situation}
+\label{sec:almost-safe}
+
+Another naïve approach consists in
+% in a \emph{combo block}  
+% is proposing the next ``same'' block on two chains,
+% at the same “moment”,
+% e.g., if on 
+is running a validator on both involved chains. 
+Whenever the validator has the right to propose 
+the next block on both chains,
+we “simultaneously” propose one transaction on each chain. 
+However,
+we could “loose” the proposal spot,
+\eg if a view change is initiated on one of the two chains.
+\todo{%
+  describe in more detail 
+}
+Even worse,
+it could be that one of the proposals goes through,
+while the other gets “vetoed”.
+
+\subsubsection{The envisioned solution: chimera chains}
+\label{sec:envisioned-solution}
+We propose to establish a ledger that records transactions
+that involve two (or more) pre-existing chains%
+---dubbed \emph{chimera chain}. 
+If we want to speak in terms of bridges,
+our envisioned solution combines the ideas of trusted and trustless bridges.
+ \todo[inline]{%
+  add fine print on which bridges might actually do this already:
+  in particular, trustless bridges,
+  see \eg \url{https://ethereum.org/en/bridges/}
+}
+
+The chimera chains orders blocks with cross-chain transactions
+such that inclusion in 
+the chimera chain leads to (eventual) execution in the two \base[s]. 
+The seemingly simple principle for running the chimera chain
+is maximal usage of pre-existing validator sets.
+\endnote{%
+  though additional validators might want to join for 
+  the purpose of bridging for the purpose of chimera chains
+}
+In particular, we want
+\begin{enumerate}
+\item more than a single validator in the intersection of two quorums
+\item a protocol, 
+  that gives these validators the opportunity to propose \emph{combo block}
+  on a chimera chain. 
+\end{enumerate}
+\todo{
+  explain in non-technical terms that
+  the same-slot-on-both-chains situation
+  has a very intuitive counterpart in
+  having quorum-pairs between 
+  two chains as the quorum system for the chimera chain 
+  of two chains. 
+}\endnote{%
+  for “quorum-pairs” between two chains,
+  explain why it is still much cheaper
+  than having a merged super-chain
+  (if it is ...)
+}
+
+
+\subsection{Chimera chains}
+\label{sec:chimera-chains}
+
+% \paragraph{Overview}
+
+Assuming a fixed set of \base[s], 
+each of which have a set of quorums
+such that one of them “should” be live at any point in time,%
+\footnote{%
+  This is a simplifying assumption,
+  which we use only in the exposition.
+  In principle,
+  learners are completely independent entities.
+  They “dictate” which quorums they would trust,  
+  in particular concerning liveness.
+  For safety, %
+  the situation is more intricate. %
+}%
+\todo{explain this}\xspace%
+chimera chains have the following phases:
+\begin{description}
+\item[Spawn] %
+  Among other things,
+  the genesis blocks are generated,
+  including links to the blocks in all \base[s]
+  that “summoned” the chimera chain. 
+
+\item[Active]
+  The usual mode of operation,
+  in particular facilitating cross-chain transfers. 
+
+\item[Retire] 
+  Low activity or inconsistencies might call 
+  for retirement of the chimera chain. 
+
+\item[Merge]
+  In principle,
+  the ecosystems of two \base[s] do “completely” merge
+  such that the chimera chain is still performant enough.
+  In fact,
+  this might be a good thing:
+  smaller \base[s] are just joining larger ones.
+  Clearly,
+  there's a trade off,
+  between centralization and usability. 
+\end{description}
+
+The chimera chain has dedicated “administrative” transactions,
+e.g.,
+for spawing
+
+
+
+
+
+
+
+
+
+
