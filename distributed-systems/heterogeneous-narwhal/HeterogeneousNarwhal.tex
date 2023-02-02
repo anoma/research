@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[dvipsnames]{article}
 \usepackage{markdown}
 \usepackage{soulutf8}
 %\renewcommand{\st}[1]{}
@@ -191,24 +191,36 @@
 }
 \author{Typhon Team Heliax}
 \date{\today}
-\begin{document}
+
+\newcommand{\code}[2][ ]{%
+  \makebox[0pt][r]{\tiny%
+    \href{%
+      https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal%
+    }%
+    {\color{gray}\texttt{#2}}%
+    ~~%
+  }%
+}
 %\renewcommand{\todo}[2][]{}
 %\renewcommand{\endnote}[1]{#1}
+\begin{document}
 %\begin{comment}
 
 
 \begin{center}
-  \huge notes to prospective co-authors, 
-  colleagues, and friends
+  \huge %
+  notes to prospective co-authors, %
+  colleagues, and friends %
 \end{center}
 \label{page:firstpage}
 \todo[inline,caption={},color=blue!30!white]{%
   Please note the following about this paper:
   \begin{itemize}
-  \item it is \emph{not} about chimera chains;
-  \item it is the \emph{basis} for chimera chains;
-  \item it is “merely” a technical report
+  \item it is “merely” a technical report about
+    \emph{Heterogeneous Narwhal}
   \item a “reader's digest” version should follow 
+  \item it is the \emph{basis} for chimera chains;
+  \item however chimera chains, will be left as (concurrent) future work;
   \end{itemize}
   Please keep this in mind,
   when reading the paper!
@@ -230,6 +242,10 @@
     \end{enumerate}
     this goal is independent of the specific uses of the different chains,
     cf. chimera chains
+  \item %
+    description of the %
+    \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright}%
+    {prototype implementation}
   \end{itemize}
   \begin{description}
   \item[learner graph] %
@@ -332,6 +348,19 @@
   we present a general framwork for building
   a cross-chain ecosystem of pre-existing and new ledgers.  
 }
+
+\section{Context}
+\label{sec:context}
+\todo[inline]{.. a little bit of story telling}
+
+We want to work towards a multi-chain world in 
+which 
+- everyone can interact with all chains of the ecosystems
+- there is a unique definitive state of every chain 
+
+
+
+
 
 \section{Preliminaries}
 \label{sec:preliminaries}
@@ -509,9 +538,9 @@ Every validator has the same number of workers.
 Thus,
 each worker can be assigned a unique \emph{mirror worker} 
 on every other validator.
-We shall adopt the convention of using the same subscript
-for mirror workers of each other. % 
-Thus,
+We shall adopt the convention 
+that mirror worker identifiers share the same subscript.
+For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
 In the integrity protocol,
@@ -545,10 +574,14 @@ primaries do not need to send messages back to their workers.
 }
 
 \begin{description}
-\item[Transaction collection (\tx{}←)] 
+\item[\code{MessageEnum::TxReq}Transaction collection (\tx{}←)] 
   \tnote{worker\\ ← client}
+  \todo{in the typhon sources for \texttt{`heterogeneous\_narwhal`},
+    each transaction collection is \emph{immediately} followed 
+    by a \texttt{TxAck}
+  }
   Each worker keeps listening 
-  for new transaction requests from clients.\footnote{%
+  for incoming transaction requests from clients.\footnote{%
     The bandwith and amount of storage for storing incoming transactions
     \emph{should} be big enough 
     to process all incoming transactions. 
@@ -564,11 +597,21 @@ primaries do not need to send messages back to their workers.
   }
   Transactions should be buffered using reasonably fast memory. 
   \endnote{%
-    This matter should be discussed
-    in the context of \textsc{p2p}. 
+    The matter of reasonably fast transaction buffer
+    needs additional context, 
+    in particular details from the \textsc{p2p} layer. 
   }
+  \todo[inline,color=SkyBlue]{%
+    In the
+    \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
+    {code}, 
+    we instantly acknowledge the transactions received.
+    \\
+    \code{MessageEnum::TxAck}
+  }
+ 
 
-\item[Transaction distribution (\tx⇒)]
+\item[\code{MessageEnum::TxToAll}Transaction distribution (\tx⇒)]
   \tnote{worker\\ ⇒ worker}
   Each worker “broadcasts” erasure coding shares of 
   every received transaction to mirror workers.
@@ -670,7 +713,7 @@ primaries do not need to send messages back to their workers.
   a worker can receive a worker hash 
   from a mirror worker. 
   As a first reaction, 
-  it checks whether enough 
+  it checks whether enough
   transactions have been received by the worker and, 
   if so, 
   whether the hash of the list of transaction matches the worker hash. 
