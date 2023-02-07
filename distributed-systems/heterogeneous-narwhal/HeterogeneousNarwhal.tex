@@ -574,7 +574,10 @@ primaries do not need to send messages back to their workers.
 }
 
 \begin{description}
-\item[\code{MessageEnum::TxReq}Transaction collection (\tx{}←)] 
+\item[%
+  \code{MessageEnum::TxReq}%
+  Transaction collection (\tx{}←)%
+  ] 
   \tnote{worker\\ ← client}
   \todo{in the typhon sources for \texttt{`heterogeneous\_narwhal`},
     each transaction collection is \emph{immediately} followed 
@@ -610,8 +613,9 @@ primaries do not need to send messages back to their workers.
     \code{MessageEnum::TxAck}
   }
  
-
-\item[\code{MessageEnum::TxToAll}Transaction distribution (\tx⇒)]
+\item[%
+  Transaction distribution (\tx⇒)%
+  ]
   \tnote{worker\\ ⇒ worker}
   Each worker “broadcasts” erasure coding shares of 
   every received transaction to mirror workers.
@@ -645,7 +649,9 @@ primaries do not need to send messages back to their workers.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \todo[inline]{put fwd ref / future work }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-  \item[Copy distribution (\es⇒)] 
+  \item[%
+    \code{MessageEnum::TxToAll}%
+    Copy distribution (\es⇒)] 
     \tnote{worker\\ ⇒ worker }
     Each share of the erasure code,
     \ie a copy of the transaction, 
@@ -657,17 +663,39 @@ primaries do not need to send messages back to their workers.
     }%
     \xspace
     We tag each transaction with a \emph{sequence number},
+    \todo[color=red]{%
+      YIKES !!!\\
+      how do we know the validators round number? \\
+      well, we \textsc{don't}
+    }
+    \todo[color=SkyBlue]{%
+      as a solution,
+      we introduce the \emph{take},
+      which might be increasing faster than the round number
+    }
     consisting of the validator round and 
     the position in the list of transactions for 
     the next block (header) in which the transaction will be included. 
     % so that it becomes clear in which order the 
     % transactions of the next block (header) will be listed. 
+    
+  \item[%
+   \code{fn process\_tx\_req}%
+   Transaction copy (erasure code) reception%
+   ]\tnote{[worker]}%
+   Upon receiving a transaction copy
+    (the specific form of erasure code, we are using)
+    we store a copy locally. 
+    
+    
   \end{description}
   Note that copies of transactions are \emph{not} signed by the worker. 
   Signatures are deferred to until after the last transaction  
   of a validator round, 
   when the worker will sign the hash of the list of all broadcast transactions,
   called a \emph{worker hash}. 
+
+
   
 \item[Worker hash compilation (\wh)]
   \tnote{(worker)}
@@ -684,7 +712,12 @@ primaries do not need to send messages back to their workers.
   \begin{itemize}
   \item the hash of the broadcast list of transactions,
   \item the number of transactions, and
-  \item the round number,  
+  \item the \st{round number}\ul{take}, 
+    \todo[color=SkyBlue]{%
+      very much like in a movie,
+      we piece together each header form \textsc{take},
+      or any other single word for \emph{batch number}
+      }
   \end{itemize}
   signed by the worker. 
   \endnote{\color{red}
@@ -693,11 +726,10 @@ primaries do not need to send messages back to their workers.
     the (hashes of the) erasure coding shares that 
     they should have available. ?
   }
-\item[Worker hash broadcast (\wh⇒)] 
-  \tnote{worker\\ ⇒ worker }  
-  A worker broadcasts its most recent worker hash
-  to mirror workers.
-\item[Worker hash provision (\wh↑)]
+\item[%
+  \code{MessageEnum::WorkerHx}%
+  Worker hash provision (\wh↑)%
+  ]
   \tnote{worker\\ → primary}
   The most recent worker hash is sent to the primary 
   for inclusion into the next header. 
@@ -706,9 +738,23 @@ primaries do not need to send messages back to their workers.
     to include into the header
     such that signing a header certificate becomes meaningful?
   }
-  
-\item[Worker hash reception and checking ({\wh[]←})] 
-  \tnote{worker\\ ← worker}  
+
+\item[%
+  \code{MessageEnum::WHxToAll}%
+  Worker hash broadcast (\wh⇒)%
+  ] 
+  \tnote{worker\\ ⇒ worker }  
+  A worker broadcasts its most recent worker hash
+  to mirror workers.
+
+\item[%
+  \code{fn process\_w\_hx}%
+  Worker hash reception and checking ({\wh[]←})%
+  ]%
+  \tnote{%
+    worker\\%
+    ← worker%
+  }
   At any time, 
   a worker can receive a worker hash 
   from a mirror worker. 
@@ -718,7 +764,10 @@ primaries do not need to send messages back to their workers.
   if so, 
   whether the hash of the list of transaction matches the worker hash. 
 
-\item[Worker hash forward ({\wh[]⇑})]
+\item[%
+  \code{MessageEnum::WHxFwd}%
+  Worker hash forwarding ({\wh[]⇑})%
+  ]
   \tnote{worker\\ → primary}  
   If a worker has successfully checked 
   the availability of the transactions of a received worker hash, %
@@ -868,16 +917,32 @@ The pure availability protocol: genesis actions
 \begin{description}
 \item[Genesis header compilation ({\hd[]})] 
   \tnote{[primary]}
-  If a primary has obtained a complete set of 
+  If a primary has obtained a “complete set”
+  \todo{
+    that is an undefined term, right?
+    }of 
   worker hashes for the genesis round
   from its workers, 
   it can compile a block header. 
-  The process of header compilation 
-  does not distinguish between worker hashes of its local workers
-  and those with transactions that were received at other validators. 
+  Compiling worker hashes into headers
+  works the same for worker hashes of local workers
+  and those generated from transactions received at other validators.%
+  \footnote{%
+    However, 
+    the compiled worker hashes will have different roles,
+    depending on whether they are stemming from local workers or not. 
+    In particular,
+    primaries will only need to generate 
+    certificates of availability for “local” headers.
+  }
   At genesis,
-  the header consists of the creator's identity 
-  and the list of worker hashes.
+  each header consists of
+  \begin{itemize}
+  \item the creator's identity and
+  \item and the list of worker hashes.
+  \end{itemize}
+ 
+
   
 \item[Availability voting/commitment (\hdₚ→)]
   \tnote{primary\\ → primary}
