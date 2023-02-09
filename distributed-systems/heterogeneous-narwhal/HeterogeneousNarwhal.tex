@@ -553,12 +553,28 @@ they only pass on hashed data and
 block header information to their primaries.
 The idea is to keep the network bandwidth usage of primaries 
 as low as possible. 
-For example,
-primaries do not need to send messages back to their workers. 
+In particular,
+primaries never send messages or any other signals to their workers,
+\todo[inline]{EXCEPT FOR}
+\endnote{%
+  Sharing the round number is the point where
+  one might be tempted to deviate from this concept. 
+}
 
 \subsection{The pure availability protocol: worker actions}
 \label{sec:base-protocol}
-\todo[inline]{get rid of the broadcast of the availability certificates}
+\todo[inline]{%
+  get rid of the broadcast of the availability certificates%
+  % ???
+  \tiny
+  \sf
+  TH well, cannot make sense of that myself any more 
+  instead we broadcast signatures of headers ?
+  % ?? 
+  or was that an error inf the figure
+  \emph{The integrity protocol (concluding each round that’s was “opened” in
+the availability-protocol)}
+}
 \todo[inline]{%
   maybe we need to ``announce'' headers, % 
   to avoid ``crossing'' of round numbers of learner%
@@ -681,7 +697,7 @@ primaries do not need to send messages back to their workers.
     
   \item[%
    \code{fn process\_tx\_req}%
-   Transaction copy (erasure code) reception%
+   Transaction copy (erasure code) \colorbox{SkyBlue}{reception}%
    ]\tnote{[worker]}%
    Upon receiving a transaction copy
     (the specific form of erasure code, we are using)
@@ -705,6 +721,13 @@ primaries do not need to send messages back to their workers.
     - validator height\\
     - ... 
   }%
+  \todo[inline,color=red,caption={}]{%
+    here now, we need to
+    \begin{enumerate}
+    \item introduce signals from primary to workers,
+    \item replace the round number by a “take” based mechanism
+    \end{enumerate}
+  }
   \xspace
   each worker produces its worker hash for the broadcast batch of transactions. 
   In detail,
@@ -801,7 +824,7 @@ primaries do not need to send messages back to their workers.
       \foreach \j in {1,...,2} {
         \node[below=\workerDistance of primaryAnchor,anchor=east] (w\p_\j) 
         at (workerAnchor) {\ensuremath{\text{worker}_{\p,\j}}};
-        \draw[->] (w\p_\j) -- ++(10.4,0) ;
+        \draw[->,draw=lightgray,semithick] (w\p_\j) -- ++(10.4,0) ;
         \coordinate (workerAnchor) at (w\p_\j.east);
       }
       \coordinate (primaryAnchor) at (p\p.east);
@@ -852,7 +875,7 @@ primaries do not need to send messages back to their workers.
     \draw[->] (wh1) -- (wh1');
     \node[right=0ex of wh1'] (wh2') {\wh₂};
     \draw[->] (wh2) -- (wh2');
-    % the following should be much later, but ... (single harmless hack)
+    % the following should be much later, but ... (unique harmless hack)
     \node[right=1ex of wh2',fill=white] (hd3) {\hd};
     \foreach \k in {1,2}
     \draw[dotted,bend right=9ex-3*\k ex] (hd3) to (wh\k'.center);
@@ -891,7 +914,9 @@ primaries do not need to send messages back to their workers.
     }
     \foreach \p in {1,2,4} { % for each "other" validator
       \draw[->] (hd\p) -- (av\p.east);
+      \draw[ultra thick,red,double,->] (hd3) --node[auto]{trigger} (hd\p);
     }
+    \draw[ultra thick,red,double,->] (hd3) --node[auto]{trigger} (hd5);
     \node[fill=white] (av3) at (ac){\hd\makebox[0pt][l]{\ensuremath{{}_{\sim3}}}};
     \draw[->] (hd3) -- (av3);
     \begin{pgfonlayer}{background}
@@ -917,9 +942,12 @@ The pure availability protocol: genesis actions
 \begin{description}
 \item[Genesis header compilation ({\hd[]})] 
   \tnote{[primary]}
+  
+  
   If a primary has obtained a “complete set”
   \todo{
-    that is an undefined term, right?
+    \emph{“complete set”}
+    is an undefined term, right?
     }of 
   worker hashes for the genesis round
   from its workers, 
@@ -941,6 +969,16 @@ The pure availability protocol: genesis actions
   \item the creator's identity and
   \item and the list of worker hashes.
   \end{itemize}
+  \begin{description}
+  \item[Header send]
+    Sending a header to other validators is optional
+    \todo[inline]{it is, isn't it?}
+    .
+    
+  \item[Header collection]
+    The primary has to collect 
+
+  \end{description}
  
 
   
