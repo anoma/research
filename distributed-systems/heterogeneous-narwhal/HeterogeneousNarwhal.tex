@@ -6,8 +6,7 @@
 \usepackage{placeins}
 \usepackage{amsthm,amssymb,hyperref,marginnote}
 \usepackage{subfig}
-\usepackage{enotez}
-\setenotez{counter-format=Alph}
+
 \usepackage[textsize=footnotesize]{luatodonotes}%\usepackage{todonotes}%
 \usepackage{xcolor}
 \newcommand{\nb}[1]{%
@@ -180,10 +179,7 @@
 %https://tex.stackexchange.com/questions/425098/which-opentype-math-fonts-are-available
 \usepackage{comment}
 %\includecomment{comment}
-\let\oldendnote\endnote
-\renewcommand{\endnote}[2][]{%
-  \marginnote{\oldendnote[#1]{#2}}%
-}
+
 \title{%
   Heterogeneous Narwhal: % 
   \\
@@ -203,6 +199,14 @@
 }
 %\renewcommand{\todo}[2][]{}
 %\renewcommand{\endnote}[1]{#1}
+\usepackage{enotez}
+\setenotez{counter-format=Alph}
+\let\oldendnote\endnote
+\renewcommand{\endnote}[2][ ]{%
+  \ifthenelse{\equal{#1}{ }}%
+  {\marginnote{\oldendnote{#2}}}%
+  {\marginnote{\oldendnote[#1]{#2}}}%
+}
 \begin{document}
 %\begin{comment}
 
@@ -932,6 +936,35 @@ the availability-protocol)}
   \caption{The availability protocol in the genesis round}
   \label{fig:availability-protocol}
 \end{figure}
+\todo[caption={}]{%
+  concerning ``triggering'' the header construction, 
+  there are the following points
+  \\
+  1. when a the triggering signing request is \emph{received} by a primary,
+  we might need to ``wait'' for the corresponding worker hashes
+  \\
+  2. new signing for more recent rounds make old ones obsolete
+  \\
+  3. what are the incentives for speedy signing ?
+}\endnote{%
+  On speedy signing incentives:
+  \begin{itemize}
+  \item as a validator, I want primarily \emph{my} blocks signed
+  \item 
+    So, why should I sign \emph{your} header?!
+    \begin{itemize}
+    \item It comes even with the storage commitment for my workers!
+    \item Actually, if “everybody” else is signing, I am still gonna be fine !!!
+    \end{itemize}
+
+    Thus, having a signature as part of an availability certificate should give
+    some kind of reward!
+  % \item well I need block references to previous blocks
+  \end{itemize}
+}
+
+
+
 %\end{comment}
 \section{Primary actions}
 
@@ -970,8 +1003,14 @@ The pure availability protocol: genesis actions
   \item and the list of worker hashes.
   \end{itemize}
   \begin{description}
-  \item[Header send]
-    Sending a header to other validators is optional
+  \item[Header announcement / Signature request]
+    A primary announces the next \emph{header}
+    by sending information about
+    \begin{itemize}
+    \item information about which worker hashes to be included
+      (as pairs of worker-ids and take numbers)
+    \item the round number
+    \end{itemize}
     \todo[inline]{it is, isn't it?}
     .
     
@@ -1211,14 +1250,12 @@ for the difference between headers at genesis and the typical phase).
   % 
   \label{fig:integrity-protocol}
 \end{figure}
-\todo[inline]{%
-  blue blocks go to all validators in 
-  %\begin{enumerate}
-  % \item
-  ① the signing quorum
-  % \item
-  ② all validators that are in some blue quorum 
-  %\end{enumerate}
+\todo[caption={},inline]{%
+  blue blocks are sent to all validators in 
+  \begin{enumerate}
+   \item[①] the signing quorum and
+   \item[②] \textsc{any other} blue quorum 
+   \end{enumerate}
 }
 
 \subsection{Availability: the typical case}
@@ -1427,6 +1464,8 @@ to storing all blocks until genesis
 
 
 \appendix
+
+\section{Endnotes}
 \printendnotes
 \end{document}
 
