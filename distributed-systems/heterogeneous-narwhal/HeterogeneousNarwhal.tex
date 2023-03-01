@@ -5,6 +5,9 @@
 %\usepackage[scale=.75]{geometry}
 \usepackage{placeins}
 \usepackage{amsthm,amssymb,hyperref,marginnote}
+
+\newtheorem{ex}{Example}[section]
+
 \usepackage{subfig}
 
 \usepackage[textsize=footnotesize]{luatodonotes}%\usepackage{todonotes}%
@@ -207,6 +210,7 @@
   {\marginnote{\oldendnote{#2}}}%
   {\marginnote{\oldendnote[#1]{#2}}}%
 }
+\newcommand{\hn}{Heterogeneous Narwhal\xspace}
 \begin{document}
 %\begin{comment}
 
@@ -959,15 +963,14 @@ the availability-protocol)}
 
     Thus, having a signature as part of an availability certificate should give
     some kind of reward!
-  % \item well I need block references to previous blocks
   \end{itemize}
+  On the other hand,
+  it is natural to collect signatures for the availability certificate
+  on a “first come, first served” basis
 }
-
-
 
 %\end{comment}
 \section{Primary actions}
-
 
 \subsection{Availability at genesis}
 The pure availability protocol: genesis actions
@@ -975,13 +978,12 @@ The pure availability protocol: genesis actions
 \begin{description}
 \item[Genesis header compilation ({\hd[]})] 
   \tnote{[primary]}
-  
-  
   If a primary has obtained a “complete set”
   \todo{
     \emph{“complete set”}
     is an undefined term, right?
-    }of 
+    }%
+    of 
   worker hashes for the genesis round
   from its workers, 
   it can compile a block header. 
@@ -1458,6 +1460,80 @@ to storing all blocks until genesis
 
 
 
+
+\section{Message dependency management}
+
+Messages depending on other messages
+is a \emph{sine qua non} of consensus protocols.
+In \hn,
+we have several types of dependencies.
+
+\begin{ex}[Answering header signature requests]
+  Header signature requests (in the availability protocol)
+  can only be answered (correctly) by a validator if
+  it has received a confirmation from each of its workers.\footnote{
+    Each confirmation states that
+    a copy of the hash-referenced transaction data has been stored.
+  }
+  This scenario is simple in that
+  \begin{itemize}
+  \item one knows exactly which messages are expected;
+  \item each expected message's \emph{fingerprint} is known in advance;
+  \item there is only a single message to be synthesized;
+  \item progress towards meeting all requirements is monotonic.
+  \end{itemize}
+  Hence, there is a conceptually simple data structure
+  where each arriving message is mapped to a pair of
+  a (shared) counter and a pointer to the message to be signed. 
+\end{ex}
+
+The next example is more tricky in that
+we are interested only in the first \(k\) messages out of \(n\). 
+
+\begin{ex}[Broadcasting certificates of availability (\textsc{i/ii})]
+  
+\end{ex}
+
+\begin{verbatim}
+{
+from [37] L. Zheng. Making distributed computation secure by construction. PhD thesis,
+Cornell University, Ithaca, New York, USA, Jan. 2007.
+}
+
+4.4 Replication and message synthesis
+
+Replicating code and data is an effective way to achieve 
+fault tolerance and ensure integrity and availability. 
+In DSR, both reactors and memory references may be replicated
+on multiple hosts. Suppose reactor c is replicated on a set of hosts H. 
+Then other reactors interact with c as follows:
+• Any message for c is sent to all the hosts in H.
+• The replicas of c process incoming messages independently of each other. To
+make this possible, all the program states of c have a local copy on every host in H.
+In particular, every memory reference (location) accessed by c is also replicated
+on H.
+• If invoked with the same context identifier, the replicas of c are supposed to pro-
+duce the same messages. Thus, the receiver host h of such a message µ may
+receive the replicas of µ from different hosts in H. The redundancy is crucial
+for achieving fault tolerance. Some hosts in H may be compromised, and these
+bad hosts may send corrupted messages or simply not send anything. In general,
+the replicas of µ received by h contain some correct ones, which are the same,
+and some bad ones, which can be arbitrarily inconsistent. It is up to h to identify
+the correct µ from those message replicas. This process is called message syn-
+thesis, and the algorithm for identifying the correct message is called a message
+synthesizer.
+\end{verbatim}
+\begin{verbatim}
+message synthesizer ref(s)
+  [37] L. Zheng. Making distributed computation secure by construction. PhD thesis,
+  Cornell University, Ithaca, New York, USA, Jan. 2007.
+
+
+  [39] L. Zheng and A. C. Myers. A language-based approach to secure quorum replication.
+  In Proceedings of the Ninth Workshop on Programming Languages and Analysis for
+  Security, PLAS’14, pages 27:27–27:39, New York, NY, USA, 2014. ACM. ISBN
+  978-1-4503-2862-3. . URL http://doi.acm.org/10.1145/2637113.2637117.
+\end{verbatim}
 
 \bibliographystyle{alpha}
 \bibliography{HN.bib}
