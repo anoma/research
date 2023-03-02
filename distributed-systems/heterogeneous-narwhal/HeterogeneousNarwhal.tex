@@ -1,6 +1,7 @@
 \documentclass[dvipsnames]{article}
 \usepackage{markdown}
 \usepackage{soulutf8}
+%\usepackage{tabularx}
 %\renewcommand{\st}[1]{}
 %\usepackage[scale=.75]{geometry}
 \usepackage{placeins}
@@ -1477,81 +1478,106 @@ we have several types of dependencies.
   }
   This scenario is simple in that
   \begin{itemize}
-  \item one knows exactly which messages are expected;
-  \item each expected message's \emph{fingerprint} is known in advance;
-  \item there is only a single message to be synthesized;
-  \item progress towards meeting all requirements is monotonic.
+  \item the primary knows exactly %
+    which messages are expected from its workers; %
+  \item each expected message's fingerprint is \emph{known in advance};
+  \item there is only a single message to be synthesized and %
+    it is known \emph{a priori}; % 
+  \item progress towards meeting all dependencies is monotonic.
   \end{itemize}
-  Hence, there is a conceptually simple data structure
-  where each arriving message is mapped to a pair of
-  a (shared) counter and a pointer to the message to be signed.
+  We can devise a relatively simple data structure:
+  each expected message (fingerprint) is mapped to a pair of
+  a shared counter and (a pointer to) the message to be signed. 
 \end{ex}
 
-The next example is more tricky in that
-we are interested only in the first \(k\) messages out of \(n\).
+Now, if we look at availability certificates,
+the situation becomes more tricky:
+we are interested only in the first \(k\) messages out of \(n\);
+moreover, 
+the synthesized message depends on which messages turn out to be 
+the first \(k\). 
 
 \begin{ex}[Broadcasting certificates of availability (\textsc{i/ii})]
   Assuming that all validator sets of size~\(f+1\) (out of~\(3f+1\))
   form a weak quorum, we
   \begin{enumerate}
-  \item count down as “shared counter”, starting from \(f+1\);
-  \item synthesize the certificate of availability (and broadcast it);
-  \item count down further and free the counter if it reaches~\(-2f\).
+  \item count down a counter, starting from \(f+1\);
+  \item synthesize the certificate of availability (and broadcast it)
+    when the counter reaches \(0\);
+  \item free the counter when it reaches~\(-2f\).
   \end{enumerate}
+  There are optimizations to be made for the last point, 
+  using a more efficient mechanism for identifying 
+  messages that we can safely ignore. 
 \end{ex}
 
+Already at genesis,
+the general situation becomes slightly more complex. 
 \begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
   Assuming more general quorum systems,
   the idea of a simple counter does not work any more. %
-  We could simply use one counter for each quorum; %
+  The brute force solution consists in using one counter for each quorum; %
   however, that would lead to an exponential blow-up. %
   Hence,
   we make use of the fact that
-  each message falls into exactly one “region”\footnote{
+  each message falls into exactly one “region”\xspace%←that \xspace
+  % allows do remove the footnote easily
+  \footnote{%
     There is a one to one correspondence of regions and terms
     in the inclusion-exclusion formula,
-    and vice versa.
-  }\todo{%
-    1. explain the regions of the Venn diagram properly\\
-    2. explain the relation to the inclusion-exclusion principle
-  }%
+    and \emph{vice versa}.
+  }
   of the Venn diagram of all quorums. 
-  \todo[caption={},inline]{
-}%
-%
-\endnote{%
-  \emph{On the inclusion exclusion principle. } %
-  %
-  We can use the
-  \href{https://en.wikipedia.org/wiki/Inclusion\%E2\%80\%93exclusion_principle}{inclusion
-    exclusion principle.}%
-  We can organize the regions of the Venn diagram into a tree %
-  in which
+  Based on the
+  \href%
+  {https://en.wikipedia.org/wiki/Inclusion\%E2\%80\%93exclusion_principle}%
+  {inclusion exclusion principle}, %
+  we can organize the regions of the Venn diagram (of a set of subsets of a set)
+  into a tree in which
   \begin{itemize}
-  \item the root is the region in which all sets intersect
-  \item the leaves are the regions sets of elements that belong to exactly one
-    set
-  \item there is a path from one region to another if the former intersects with
-    more sets than the latter
-  \item in particular, direct ancestry means to have exactly one additional intersection
+  \item the root is the region of elements that belong to all sets
+  \item the leaves are the regions of elements that belong to exactly one set
+  \item there is a path from one region to another if the former is contained in
+    every set that the latter is contained in
+  \item in particular, the elements of a direct ancestor belong to exactly one additional set.
   \end{itemize}
-  We can simplify this tree by repeating the following two operations,
-  starting at the root:
-  \begin{enumerate}
-  \item coalesce all children of the same cardinality
-  \item coalesce parent and child if the child is the only child
-  \end{enumerate}
-  For a proper counter system, %
-  we can disregard empty regions. %
-
-  Does the above algorithm (up to some corner case details of empty regions)
-  yields a single node if we start with the set of all sub-sets?
+  We set up a system of counters,
+  one for each non-empty region,
+  initialized to the size of the region.
+  Each received signature contributes to exactly one counter,
+  which is decremented upon message delivery. 
+  Now,
+  we have received enough signatures if, and only if, 
+  all counters on a branch reach zero.
+ \endnote{%
+ \emph{On the inclusion exclusion principle.} %
+   We can simplify this tree by repeating the following two operations,
+   starting at the root:
+   \begin{enumerate}
+   \item coalesce all children of the same cardinality 
+   \item coalesce parent and child if the child is the only child
+   \end{enumerate}
+   For a proper counter system, %
+   we can disregard empty regions; %
+   moreover,
+   we can disregard empty regions. 
+   Thus,
+   we need at most one counter per learner. 
+   Finally,
+   counters organize into a tree in a natural way
+   such that
+   we have received enough signatures if, and only if, 
+   all counters on a branch reach zero.
+   \\\centerline{
+     \colorbox{Apricot}{%
+       \begin{tabular}[c]{p{20em}}
+         Does the above algorithm (up to some corner case details of empty regions)
+         yield a single node if we start with the set of all sub-sets?
+       \end{tabular}
+     }
+   }
 }
-  \begin{enumerate}
-  \item count down as “shared counter”, starting from \(f+1\);
-  \item synthesize the certificate of availability (and broadcast it);
-  \item count down further and free the counter if it reaches~\(-2f\).
-  \end{enumerate}
+
 \end{ex}
 
 
