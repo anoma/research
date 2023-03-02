@@ -70,7 +70,7 @@
 }
 \newcommand{\circledX}[1]{\tikz[baseline={(x.south)}]{\node[circle,draw,inner sep=.3pt,outer sep=0pt,very thin](x){\tiny #1};}}
 \usepackage{newunicodechar}
-%\newunicodechar{}{\ensuremath{}}  
+%\newunicodechar{}{\ensuremath{}} 
 \newunicodechar{₁}{\ensuremath{{}_1}}
 \newunicodechar{₂}{\ensuremath{{}_2}}
 \newunicodechar{₃}{\ensuremath{{}_3}}
@@ -86,25 +86,25 @@
 \newunicodechar{ₚ}{\ensuremath{{}_p}}
 \newunicodechar{‼}{\rough}
 \newunicodechar{‽}{\ensuremath{?!}}
-\newunicodechar{↑}{\ensuremath{\uparrow}}  
-\newunicodechar{⇑}{\ensuremath{\Uparrow}}  
+\newunicodechar{↑}{\ensuremath{\uparrow}} 
+\newunicodechar{⇑}{\ensuremath{\Uparrow}} 
 \newunicodechar{♯}{\ensuremath{\sharp%\hat\#
-}}  
+}} 
 \newunicodechar{∅}{\ensuremath{\varnothing}}
-\newunicodechar{≠}{\ensuremath{\neq}}              
-\newunicodechar{∩}{\ensuremath{\cap}}              
-\newunicodechar{≡}{\ensuremath{\equiv}}              
+\newunicodechar{≠}{\ensuremath{\neq}}             
+\newunicodechar{∩}{\ensuremath{\cap}}             
+\newunicodechar{≡}{\ensuremath{\equiv}}             
 \newunicodechar{∈}{\ensuremath{\in}}
 \newunicodechar{ℝ}{\ensuremath{\mathbb{R}}}
-\newunicodechar{↔}{\ensuremath{\leftrightarrows}}    
+\newunicodechar{↔}{\ensuremath{\leftrightarrows}}   
 \newunicodechar{→}{\ensuremath{\rightarrow}}
 \newunicodechar{←}{\ensuremath{\leftarrow}}
 \newunicodechar{⇒}{\ensuremath{\Rightarrow}}
 \newunicodechar{∀}{\ensuremath{\forall}}
 \newunicodechar{‌}{\allowbreak }
-\newunicodechar{‍}{{}}                                
+\newunicodechar{‍}{{}}                               
 
-\usepackage{tikzpeople}%‼ for evil validators etc. 
+\usepackage{tikzpeople}%‼ for evil validators etc.
 
 \usepackage{tikz}
 \usetikzlibrary{shapes,positioning,fit,backgrounds}
@@ -124,7 +124,7 @@
     }}%
   {\tikz[baseline={([yshift=0pt]theNode.base)}]{
       \node[rectangle,double,inner sep=1.5pt,outer sep=0pt,double,draw] (theNode){\textcolor{black}{\footnotesize \bf HD}};
-      
+     
     }}%
 }
 \newcommand{\wh}[1][ ]{%
@@ -150,7 +150,7 @@
       }%
     };%
   }%
-  % additional “decorations” via another pic, 
+  % additional “decorations” via another pic,
   % (with `remember picture` and `overlay`)
 }
 
@@ -184,7 +184,7 @@
 %\includecomment{comment}
 
 \title{%
-  Heterogeneous Narwhal: % 
+  Heterogeneous Narwhal: %
   \\
   a multi-chain mempool \Dag%
 }
@@ -226,7 +226,7 @@
   \begin{itemize}
   \item it is “merely” a technical report about
     \emph{Heterogeneous Narwhal}
-  \item a “reader's digest” version should follow 
+  \item a “reader's digest” version should follow
   \item it is the \emph{basis} for chimera chains;
   \item however chimera chains, will be left as (concurrent) future work;
   \end{itemize}
@@ -242,8 +242,8 @@
   \item
     go for the real deal: %
     we go for an “ideal” world
-    where in principle 
-    every validator 
+    where in principle
+    every validator
     \begin{enumerate}
     \item could have (part of) all transaction data available
     \item participate in as many differently colored ledgers as desired
@@ -259,7 +259,7 @@
   \item[learner graph] %
     There are several ways to understand the learner graph:
     \begin{itemize}
-    \item 
+    \item
       \emph{learner-crafted} learner graphs,
       where learners are formalizing they assumption about
       \begin{enumerate}
@@ -276,7 +276,7 @@
       each observation gives rise
       to maximally optimistic learner graphs:
       every validator is supposed to behave well
-      unless evidence of misbehaviour/attacks 
+      unless evidence of misbehaviour/attacks
       have been found.
       For each incident,
       one might actually ask for “resolution”,
@@ -291,18 +291,18 @@
 
 \begin{abstract}
   \noindent
-  Blockchains exhibit \emph{linear} structure, 
+  Blockchains exhibit \emph{linear} structure,
   resulting from a \emph{single} reference to the previous block.
-  If instead, 
+  If instead,
   each block may reference \emph{several} previous blocks,
   we can build a \emph{directed acyclic graph} (\Dag) of blocks.
   In fact,
   such “block \Dag[s]” are the basic data structure that
   several recent consensus algorithms rely on,
   \eg \Dag-rider, Bullshark, and Narwhal\&Tusk.\footnote{%
-    The respective references are, 
+    The respective references are,
   }
-  These protocols build 
+  These protocols build
   a growing “global” \Dag of transaction data such that%
   ---among other things---%
   ① every validator's local view is a sub-\Dag of the “global” \Dag and %
@@ -315,17 +315,17 @@
     Setchain: Improving Blockchain Scalability
     with Byzantine Distributed Sets and Barriers}
   }
-  for inclusion into a total order of blocks. 
-  Such “global” \Dag[s] will be the topic of the present paper, 
-  referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]}, 
-  for short.  
+  for inclusion into a total order of blocks.
+  Such “global” \Dag[s] will be the topic of the present paper,
+  referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]},
+  for short. 
 
-  The paper introduces a multi-ledger mem-\Dag, 
+  The paper introduces a multi-ledger mem-\Dag,
   generalizing Narwhal's single ledger mem-\Dag;
   in analogy to Heterogeneous Paxos,
-  the new protocol is called \emph{Heterogenous Narwhal}.   
+  the new protocol is called \emph{Heterogenous Narwhal}.  
   In principle,
-  Heterogeneous Narwhal\&Paxos are an alternative for bridges. 
+  Heterogeneous Narwhal\&Paxos are an alternative for bridges.
   \todo[caption={}]{%
     In a follow up paper,
     we actually need to explain how heterogeneous Narwhal is \\
@@ -333,7 +333,7 @@
     2. which benefits / drawback we have, in general\\
     3. which parts are “implementation detail”.\\
     so, as written on the opening page (on page~\pageref{page:firstpage}):
-    not in this paper ... 
+    not in this paper ...
   }
   However,
   in the present paper,
@@ -349,22 +349,22 @@
 \todo[inline]{main contribs:\\[\baselineskip]
   \begin{minipage}{1.0\linewidth}
     - alternative to bridges (between very different chains ?)\\
-    - merging might be actually a very good thing (for very small chains)\\ 
+    - merging might be actually a very good thing (for very small chains)\\
     - chimera chains (between big chains)
   \end{minipage}\\[\baselineskip]
   In summary,
   we present a general framwork for building
-  a cross-chain ecosystem of pre-existing and new ledgers.  
+  a cross-chain ecosystem of pre-existing and new ledgers. 
 }
 
 \section{Context}
 \label{sec:context}
 \todo[inline]{.. a little bit of story telling}
 
-We want to work towards a multi-chain world in 
-which 
+We want to work towards a multi-chain world in
+which
 - everyone can interact with all chains of the ecosystems
-- there is a unique definitive state of every chain 
+- there is a unique definitive state of every chain
 
 
 
@@ -373,11 +373,11 @@ which
 \section{Preliminaries}
 \label{sec:preliminaries}
 \todo[inline]{%
-  ``copy'' relevant parts of % 
+  ``copy'' relevant parts of %
   the heterogeneous paxos tech report%
 }
 
-Let us fix an arbitrary learner graph. 
+Let us fix an arbitrary learner graph.
 
 \begin{definition}[Global Weak Quorum]
   \label{def:global-weak-quorum}
@@ -392,7 +392,7 @@ Let us fix an arbitrary learner graph.
 \begin{definition}[Universal Quorum]
   \label{def:universal-quorum}
   A universal quorum is a set
-  that contains a qourum for each learner. 
+  that contains a qourum for each learner.
 \end{definition}
 \todo{%
 “upward” closure for live quorums seems a “wrong” assumption
@@ -411,20 +411,20 @@ that sees all blocks that some validator has proposed.
 While being not available to any single agent,
 the global \dag is of intersubjective relevance,
 as every \emph{local} view of any validator
-is a sub-graph of the “global” \Dag. 
+is a sub-graph of the “global” \Dag.
 
-A block in the \Dag can be \emph{committed} 
+A block in the \Dag can be \emph{committed}
 using an arbitrary consensus algorithm
-if it is referenced by a weak quorum 
+if it is referenced by a weak quorum
 (from the next “layer” in the \Dag)
 in every local view of the consensus participants.
 
 An example of such a “global” \Dag
-is shown in \fig\ref{fig:blue_dag}. 
+is shown in \fig\ref{fig:blue_dag}.
 In the present paper,
-we describe a protocol for concurrent building 
+we describe a protocol for concurrent building
 of \emph{entangled} \Dag[s] for a whole ecosystem of different ledgers,
-in the spirit of a multi-chain world. 
+in the spirit of a multi-chain world.
 
 \begin{figure}[htb]
   \centering
@@ -447,47 +447,47 @@ in the spirit of a multi-chain world.
 \end{tikzpicture}\makebox[0pt][r]{\Large \bf \color{blue} make this Fig. something that actually helps (or delete)} \protect\todo{where to put the signed quorums ?!}
   \caption%
   [Interdependence of availability and integrity]%
-  {Illustration of 
-    the interdependence of the availability and 
+  {Illustration of
+    the interdependence of the availability and
     integrity protocols}
   \label{fig:availability-n-integrity}
 \end{figure}
 
 
 
-Roughly, we have two complementary protocols running concurrently: 
+Roughly, we have two complementary protocols running concurrently:
  \begin{enumerate}
  \item the availability protocol; and
- \item the integrity protocol. 
+ \item the integrity protocol.
  \end{enumerate}
  The availability protocol makes sure
- that transaction data is available 
+ that transaction data is available
  as long as necessary;\footnote{%
-   There is some fine print concerning 
-   the conditions under which this is actually the case. 
+   There is some fine print concerning
+   the conditions under which this is actually the case.
  }
  moreover,
- the availability protocol 
- is tasked with keeping available 
+ the availability protocol
+ is tasked with keeping available
  the \emph{signed headers},
  \todo{explain \texttt{signed headers}}
- which the integrity protocol produces. 
+ which the integrity protocol produces.
 
- The integrity protocol makes sure that 
- each validator can only produce one block in each of its (local) rounds. 
+ The integrity protocol makes sure that
+ each validator can only produce one block in each of its (local) rounds.
 
 
- 
+
 
 \section{Architecture and communication patterns}
 \label{sec:communication-patterns}
- We incorporate Narwhal's~\cite{NT} 
- scale out architecture%in our availability protocol 
+ We incorporate Narwhal's~\cite{NT}
+ scale out architecture%in our availability protocol
  : %
- each validator has a unique \emph{primary} and % 
- a number of \emph{workers} % 
+ each validator has a unique \emph{primary} and %
+ a number of \emph{workers} %
  (see \fig\ref{fig:validators})%
- . 
+ .
 \begin{figure}[htb]
   \centering
 
@@ -542,31 +542,31 @@ validator:\(\left\{\begin{tikzpicture}[baseline={(q.north)},remember picture,ysc
 
 \section{Worker actions}
 \label{sec:worker-actions}
-Every validator has the same number of workers. 
+Every validator has the same number of workers.
 Thus,
-each worker can be assigned a unique \emph{mirror worker} 
+each worker can be assigned a unique \emph{mirror worker}
 on every other validator.
-We shall adopt the convention 
+We shall adopt the convention
 that mirror worker identifiers share the same subscript.
 For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
 In the integrity protocol,
-workers are only tasked with “bookkeeping” matters; 
+workers are only tasked with “bookkeeping” matters;
 in particular,
 they keep track of (batches of) transactions,
 their hashes,
 and erasure coding shares;
-they only pass on hashed data and 
+they only pass on hashed data and
 block header information to their primaries.
-The idea is to keep the network bandwidth usage of primaries 
-as low as possible. 
+The idea is to keep the network bandwidth usage of primaries
+as low as possible.
 In particular,
 primaries never send messages or any other signals to their workers,
 \todo[inline]{EXCEPT FOR}
 \endnote{%
   Sharing the round number is the point where
-  one might be tempted to deviate from this concept. 
+  one might be tempted to deviate from this concept.
 }
 
 \subsection{The pure availability protocol: worker actions}
@@ -576,7 +576,7 @@ primaries never send messages or any other signals to their workers,
   % ???
   \tiny
   \sf
-  TH well, cannot make sense of that myself any more 
+  TH well, cannot make sense of that myself any more
   instead we broadcast signatures of headers ?
   % ?? 
   or was that an error inf the figure
@@ -584,12 +584,12 @@ primaries never send messages or any other signals to their workers,
 the availability-protocol)}
 }
 \todo[inline]{%
-  maybe we need to ``announce'' headers, % 
+  maybe we need to ``announce'' headers, %
   to avoid ``crossing'' of round numbers of learner%
 }
 \todo[inline]{%
   so, signed qourums are an ``output'' of the integrity protocol,
-  and need to be made available (such that it is possible to create new headers). 
+  and need to be made available (such that it is possible to create new headers).
 }
 
 \todo[inline]{%
@@ -601,84 +601,84 @@ the availability-protocol)}
 \item[%
   \code{MessageEnum::TxReq}%
   Transaction collection (\tx{}←)%
-  ] 
+  ]
   \tnote{worker\\ ← client}
   \todo{in the typhon sources for \texttt{`heterogeneous\_narwhal`},
-    each transaction collection is \emph{immediately} followed 
+    each transaction collection is \emph{immediately} followed
     by a \texttt{TxAck}
   }
-  Each worker keeps listening 
+  Each worker keeps listening
   for incoming transaction requests from clients.\footnote{%
     The bandwith and amount of storage for storing incoming transactions
-    \emph{should} be big enough 
-    to process all incoming transactions. 
-    We share this assumption with Byzantine set consensus \cite{RedBelly}. 
+    \emph{should} be big enough
+    to process all incoming transactions.
+    We share this assumption with Byzantine set consensus \cite{RedBelly}.
     Transaction fees are one way to avoid flooding attacks,
-    making the latter prohibitively expensive. 
+    making the latter prohibitively expensive.
     For example,
     we might assume a \fifo-buffer
     although it is more likely
     a priority queue,
     based on a combination of fees and
-    quality of service considerations. 
+    quality of service considerations.
   }
-  Transactions should be buffered using reasonably fast memory. 
+  Transactions should be buffered using reasonably fast memory.
   \endnote{%
     The matter of reasonably fast transaction buffer
-    needs additional context, 
-    in particular details from the \textsc{p2p} layer. 
+    needs additional context,
+    in particular details from the \textsc{p2p} layer.
   }
   \todo[inline,color=SkyBlue]{%
     In the
     \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
-    {code}, 
+    {code},
     we instantly acknowledge the transactions received.
     \\
     \code{MessageEnum::TxAck}
   }
- 
+
 \item[%
   Transaction distribution (\tx⇒)%
   ]
   \tnote{worker\\ ⇒ worker}
-  Each worker “broadcasts” erasure coding shares of 
+  Each worker “broadcasts” erasure coding shares of
   every received transaction to mirror workers.
-  In the simplest case\xspace% 
+  In the simplest case\xspace%
   ---the one we cover first---%
-  this amounts to broadcasting the transaction.\footnote{ 
-  However, 
-  if we perform proper erasure coding,  
+  this amounts to broadcasting the transaction.\footnote{
+  However,
+  if we perform proper erasure coding, 
   it is not broadcasting in the strict sense:
-  each mirror worker receives a different message. 
+  each mirror worker receives a different message.
   We first cover the case of trivial erasure coding
   ‼[covering the case of proper erasure codining in ‽].
   }
   In general,
   transaction distribution can be divided into two steps.
   \todo[inline]{
-    we might require a 
+    we might require a
     \emph{position number} for
-    transactions of the current batch, 
+    transactions of the current batch,
     and a sequence number (of the block to be produced)
   }
   \begin{description}
   \item[Erasure coding via copying (\es)]
     \tnote{[worker]}
-    We first cover the case of trivial erasure coding, 
+    We first cover the case of trivial erasure coding,
     in line with the description of the homogeneous case~\cite{NT}. %
-    Thus, erasure coding shares of a transactions are simply copies. 
+    Thus, erasure coding shares of a transactions are simply copies.
     We visually distinguish between “copies” of transactions
-    from the “original” transaction supplied by the client,  
-    using the symbols \tx\ and \es, respectively. 
+    from the “original” transaction supplied by the client, 
+    using the symbols \tx\ and \es, respectively.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \todo[inline]{put fwd ref / future work }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
   \item[%
     \code{MessageEnum::TxToAll}%
-    Copy distribution (\es⇒)] 
+    Copy distribution (\es⇒)]
     \tnote{worker\\ ⇒ worker }
     Each share of the erasure code,
-    \ie a copy of the transaction, 
+    \ie a copy of the transaction,
     is sent to every mirror worker.%
     \endnote{
       elaborate on the distribution scheme,
@@ -697,37 +697,37 @@ the availability-protocol)}
       we introduce the \emph{take},
       which might be increasing faster than the round number
     }
-    consisting of the validator round and 
-    the position in the list of transactions for 
-    the next block (header) in which the transaction will be included. 
-    % so that it becomes clear in which order the 
-    % transactions of the next block (header) will be listed. 
-    
+    consisting of the validator round and
+    the position in the list of transactions for
+    the next block (header) in which the transaction will be included.
+    % so that it becomes clear in which order the
+    % transactions of the next block (header) will be listed.
+   
   \item[%
    \code{fn process\_tx\_req}%
    Transaction copy (erasure code) \colorbox{SkyBlue}{reception}%
    ]\tnote{[worker]}%
    Upon receiving a transaction copy
     (the specific form of erasure code, we are using)
-    we store a copy locally. 
-    
-    
+    we store a copy locally.
+   
+   
   \end{description}
-  Note that copies of transactions are \emph{not} signed by the worker. 
-  Signatures are deferred to until after the last transaction  
-  of a validator round, 
+  Note that copies of transactions are \emph{not} signed by the worker.
+  Signatures are deferred to until after the last transaction 
+  of a validator round,
   when the worker will sign the hash of the list of all broadcast transactions,
-  called a \emph{worker hash}. 
+  called a \emph{worker hash}.
 
 
-  
+ 
 \item[Worker hash compilation (\wh)]
   \tnote{(worker)}
   Towards the end of a “validator round”,\endnote{%
     Is there any such thing as “validator round”?\\
     - sequence number\\
     - validator height\\
-    - ... 
+    - ...
   }%
   \todo[inline,color=red,caption={}]{%
     here now, we need to
@@ -737,24 +737,24 @@ the availability-protocol)}
     \end{enumerate}
   }
   \xspace
-  each worker produces its worker hash for the broadcast batch of transactions. 
+  each worker produces its worker hash for the broadcast batch of transactions.
   In detail,
-  a worker hash consists of 
+  a worker hash consists of
   \begin{itemize}
   \item the hash of the broadcast list of transactions,
   \item the number of transactions, and
-  \item the \st{round number}\ul{take}, 
+  \item the \st{round number}\ul{take},
     \todo[color=SkyBlue]{%
       very much like in a movie,
       we piece together each header form \textsc{take},
       or any other single word for \emph{batch number}
       }
   \end{itemize}
-  signed by the worker. 
+  signed by the worker.
   \endnote{\color{red}
     For general erasure coding:
     \em Does this need to includes for each receiving worker,
-    the (hashes of the) erasure coding shares that 
+    the (hashes of the) erasure coding shares that
     they should have available. ?
   }
 \item[%
@@ -762,10 +762,10 @@ the availability-protocol)}
   Worker hash provision (\wh↑)%
   ]
   \tnote{worker\\ → primary}
-  The most recent worker hash is sent to the primary 
-  for inclusion into the next header. 
+  The most recent worker hash is sent to the primary
+  for inclusion into the next header.
   \todo{
-    How much “additional” information do we have 
+    How much “additional” information do we have
     to include into the header
     such that signing a header certificate becomes meaningful?
   }
@@ -773,8 +773,8 @@ the availability-protocol)}
 \item[%
   \code{MessageEnum::WHxToAll}%
   Worker hash broadcast (\wh⇒)%
-  ] 
-  \tnote{worker\\ ⇒ worker }  
+  ]
+  \tnote{worker\\ ⇒ worker } 
   A worker broadcasts its most recent worker hash
   to mirror workers.
 
@@ -786,24 +786,24 @@ the availability-protocol)}
     worker\\%
     ← worker%
   }
-  At any time, 
-  a worker can receive a worker hash 
-  from a mirror worker. 
-  As a first reaction, 
+  At any time,
+  a worker can receive a worker hash
+  from a mirror worker.
+  As a first reaction,
   it checks whether enough
-  transactions have been received by the worker and, 
-  if so, 
-  whether the hash of the list of transaction matches the worker hash. 
+  transactions have been received by the worker and,
+  if so,
+  whether the hash of the list of transaction matches the worker hash.
 
 \item[%
   \code{MessageEnum::WHxFwd}%
   Worker hash forwarding ({\wh[]⇑})%
   ]
-  \tnote{worker\\ → primary}  
-  If a worker has successfully checked 
+  \tnote{worker\\ → primary} 
+  If a worker has successfully checked
   the availability of the transactions of a received worker hash, %
   it “forwards” the worker hash to its primary.\footnote{%
-    Validators will use this information 
+    Validators will use this information
     to send availability commitments to block headers of other primaries.
   }
 \end{description}
@@ -819,25 +819,25 @@ the availability-protocol)}
   \scalebox{.9}{%
   \footnotesize%
   \begin{tikzpicture}[scale=1.2]
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % The message passing diagram of the availability protocol at genesis
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % first the time lines for primaries and their workers
     \coordinate (primaryAnchor) at (0,0);
     \foreach \p in {1,...,5} {
-      \node[below=\primaryDistance of primaryAnchor,anchor=east] (p\p) 
+      \node[below=\primaryDistance of primaryAnchor,anchor=east] (p\p)
       at (primaryAnchor) {\ensuremath{\text{primary}_\p}};
       \draw[->] (p\p) -- ++(10.4,0);
       \coordinate (workerAnchor) at ([yshift=-\workerPrimaryDistance]p\p.east);
       \foreach \j in {1,...,2} {
-        \node[below=\workerDistance of primaryAnchor,anchor=east] (w\p_\j) 
+        \node[below=\workerDistance of primaryAnchor,anchor=east] (w\p_\j)
         at (workerAnchor) {\ensuremath{\text{worker}_{\p,\j}}};
         \draw[->,draw=lightgray,semithick] (w\p_\j) -- ++(10.4,0) ;
         \coordinate (workerAnchor) at (w\p_\j.east);
       }
       \coordinate (primaryAnchor) at (p\p.east);
     }
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % a first transaction tx1
     \node (tx1) at ([xshift=3.5ex]w1_1.east) {\tx₁};
     \draw[->,double,dotted,shorten >=-2ex] (tx1.200) ++ (200:1em) -- (tx1);
@@ -906,7 +906,7 @@ the availability-protocol)}
         % and header creation (after second block)
         % ... and sending availability votes
         \ifthenelse{\equal{\whx}{2}}%
-        {\node[right=2ex of wh\whx_\p_\whx',fill=white,draw=none] (hd\p) {\hd}; 
+        {\node[right=2ex of wh\whx_\p_\whx',fill=white,draw=none] (hd\p) {\hd};
           \foreach \k in {1,2}
           \draw[dotted,bend right=9ex-3*\k ex] (hd\p) to (wh\k_\p_\k'.center);
         }%
@@ -933,7 +933,7 @@ the availability-protocol)}
     % broadcast the availability certificate
     \foreach \p in {1,...,5} { % for each "other" validator
       \node (ac\p') at ([xshift=17ex-\p ex]ac|-p\p) {\ac\ensuremath{{}_\p}};
-      \draw[->] ([yshift=2.5ex-\p ex]ac3.east) -- (ac\p'); 
+      \draw[->] ([yshift=2.5ex-\p ex]ac3.east) -- (ac\p');
     }
   \end{tikzpicture}%
   }
@@ -941,7 +941,7 @@ the availability-protocol)}
   \label{fig:availability-protocol}
 \end{figure}
 \todo[caption={}]{%
-  concerning ``triggering'' the header construction, 
+  concerning ``triggering'' the header construction,
   there are the following points
   \\
   1. when a the triggering signing request is \emph{received} by a primary,
@@ -954,7 +954,7 @@ the availability-protocol)}
   On speedy signing incentives:
   \begin{itemize}
   \item as a validator, I want primarily \emph{my} blocks signed
-  \item 
+  \item
     So, why should I sign \emph{your} header?!
     \begin{itemize}
     \item It comes even with the storage commitment for my workers!
@@ -976,26 +976,26 @@ the availability-protocol)}
 The pure availability protocol: genesis actions
 
 \begin{description}
-\item[Genesis header compilation ({\hd[]})] 
+\item[Genesis header compilation ({\hd[]})]
   \tnote{[primary]}
   If a primary has obtained a “complete set”
   \todo{
     \emph{“complete set”}
     is an undefined term, right?
     }%
-    of 
+    of
   worker hashes for the genesis round
-  from its workers, 
-  it can compile a block header. 
+  from its workers,
+  it can compile a block header.
   Compiling worker hashes into headers
   works the same for worker hashes of local workers
   and those generated from transactions received at other validators.%
   \footnote{%
-    However, 
+    However,
     the compiled worker hashes will have different roles,
-    depending on whether they are stemming from local workers or not. 
+    depending on whether they are stemming from local workers or not.
     In particular,
-    primaries will only need to generate 
+    primaries will only need to generate
     certificates of availability for “local” headers.
   }
   At genesis,
@@ -1015,40 +1015,40 @@ The pure availability protocol: genesis actions
     \end{itemize}
     \todo[inline]{it is, isn't it?}
     .
-    
+   
   \item[Header collection]
-    The primary has to collect 
+    The primary has to collect
 
   \end{description}
- 
 
-  
+
+ 
 \item[Availability voting/commitment (\hdₚ→)]
   \tnote{primary\\ → primary}
-  A genesis header of a primary is acceptable 
+  A genesis header of a primary is acceptable
   if all its worker hashes have been forwarded
   by the local workers
   (which are trusted to have checked these worker hashes).
   The latter implies that the relevant erasure coding shares
-  are kept available. 
+  are kept available.
   An availability commitment is made
-  by signing the header 
+  by signing the header
   and sending the signed header to the creator
-  (for the purpose of aggregation into availability certificates). 
+  (for the purpose of aggregation into availability certificates).
 
 \item[Commitment aggregation (\hdₚ←)]
   \tnote{[primary]}
-  The signatures of received availability commitments 
-  are aggregated into certificates of availability 
-  for a header. 
+  The signatures of received availability commitments
+  are aggregated into certificates of availability
+  for a header.
 
 \item[Certificate broadcast (\ac⇒)]
   \tnote{primary\\ ⇒ primary}
   Once a primary receives commitments
   from a global weak quorum for its genesis header,
-  it broadcasts the certificate of availability.  
+  it broadcasts the certificate of availability. 
 
-\item[optional header distribution] 
+\item[optional header distribution]
   ~\todo[inline]{%
     Right now,
     there seems no reason to add this ``safe guard'';
@@ -1057,29 +1057,29 @@ The pure availability protocol: genesis actions
   One might expect that header creators send their headers around.
   However,
   there is no need for this.%
-  \endnote{... at least in theory, we'll keep it slick for the moment} 
-  
-  % has uploaded a worker hash 
-  % for the genesis round, 
-  % optionally, 
-  % the primary \emph{can} distribute 
+  \endnote{... at least in theory, we'll keep it slick for the moment}
+ 
+  % has uploaded a worker hash
+  % for the genesis round,
+  % optionally,
+  % the primary \emph{can} distribute
   % the genesis header:
   % ‼{\color{red} why do we do this then at all?}
   % \begin{itemize}
   % \item the primary~\(p\)
-  % \item worker hashes \(\wh_1 \cdots \wh_n\), 
-  %   produces by the local workers at \(p\)'s validator. 
+  % \item worker hashes \(\wh_1 \cdots \wh_n\),
+  %   produces by the local workers at \(p\)'s validator.
   % \end{itemize}
   % In theory,
   % this step is not necessary,
   % since each other primary will eventually receive
-  % the  worker hashes \(\wh_1 \cdots \wh_n\),  
-  % forwarded from it's workers. 
-  
+  % the  worker hashes \(\wh_1 \cdots \wh_n\), 
+  % forwarded from it's workers.
+ 
   % Note,
   % the creating primary of the header does not sign it;
-  % the signature is “delayed” until 
-  % enough primaries have commited to storing 
+  % the signature is “delayed” until
+  % enough primaries have commited to storing
   % the underlying data,
   % as described by the next action.
 
@@ -1095,58 +1095,58 @@ illustrated in \fig\ref{fig:availability-protocol}.
 \subsection{Integrity: the general case at once}
 First off,
 the integrity-protocol
-re-uses the sending of signed headers~\(\hdₚ\) to the creator 
-(from the availability-protocol), 
-as a commitment of the signer to 
-one unique header for the  validator (and round),  
-namely the first one signed and sent. 
-Thus, 
-correct validators will not sign and send any other header 
-for the respective  creator of the header (for the same round). 
+re-uses the sending of signed headers~\(\hdₚ\) to the creator
+(from the availability-protocol),
+as a commitment of the signer to
+one unique header for the  validator (and round), 
+namely the first one signed and sent.
+Thus,
+correct validators will not sign and send any other header
+for the respective  creator of the header (for the same round).
 
 
 \begin{description}
 \item[Integrity signing \(\hdₚ\)]
   \tnote{primary ⇒ primary}
-  Signing and sending the header to the creator implies that 
+  Signing and sending the header to the creator implies that
   (a correct) primary will not sign any other header
-  of the same creator with the same round number. 
+  of the same creator with the same round number.
 
 \item[Block aggregation (\bk)]
   \tnote{[primary]}
-  Using 
+  Using
   the same signature aggregation mechanism that
-  is used for availability certificates, 
-  validators will aggregate additional signatures 
+  is used for availability certificates,
+  validators will aggregate additional signatures
   (besides the availability signature) for their block headers,
-  producing learner-specific \emph{blocks}, 
-  which, by definition, 
-  are headers signed by a learner-specific quorum. 
+  producing learner-specific \emph{blocks},
+  which, by definition,
+  are headers signed by a learner-specific quorum.
 
-\item[Block broadcast \(\bk\)] 
+\item[Block broadcast \(\bk\)]
   \tnote{primary ⇒ primary}
-  The aggregated signatures of a block header form 
-  a \emph{learner-specific block}. 
-  The signature aggreator will broadcast 
-  to all primaries that belong to some quorum of the respective learner. 
+  The aggregated signatures of a block header form
+  a \emph{learner-specific block}.
+  The signature aggreator will broadcast
+  to all primaries that belong to some quorum of the respective learner.
   (Later,
-  these will be used as references to 
+  these will be used as references to
   previous blocks in the learner-specific \Dag[s]
   see \ref{???}) %FIXME reference.
 \end{description}
 
-There is no conceptual difference between 
+There is no conceptual difference between
 the integrity protocol at genesis,
-comparted to the typical case. 
-The only difference is that 
-headers in the general case 
-will carry additional information. 
+comparted to the typical case.
+The only difference is that
+headers in the general case
+will carry additional information.
 Thus,
-we can finish the description of the protocol, 
+we can finish the description of the protocol,
 by filling in the additional data and steps in the typical phase
-of the availability-protocol 
+of the availability-protocol
 (see also \fig\ref{fig:data-structures},
-for the difference between headers at genesis and the typical phase). 
+for the difference between headers at genesis and the typical phase).
 
 \begin{figure}[htb]
   \centering
@@ -1157,12 +1157,12 @@ for the difference between headers at genesis and the typical phase).
   \scalebox{.8}{%
     \footnotesize%
     \begin{tikzpicture}[scale=1,thick]
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % The message passing diagram of the integrity protocol
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       \coordinate (primaryAnchor) at (0,0);
       \foreach \p in {1,...,7} {
-        \node[below=\primaryDistance of primaryAnchor,anchor=east] (p\p) 
+        \node[below=\primaryDistance of primaryAnchor,anchor=east] (p\p)
         at (primaryAnchor) {\ensuremath{\text{primary}_\p}};
         \draw[->] (p\p) -- ++(15,0);
         \coordinate (primaryAnchor) at (p\p.east);
@@ -1187,7 +1187,7 @@ for the difference between headers at genesis and the typical phase).
         \coordinate (ac\p') at ([xshift=17ex-\p ex]theOrigin|-p\p) ;
     }
     \node (ac3') at ([xshift=17ex-3 ex]theOrigin|-p3) {\ac\ensuremath{{}_3}};
-    \draw[->] (theOrigin) -- ([xshift=4ex,yshift=4ex]ac3'); 
+    \draw[->] (theOrigin) -- ([xshift=4ex,yshift=4ex]ac3');
     \coordinate[right=14ex of ac3'] (sigAgg);
     \foreach \p in {1,2,4} { % for each "other" validator
       \node[fill=white] (av\p) at (sigAgg){\hd\makebox[0pt][l]{\ensuremath{{}_{\sim\p}}}};
@@ -1198,12 +1198,12 @@ for the difference between headers at genesis and the typical phase).
       \draw[->] (hd\p') -- (av\p);
     }
     \begin{pgfonlayer}{background}
-      
+     
       \node[fit={(av4)([xshift=2ex]av1.north east)([xshift=-2ex]ac3'.west)},pattern=crosshatch,pattern color=green!80!black,draw] (bkGreen) {};
     \end{pgfonlayer}
     \foreach \p in {1,...,4} { % for each "green" validator
       \node[right=25 ex of ac\p'] (bkGreen\p') {\bk};
-      \draw[->] (bkGreen) -- (bkGreen\p'); 
+      \draw[->] (bkGreen) -- (bkGreen\p');
     }
     \foreach \p in {5,...,7} {
       \node[right=35 ex of ac\p',fill=white] (hd\p') {\hd};
@@ -1216,15 +1216,15 @@ for the difference between headers at genesis and the typical phase).
       \coordinate (sigAgg) at ([xshift=-1ex,yshift=-1ex]sigAgg);
     }
       \begin{pgfonlayer}{background}
-        
+       
         \node[fit={(bkGreen3')([xshift=2ex]av7.north east)(av5)},pattern=vertical lines,pattern color=blue,draw] (bkBlue) {};
       \end{pgfonlayer}
-    \foreach \p in {7,...,3,1} { % for each validator in some "blue" quorum, 
+    \foreach \p in {7,...,3,1} { % for each validator in some "blue" quorum,
       \node[right=65 ex of ac\p'] (bkBlue\p') {\bk[blue]\ensuremath{{}_3}};
-      \draw[->] (bkBlue.east) -- (bkBlue\p'); 
+      \draw[->] (bkBlue.east) -- (bkBlue\p');
     }
-    \coordinate (top) at (bkBlue3'.east|-p1); 
-    \coordinate (bottom) at (bkBlue3'.east|-p7); 
+    \coordinate (top) at (bkBlue3'.east|-p1);
+    \coordinate (bottom) at (bkBlue3'.east|-p7);
     \draw[double,very thick,dotted] ([xshift=1ex,yshift=1ex]top) -- ([xshift=1ex,yshift=-1ex]bottom);
     \coordinate (sigAgg) at ([xshift=20ex]bkBlue5');
     \foreach \p in {7,...,4} { % for each "other" blue validator, not 3
@@ -1232,7 +1232,7 @@ for the difference between headers at genesis and the typical phase).
       %\draw[->] (bk\p') -- ([xshift=1ex,yshift=-.5ex]av\p.south east);
       \coordinate (sigAgg) at ([xshift=-1ex,yshift=-1ex]sigAgg);
       \draw[->] (sigAgg|-p\p) -- (bk\p.south east);
-    }    
+    }   
     \begin{pgfonlayer}{background}
       \node[fit={(bkBlue5')([xshift=2ex]bk7.north east)(bk4.south west)},fill=lightgray] (BlueBlocks) {};
     \end{pgfonlayer}
@@ -1246,17 +1246,17 @@ for the difference between headers at genesis and the typical phase).
     }
   }
   \caption[Integrity protocol]{%
-    The integrity protocol 
+    The integrity protocol
     (concluding each round that's was “opened” in the availability-protocol)%
   }
-  % 
+  %
   \label{fig:integrity-protocol}
 \end{figure}
 \todo[caption={},inline]{%
-  blue blocks are sent to all validators in 
+  blue blocks are sent to all validators in
   \begin{enumerate}
    \item[①] the signing quorum and
-   \item[②] \textsc{any other} blue quorum 
+   \item[②] \textsc{any other} blue quorum
    \end{enumerate}
 }
 
@@ -1265,29 +1265,29 @@ for the difference between headers at genesis and the typical phase).
 \begin{description}
 \item[Generating and broadcasting signed quorums]
   \tnote{primary \\⇒ primary}
-  Once a validator has collected 
-  enough new  blocks (for a learner), 
+  Once a validator has collected
+  enough new  blocks (for a learner),
   it signs a learner-specific quorum of such blocks;
-  the result is called a \emph{signed quorum},  
-  for short. 
+  the result is called a \emph{signed quorum}, 
+  for short.
   All these blocks have to be from the same round. {\color{red} important ‼}
 
   Under certain conditions,
   in particular if there is exceptional delay for a specific learner,
   one can forgoe announcing a proper signed quorum
   and instead signs a \emph{dummy quorum} for a specific learner,
-  \ie a signature over the ID of the learner in question and the current round number.  
+  \ie a signature over the ID of the learner in question and the current round number. 
 
 \item[General header compilation]
   The biggest additional work and data
   concerns the compilation of headers.
-  In the typical phase, 
+  In the typical phase,
   a header carries two additional data items, namely
   \begin{itemize}
-  \item 
-    the availability certificate of the previous header 
+  \item
+    the availability certificate of the previous header
     of the header's creator/initiator
-  \item 
+  \item
     hashes of the signed (dummy) quorums sent by the same validator
   \end{itemize}
 
@@ -1299,30 +1299,30 @@ for the difference between headers at genesis and the typical phase).
   the certificate of availability amounts to a checking of signatures.
 \end{description}
 
-\todo[inline]{describe in detail how 
+\todo[inline]{describe in detail how
 
   the checking of the availability of the headers takes place}
 
 \subsection{Summary}
-The availability protocol in a non-genesis round 
+The availability protocol in a non-genesis round
 only differs in having
 \begin{enumerate}
-\item the additional requirement 
-that each block header also includes 
-the certificate of availability 
-for the previous header of the same validator and 
-\item 
+\item the additional requirement
+that each block header also includes
+the certificate of availability
+for the previous header of the same validator and
+\item
 the sending and checking of signed quorums
-(each of which implements the reference to 
+(each of which implements the reference to
 blocks from the previous round—in a learner-specific \Dag).
 \end{enumerate}
 
 As a consequence,
-casting an availability vote / sending a commitment message 
+casting an availability vote / sending a commitment message
 \todo{discuss terminnolgy}
 becomes a recursive commitment
-to storing all blocks until genesis 
-(or the last block that some of learners might still want availabl). 
+to storing all blocks until genesis
+(or the last block that some of learners might still want availabl).
 
 \section{Data structures}
 
@@ -1332,7 +1332,7 @@ to storing all blocks until genesis
 %   \begin{minipage}{.3\linewidth}
 %       \begin{itemize}
 %   \item Integrity Vote (cf. Availability Vote → Storing promise ?)
-%   \item ~ 
+%   \item ~
 %   \end{itemize}
 %   \end{minipage}
 % }
@@ -1361,10 +1361,10 @@ to storing all blocks until genesis
     %       data
     %     \end{tabular}}
     %   };}
-    % % https://texample.net/tikz/examples/torn-paper/ 
+    % % https://texample.net/tikz/examples/torn-paper/
     % % ‼ make cute torn edges
     % \clip[fill] ([xshift=-1em]b.north east)
-    % -- ([yshift=1em]b.south west) 
+    % -- ([yshift=1em]b.south west)
     % -- ([xshift=1em]b.south west)
     % -- ([yshift=-1em]b.north east) -- cycle;
     % \node[ellipse,fill=black] (b){
@@ -1398,14 +1398,14 @@ to storing all blocks until genesis
       \end{tikzpicture}\right)\)
   }
   \subfloat[%
-  Worker hash (issued by~\(w\)), 
+  Worker hash (issued by~\(w\)),
   including the round number \(\rnd\),
   and the number of transactions~\(\|\protect\overrightarrow \tx\|\);
   it is signed by~\(w\)]{
     \wh:
     \begin{tabular}[t]{@{}l@{}}
       \begin{tikzpicture}[baseline={([yshift=-.5ex]wh.center)}]
-        \node (wh){\(\left[ \#(\overrightarrow \tx), \rnd,  \|\overrightarrow \tx\| \right]_{w}\)}; 
+        \node (wh){\(\left[ \#(\overrightarrow \tx), \rnd,  \|\overrightarrow \tx\| \right]_{w}\)};
       \end{tikzpicture}
       %\footnotesize
     % {\color{violet} + info for correctness checking} \\
@@ -1422,7 +1422,7 @@ to storing all blocks until genesis
   }
 \qquad
   \subfloat[Genesis certificate of availability]{
-    \(\ac\): 
+    \(\ac\):
     \(\Bigl[\hd[]\Bigr]_{\overrightarrow q}\)
   }
 
@@ -1484,15 +1484,76 @@ we have several types of dependencies.
   \end{itemize}
   Hence, there is a conceptually simple data structure
   where each arriving message is mapped to a pair of
-  a (shared) counter and a pointer to the message to be signed. 
+  a (shared) counter and a pointer to the message to be signed.
 \end{ex}
 
 The next example is more tricky in that
-we are interested only in the first \(k\) messages out of \(n\). 
+we are interested only in the first \(k\) messages out of \(n\).
 
 \begin{ex}[Broadcasting certificates of availability (\textsc{i/ii})]
-  
+  Assuming that all validator sets of size~\(f+1\) (out of~\(3f+1\))
+  form a weak quorum, we
+  \begin{enumerate}
+  \item count down as “shared counter”, starting from \(f+1\);
+  \item synthesize the certificate of availability (and broadcast it);
+  \item count down further and free the counter if it reaches~\(-2f\).
+  \end{enumerate}
 \end{ex}
+
+\begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
+  Assuming more general quorum systems,
+  the idea of a simple counter does not work any more. %
+  We could simply use one counter for each quorum; %
+  however, that would lead to an exponential blow-up. %
+  Hence,
+  we make use of the fact that
+  each message falls into exactly one “region”\footnote{
+    There is a one to one correspondence of regions and terms
+    in the inclusion-exclusion formula,
+    and vice versa.
+  }\todo{%
+    1. explain the regions of the Venn diagram properly\\
+    2. explain the relation to the inclusion-exclusion principle
+  }%
+  of the Venn diagram of all quorums. 
+  \todo[caption={},inline]{
+}%
+%
+\endnote{%
+  \emph{On the inclusion exclusion principle. } %
+  %
+  We can use the
+  \href{https://en.wikipedia.org/wiki/Inclusion\%E2\%80\%93exclusion_principle}{inclusion
+    exclusion principle.}%
+  We can organize the regions of the Venn diagram into a tree %
+  in which
+  \begin{itemize}
+  \item the root is the region in which all sets intersect
+  \item the leaves are the regions sets of elements that belong to exactly one
+    set
+  \item there is a path from one region to another if the former intersects with
+    more sets than the latter
+  \item in particular, direct ancestry means to have exactly one additional intersection
+  \end{itemize}
+  We can simplify this tree by repeating the following two operations,
+  starting at the root:
+  \begin{enumerate}
+  \item coalesce all children of the same cardinality
+  \item coalesce parent and child if the child is the only child
+  \end{enumerate}
+  For a proper counter system, %
+  we can disregard empty regions. %
+
+  Does the above algorithm (up to some corner case details of empty regions)
+  yields a single node if we start with the set of all sub-sets?
+}
+  \begin{enumerate}
+  \item count down as “shared counter”, starting from \(f+1\);
+  \item synthesize the certificate of availability (and broadcast it);
+  \item count down further and free the counter if it reaches~\(-2f\).
+  \end{enumerate}
+\end{ex}
+
 
 \begin{verbatim}
 {
@@ -1502,10 +1563,10 @@ Cornell University, Ithaca, New York, USA, Jan. 2007.
 
 4.4 Replication and message synthesis
 
-Replicating code and data is an effective way to achieve 
-fault tolerance and ensure integrity and availability. 
+Replicating code and data is an effective way to achieve
+fault tolerance and ensure integrity and availability.
 In DSR, both reactors and memory references may be replicated
-on multiple hosts. Suppose reactor c is replicated on a set of hosts H. 
+on multiple hosts. Suppose reactor c is replicated on a set of hosts H.
 Then other reactors interact with c as follows:
 • Any message for c is sent to all the hosts in H.
 • The replicas of c process incoming messages independently of each other. To
