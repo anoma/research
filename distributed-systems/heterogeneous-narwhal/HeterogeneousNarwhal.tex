@@ -1512,8 +1512,15 @@ the first \(k\).
 \end{ex}
 
 Already at genesis,
-the general situation becomes slightly more complex. 
+the general situation becomes \st{slightly more complex}  \todo[inline]{\Large a nightmare}. 
 \begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
+  \todo{the below works only for systems in there is a single node in every
+    quorum -- a veto node
+    alternatively, one could put things ``upside down'',
+    and let the leaves report on success -- 
+    provided that every quorum has a node that does not belong to any other
+    quorum (every neighborhood has a grumpy person)
+  }\color{red}
   Assuming more general quorum systems,
   the idea of a simple counter does not work any more. %
   The brute force solution consists in using one counter for each quorum; %
