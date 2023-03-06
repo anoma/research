@@ -52,8 +52,9 @@
 \newcommand{\fifo}{\textsc{fifo}}
 \newcommand{\Fifo}{\textsc{Fifo}}
 \newcommand{\aka}[1][]{a.k.a.\xspace}
-\newcommand{\ie}[1][]{\emph{i.e.}, }
-\newcommand{\eg}[1][]{\emph{e.g.}, }
+\newcommand{\ie}[1][, ]{\emph{i.e.}#1}
+\newcommand{\eg}[1][, ]{\emph{e.g.}#1}
+\newcommand{\etc}[1][ ]{\emph{etc.}\xspace}
 \newcommand{\fig}[1][]{Fig.~}
 \newcommand{\Learner}{%
   % the set of learners
@@ -185,9 +186,9 @@
 %\includecomment{comment}
 
 \title{%
-  Heterogeneous Narwhal: %
+  Heterogenizing \Dag-based consensus (1/\(n\)):
   \\
-  a multi-chain mempool \Dag%
+  heterogeneous narwhal-rider
 }
 \author{Typhon Team Heliax}
 \date{\today}
@@ -292,23 +293,26 @@
 
 \begin{abstract}
   \noindent
-  Blockchains exhibit \emph{linear} structure,
-  resulting from a \emph{single} reference to the previous block.
+  Blockchains exhibit \emph{linear} structure
+  as each block has a unique reference to \emph{the} previous block.
   If instead,
   each block may reference \emph{several} previous blocks,
-  we can build a \emph{directed acyclic graph} (\Dag) of blocks.
+  we can build a \emph{directed acyclic graph} (\Dag) of blocks.\xspace%
+  \footnote{%
+    Note that this includes block chains as one particular case. 
+  }
   In fact,
   such “block \Dag[s]” are the basic data structure that
-  several recent consensus algorithms rely on,
+  several recent consensus protocols rely on,
   \eg \Dag-rider, Bullshark, and Narwhal\&Tusk.\footnote{%
     The respective references are,
   }
   These protocols build
   a growing “global” \Dag of transaction data such that%
   ---among other things---%
-  ① every validator's local view is a sub-\Dag of the “global” \Dag and %
-  ② every node of the “global” \Dag is
-  “logged”\endnote{%
+  ① every validator's local view is a sub-\Dag of an “ideal” global \Dag and %
+  ② every block of the “ideal” \Dag is
+  \emph{logged}\endnote{%
     Logging is terminology borrowed from César Sanchez:
     he likes to talk about \emph{log-chain}s,
     or more verbose “mempool \emph{log system}”
@@ -316,36 +320,72 @@
     Setchain: Improving Blockchain Scalability
     with Byzantine Distributed Sets and Barriers}
   }
-  for inclusion into a total order of blocks.
-  Such “global” \Dag[s] will be the topic of the present paper,
-  referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]},
-  for short. 
+  for inclusion into a total order of blocks,   %
+  which  roughly means eventual execution of its transactions. 
+  
+  % Such “global” \Dag[s] will be the topic of the present paper,
+  % referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]},
+  % for short. 
 
-  The paper introduces a multi-ledger mem-\Dag,
-  generalizing Narwhal's single ledger mem-\Dag;
-  in analogy to Heterogeneous Paxos,
-  the new protocol is called \emph{Heterogenous Narwhal}.  
-  In principle,
-  Heterogeneous Narwhal\&Paxos are an alternative for bridges.
+  The paper focuses on the general principle of heterogenization
+  of \Dag-based mempools
+  and presents the general idea by means of a specific example,
+  which we dub \emph{Heterogeneous Narhwhal-Rider}, or HNR for short.
+  Very much like Heterogeneous Paxos is a heterogeneous version of Lamport's
+  Paxos, 
+  HNR is a heterogeneous version of
+  the Narwhal mempool, extended with \Dag-rider's weak links. 
+  % In principle,
+  % Heterogeneous Narwhal\&Paxos  an alternative for bridges,
   \todo[caption={}]{%
     In a follow up paper,
     we actually need to explain how heterogeneous Narwhal is \\
     1. an alternative to bridges    \\
     2. which benefits / drawback we have, in general\\
     3. which parts are “implementation detail”.\\
-    so, as written on the opening page (on page~\pageref{page:firstpage}):
-    not in this paper ...
+    cf. (on page~\pageref{page:firstpage}):
+    \textsc{not} part of this paper ...
   }
-  However,
-  in the present paper,
-  we focus on \emph{eventual finality} of the mem-\Dag[s].
+  % However,
+  % in the present paper,
+  % we focus on \emph{eventual finality} of the mem-\Dag[s].
+  We conclude with a discussion of how heterogenization is a suitable tool
+  for building towards an eco-system,
+  very much in the spirit of Vitalik Buterin's \texttt{cross-chain
+    world}\todo{put in proper term,
+    that iscompatible with the Vitalik
+  }.
 \end{abstract}
 
-
-
-
 \tableofcontents
+
 \section{Introduction}
+Directed acyclic graphs feature in % 
+several recently proposed consensus protocols \cite{}.\todo{→isaac?: 
+  which ones should I add here?
+} %
+So, are we presenting yet another \Dag-based consensus protocol?
+
+Clearly, the answer is no; the research is active,
+and somebody might be in the very process of writing a new one.
+The present paper is rather explains how to heterogenize one example of
+\Dag-based mempools;
+we believe that this process applies to the whole family of \Dag-based mempools,
+which shall dub \Dag-pools. 
+So,
+for the sake of specificity,
+we use a mix of Narwhal and \Dag-rider as a first guinea pig, %
+leading up to the general principle of heterogenization.
+
+Along the way,
+we shall find out that heterogenization applies differently to questions of availability and integrity \cite{charlotte}:
+\begin{description}
+\item[availability] all relevant transaction data is promised to be available
+\item[integrity] the protocol is safe, \eg no double spends, equivocation,  \etc. 
+\end{description}
+
+
+
 
 \todo[inline]{main contribs:\\[\baselineskip]
   \begin{minipage}{1.0\linewidth}
@@ -355,7 +395,7 @@
   \end{minipage}\\[\baselineskip]
   In summary,
   we present a general framwork for building
-  a cross-chain ecosystem of pre-existing and new ledgers. 
+  a cross-chain ecosystem of pre-existing and new ledgers. %
 }
 
 \section{Context}
@@ -482,6 +522,9 @@ Roughly, we have two complementary protocols running concurrently:
 
 \section{Architecture and communication patterns}
 \label{sec:communication-patterns}
+
+
+
  We incorporate Narwhal's~\cite{NT}
  scale out architecture%in our availability protocol
  : %
@@ -1461,6 +1504,10 @@ to storing all blocks until genesis
 
 
 
+\bibliographystyle{alpha}
+\bibliography{HN.bib}
+
+\appendix
 
 \section{Message dependency management}
 
@@ -1628,12 +1675,6 @@ message synthesizer ref(s)
   Security, PLAS’14, pages 27:27–27:39, New York, NY, USA, 2014. ACM. ISBN
   978-1-4503-2862-3. . URL http://doi.acm.org/10.1145/2637113.2637117.
 \end{verbatim}
-
-\bibliographystyle{alpha}
-\bibliography{HN.bib}
-
-
-\appendix
 
 \section{Endnotes}
 \printendnotes
