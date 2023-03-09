@@ -5,7 +5,9 @@
 %\renewcommand{\st}[1]{}
 %\usepackage[scale=.75]{geometry}
 \usepackage{placeins}
-\usepackage{amsthm,amssymb,hyperref,marginnote}
+\usepackage{amsthm,amssymb,marginnote}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
 
 \newtheorem{ex}{Example}[section]
 
@@ -88,8 +90,8 @@
 \newunicodechar{“}{``}
 \newunicodechar{”}{''}
 %\newunicodechar{②}{\circledX 2}
-\newunicodechar{ₐ}{\ensuremath{{}_a}}
-\newunicodechar{ₚ}{\ensuremath{{}_p}}
+\newunicodechar{ₐ}{\ifmmode_a\else\ensuremath{{}_a}\fi}
+\newunicodechar{ₚ}{\ifmmode_a\else\ensuremath{{}_q}\fi}
 \newunicodechar{‼}{\rough}
 \newunicodechar{‽}{\ensuremath{?!}}
 \newunicodechar{↑}{\ensuremath{\uparrow}} 
@@ -218,7 +220,7 @@
   {\marginnote{\oldendnote[#1]{#2}}}%
 }
 \newcommand{\hn}{Heterogeneous Narwhal\xspace}
-\usepackage[textsize=footnotesize]{./myluatodonotes}%\usepackage{todonotes}%
+\usepackage[textsize=footnotesize]{./luatodonotes}%\usepackage{todonotes}%
 
 \begin{document}
 
@@ -503,7 +505,7 @@ which
 One good example of learners are \emph{executor nodes} %
 \cite{anoma_specs}\todo{%
   check / update link, % 
-  \url{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}
+  \href{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}{execution} %
 }, %
 which are in charge of updating the state of one or several \base. %
 
@@ -540,26 +542,30 @@ we also discuss the preliminaries for \hnr's salient properties.
   \end{itemize}
 }
 
-\subsection{Core concepts}
+\subsection{Quorums: learner-specific, global, and universal}
 \label{sec:core-defs}
 
-The \hnr protocol uses learner-specific assumptions,
+The \hnr protocol is designed to take into account learner-specific assumptions, %
 first and foremost about liveness of sets of validators.\xspace%
 \footnote{% 
   We keep the terminology introduced for %
   Heterogeneous Paxos \cite{opodis20HPaxos}. %
 } %
-We start by fixing a finite set of \emph{learners}. %
-each of which has their own assumptions about the behavior of validators.\todo{%
+We start by fixing a finite set of \emph{learners} \(Learners\), %
+each of which holds certain beliefs that 
+imply restrictions on the behavior of validators that is considered possible.\xspace%
+\todo{%
   double check with Isaac %
   that it is safe to use the terms %
   validator and acceptor %
   interchangeably 
-} %
-Each learner is asked to commit to a set of \emph{quorums}\todo{define\&explain} 
-such that, % 
-at any given point in time, %
-at least one of the quorums will be live for a sufficiently long period. %
+}%
+Each learner is asked to commit to a set of \emph{quorums}\xspace%
+\todo{define\&explain}%
+such that at least one of the quorums will be live at all times. %
+\endnote{
+  this is way too strong as an assumption, no ?
+}
 \endnote{%
   on corroboration of liveness assumptions: %
   keep tabs on that there is enough progress
@@ -577,41 +583,56 @@ at least one of the quorums will be live for a sufficiently long period. %
 In particular,
 the protocol description takes as input a function
 from learners to sets of quorums. 
-\begin{definition}[Learner-specific quorums]
+Let us mention once more, %
+as protocol designers, % 
+we assume each learner to have commited to a set of quorums, %
+such that one of these quorums is live at all times %
+(and that this is compatible with the learner's believes).\xspace%
+\footnote{%
+  This is formalized as
+  \href%
+  {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
+  {\texttt{Trust Live}}
+  in the
+  \href%
+  {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
+  {\tla-specification}. 
+}
+\begin{definition}[Learner-specific quorum system]
   \label{def:trustlive}
-  Each learner \(a\) chooses a set of quorums \(\Q{a}\)
-  such that one of these quorums is live at all times %
-  (according to their beliefs).\xspace%
-   \footnote{%
-     This is formalized as
-     \href%
-     {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
-     {\texttt{Trust Live}}
-     in the
-     \href%
-     {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
-     {\tla-specification}. 
-  }
+  A \emph{learner-specific quorum system} is a function from 
+  learners to sets of quorums.
+  For a {learner-specific quorum system}~\(\Q{}\)
+  and a learner \(a\), 
+  we denote the learners set of qourums by \(\Q{a}\), 
+  whose elements are the \emph{learner-specific quorum} of \(a\).
+  We use \(qₐ, q'ₐ,\) \etc to range over learner-specific quorums of learner \(a\).
 \end{definition} %
 One might even go as far and ask learners to choose %
 a maximal set of quorums that are compatible with their beliefs; %
 however, %
 all we need is a map from learners to sets of quorums. %
-Based on these we can formulate the remaining two core definitions. % 
-\begin{definition}[Global Weak Quorum]
+Based on these we can formulate the remaining two core definitions. %
+
+Global weak quorums are important for matters of availability:
+if a global weak quorum is holding a copy of a particular transaction request, %
+then one copy should be available %
+(as a ``shared belief'' of all learners). %
+\begin{definition}[Global weak quorum]
   \label{def:global-weak-quorum}
-  A %
-  \emph{global weak quorum} %
-  is a set~\(X\) that is a weak quorum for each learner,  %
+  A \emph{global weak quorum} is %
+  a set of validators \(X\) that is a weak quorum for each learner, %
   i.e., \(X ∩ qₐ ≠ ∅\) %
   for every learner~\(a ∈ \Learner\), and %
   all \(qₐ ∈ \Q{a}\).
 \end{definition}
 
+
+\todo{explain where we need universal quorums}%
 \begin{definition}[Universal Quorum]
   \label{def:universal-quorum}
-  A universal quorum is a set
-  that contains a qourum for each learner.
+  A \emph{universal quorum} is a set of quorums
+  that contains at least one learner-specific quorum for each learner.
 \end{definition}
 
 \subsection{Discussion of desirable properties}
@@ -621,16 +642,16 @@ Based on these we can formulate the remaining two core definitions. %
   recall/discuss the properties 
   such as chain quality, 
   fair inclusion,
-  etc
+  \etc
 }
 
 
- 
 \section{Overview: %
   mem-DAGs, heterogeneity, etc.
 }
 \label{sec:overview}
-\todo[inline,caption={}]{probably move the ``hidden material'' to an earlier point (context)}
+\todo[inline,caption={}]{probably move the below ``hidden material'' (see \TeX-source)
+  to an earlier point (context)}
 \begin{comment}
 Recall that we aim to build “global” \Dag[s] of blocks, one for each leaner, 
 each referencing a quorum of previous blocks (of the respective learner);
@@ -712,16 +733,11 @@ Roughly, we have two complementary protocols running concurrently:
 \end{comment}
 \section{Architecture and communication patterns}
 \label{sec:communication-patterns}
-
-
-
- We incorporate Narwhal's~\cite{NT}
- scale out architecture%in our availability protocol
- : %
+ \Hnr incorporates Narwhal's~\cite{NT}
+ scale out architecture: %
  each validator has a unique \emph{primary} and %
  a number of \emph{workers} %
- (see \fig\ref{fig:validators})%
- .
+ (see \fig\ref{fig:validators}).
 \begin{figure}[htb]
   \centering
 
@@ -738,7 +754,6 @@ validator:\(\left\{\begin{tikzpicture}[baseline={(p.south)},remember picture]
       \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(w_1.south west)(w_10.south east)(p)] {};
     \end{pgfonlayer}
   \end{tikzpicture}\right.\)
-
 \vspace{4ex}
 
 \tikz[remember picture]{\node[rectangle,fill=gray,draw] (c) {client};}\hfill~\\
@@ -814,29 +829,24 @@ primaries never send messages or any other signals to their workers.\xspace%
 \subsection{The pure availability protocol: worker actions}
 \label{sec:base-protocol}
 \todo[inline]{%
-  get rid of the broadcast of the availability certificates%
-  % ???
-  \tiny
-  \sf
-  TH well, cannot make sense of that myself any more
-  instead we broadcast signatures of headers ?
-  % ?? 
-  or was that an error inf the figure
-  \emph{The integrity protocol (concluding each round that’s was “opened” in
-the availability-protocol)}
-}
-\todo[inline]{%
-  maybe we need to ``announce'' headers, %
-  to avoid ``crossing'' of round numbers of learner%
+  we need to ``announce'' headers
+  differently to what what is/was in the specs
+  \tiny\tt(written March 7 2023, Tobias Heindel)
 }
 \todo[inline]{%
   so, signed qourums are an ``output'' of the integrity protocol,
-  and need to be made available (such that it is possible to create new headers).
+  and need to be made available
+  (such that it is possible to create new headers).
+  NEEDS EXPLAIN
 }
 
 \todo[inline]{%
   worker hashes also should include an availability certificate %
   of the header creator's previous header %
+  \\
+  However,
+  as we now have the header announcement, 
+  one could logically move it to the primary's signature request ?
 }
 
 \begin{description}
@@ -1707,7 +1717,26 @@ to storing all blocks until genesis
 
 \appendix
 
+
 \section{Message dependency management}
+\todo[inline]{possibly move to }
+In the high-level protocol description, %
+one typically considers the benevolent scenarios %
+where all message dependencies are met, %
+such that all messages that one needs to progress, %
+i.e., compile and send new messages, %
+have already been received and their data are immediately accessible. %
+However, eventually one has to also address the issues of %
+managing message dependencies. %
+
+
+\begin{description}
+\item[filtering] how we can efficiently sort out unwanted messages
+\item[pre-condition check] whether the message triggers one or more actions 
+\item[processing] what we do if the pre-condition is met
+\item[post-condition assertions] if applicable, what is ensured by the action. 
+\end{description}
+
 
 Messages depending on other messages
 is a \emph{sine qua non} of consensus protocols.
