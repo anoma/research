@@ -1,6 +1,10 @@
 \documentclass[dvipsnames]{article}
+\usepackage{lmodern}
+\usepackage{microtype}
+
 \usepackage{markdown}
 \usepackage{soulutf8}
+
 %\usepackage{tabularx}
 %\renewcommand{\st}[1]{}
 %\usepackage[scale=.75]{geometry}
@@ -20,12 +24,14 @@
 }
 
 \usepackage{newunicodechar}
+\usepackage{lmodern}
 \input{UnicodeReplacements.tex}
+
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \usepackage{amsmath}
 % \usepackage[T1]{fontenc}
-% \usepackage{lmodern}
+
 %\usepackage[utf8]{inputenc}
 \usepackage{xspace}
 % macros
@@ -50,6 +56,8 @@
 % \dag is defined to produce † unfortunately
 \newcommand{\DAG}[1][]{\textsc{Dag}#1\xspace}
 \newcommand{\Dag}[1][]{\textsc{dag}#1\xspace}
+\newcommand{\statetright}{\textsf{stateright}}
+\newcommand{\Statetright}{\textsf{Stateright}}
 \newcommand{\tla}[1][]{\textsc{tla}\ensuremath{{}^{+}}\xspace}
 
 \newcommand{\hnr}{\textsc{hnr}\xspace}
@@ -221,6 +229,7 @@
 }
 \newcommand{\hn}{Heterogeneous Narwhal\xspace}
 \usepackage[textsize=footnotesize]{./luatodonotes}%\usepackage{todonotes}%
+
 
 \begin{document}
 
@@ -810,14 +819,13 @@ they only pass on hashed data and
 block header information to their primaries.
 The idea is to keep the network bandwidth usage of primaries
 as low as possible.
-In particular,
-primaries never send messages or any other signals to their workers.\xspace%
+Moreover,
+as a secondary principle, 
+primaries never send messages or other direct signals to their workers.\xspace%
 \footnote{%
   However, %
-  there will be a point in time when workers receive signals
-  after transactions have been processes
-  such that they can free up the storage that they use for 
-  keeping transaction data available. 
+  workers receive signals upon successful execution of transactions, 
+  which allows them to free up the transaction storage. 
 }%
 \endnote{%
   Sharing the round number is the point where
@@ -1718,37 +1726,57 @@ to storing all blocks until genesis
 \appendix
 
 
-\section{Message dependency management}
-\todo[inline]{possibly move to }
-In the high-level protocol description, %
-one typically considers the benevolent scenarios %
-where all message dependencies are met, %
-such that all messages that one needs to progress, %
-i.e., compile and send new messages, %
-have already been received and their data are immediately accessible. %
-However, eventually one has to also address the issues of %
-managing message dependencies. %
+\section{Actor-based message dependency management}
+\todo[inline]{%
+  possibly move to the main part of the  paper %
+  although it is technically not needed for the high(est)-level spec
+}
+Messages depending on other messages %
+is a \emph{sine qua non} of consensus protocols. %
+Sending a message according to some protocol %
+typically is a response to having received one or several messages.\xspace%
+\footnote{%
+  Elapsing timers act very much like ``local messages'' %
+  (cf.\ \statetright's \href%
+  {docs.rs/stateright/latest/stateright/actor/trait.Actor.html}%
+  {\texttt{on\_tiemeout}}%
+  ). 
+}
+However, %
+high-level protocol descriptions do not---and \emph{should} not---specify %
+how a process can effectively become aware of the fact that %
+it should send a specific message, %
+let alone how it should keep track of all relevant received messages (efficiently). %
+However, %
+if we want to run the protocol, % 
+we {have to} address these questions
+by implementing what we call \emph{message dependency management}. %
+We shall follow the actor based model, % 
+which means that we have to map high-level protocol descriptions like
+\emph{upon reception of header signatures from a weak quorum of validators} %
+to a function that the processes calls for \emph{every} single received message %
+and returns  a set of messages to be sent. 
+%This amounts to specifying an actor based implementation of the protocol. %
+We shall see that %
+it was indeed appropriate to disregard questions of message dependency management
+``without loss of generality'' %
+in our high-level description of \hnr. %
 
+% When receiving a message, we have to first 
+% the sender is aware of the fact that all messaged dependencies are met %
+% and also can retrieve the received messages (from memory, storage, \etc). %
+% Finally, %
+% one has to have an efficient filter for irrelevant messages %
+% (relative to the current observations of the agent). %
 
-\begin{description}
-\item[filtering] how we can efficiently sort out unwanted messages
-\item[pre-condition check] whether the message triggers one or more actions 
-\item[processing] what we do if the pre-condition is met
-\item[post-condition assertions] if applicable, what is ensured by the action. 
-\end{description}
-
-
-Messages depending on other messages
-is a \emph{sine qua non} of consensus protocols.
-In \hn,
-we have several types of dependencies.
-
-\begin{ex}[Answering header signature requests]
+Let us look at some examples of message dependencies before %
+we describe the complete message dependency manager.  %
+\begin{ex}[Responses to header signature requests]
   Header signature requests (in the availability protocol)
   can only be answered (correctly) by a validator if
   it has received a confirmation from each of its workers.\footnote{
     Each confirmation states that
-    a copy of the hash-referenced transaction data has been stored.
+    a copy of the referenced transaction data has been stored.
   }
   This scenario is simple in that
   \begin{itemize}
@@ -1761,7 +1789,9 @@ we have several types of dependencies.
   \end{itemize}
   We can devise a relatively simple data structure:
   each expected message (fingerprint) is mapped to a pair of
-  a shared counter and (a pointer to) the message to be signed. 
+  a shared counter and (a pointer to) the message to be signed.
+  The counter is decremented of each one of the expected messages %
+  and the message is synthesized. % 
 \end{ex}
 
 Now, if we look at availability certificates,
@@ -1785,8 +1815,11 @@ the first \(k\).
   messages that we can safely ignore. 
 \end{ex}
 
-Already at genesis,
-the general situation becomes \st{slightly more complex}  \todo[inline]{\Large a nightmare}. 
+In general, the situation becomes already a nightmare, %
+if we consider fully general quorum systems. %
+\todo[inline]{%
+  probably kick this example out. 
+}
 \begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
   \todo{the below works only for systems in there is a single node in every
     quorum -- a veto node
@@ -1858,8 +1891,26 @@ the general situation becomes \st{slightly more complex}  \todo[inline]{\Large a
      }
    }
 }
-
 \end{ex}
+
+We discern the following sub-tasks of message dependency management: %
+filtering, trigger detection, message synthesis, (local) state update. %
+\begin{description}
+\item[Filtering] %
+  How we can efficiently sort out irrelevant messages? %
+\item[Trigger detection] %
+  Is the received message a trigger for sending new messages?
+\item[Message retrieval] %
+  How can we retrieve exactly the relevant received messages?
+\item[State update] %
+  Update the local state for the above three processes to work. %
+\end{description}
+In the accompanying %
+\href%
+{https://github.com/anoma/typhon/tree/hnarwhal-stateright}%
+{prototype implementation}, %
+these tasks are accomplished %
+inside \statetright's \texttt{on\_msg}-functions. %
 
 
 \begin{verbatim}
