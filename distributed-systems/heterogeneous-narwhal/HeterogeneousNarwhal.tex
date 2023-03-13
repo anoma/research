@@ -168,7 +168,7 @@
     \node[#2,fill=#3,draw=#4,inner sep=.5pt,outer sep=0pt] %
     (#1){%
       \textcolor{#5}{%
-        \footnotesize #6%
+        \small #6%
       }%
     };%
   }%
@@ -194,6 +194,9 @@
   {white}%
   {\textsc{tx}}%
 }
+\newcommand{\txs}[1][theTX]{%
+  \tx[#1]{}\ensuremath{\mathrm{s}}\xspace%
+}
 % \newcommand{\tx}[1][]{%
 %   \tikz[baseline={([yshift=0pt]theNode.base)}]{%
 %     \node[ellipse,fill=black,inner sep=.5pt,outer sep=0pt] %
@@ -201,7 +204,19 @@
 %       \textcolor{white}{\footnotesize \bf TX\makebox[0pt][l]{\ensuremath{{}_{#1}}}}};%
 %   }%
 % }
-\newcommand{\es}{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[ellipse,fill=white,draw,thick,inner sep=.5pt,outer sep=0pt] (theNode){\textcolor{black}{\footnotesize TX}};}}
+
+% \newcommand{\es}{%
+%   \tikz[baseline={([yshift=0pt]theNode.base)}]{\node[ellipse,fill=white,draw,thick,inner
+%     sep=.5pt,outer sep=0pt] (theNode){\textcolor{black}{\textsc{tx}}};}
+% }
+\newcommand{\es}[1][theES]{%
+  \anItemInline[#1]%
+  {ellipse}%
+  {white}%
+  {black}%
+  {black}%
+  {\textsc{tx}}%
+}
 \newcommand{\rnd}{\ensuremath{\mathrm{rnd}}}
 \newcommand{\cnt}{\ensuremath{\mathrm{cnt}}}
 % \usepackage{ebgaramond}
@@ -211,7 +226,6 @@
 \usepackage{fontspec}
 \setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
 \addfontfeatures{Numbers=OldStyle}
-\addfontfeature{ItalicFeatures={Style=Swash}}
 %\usepackage{unicode-math} // buggy ⁈
 %\setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
 
@@ -829,14 +843,15 @@ that mirror worker identifiers share the same subscript.
 For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
-In the integrity protocol,
-workers are only tasked with “bookkeeping” matters;
-in particular,
-they keep track of (batches of) transactions,
+Workers are mainly featuring in the availability protocol,
+and feature in the  integrity protocol only insofar as 
+they take care of “bookkeeping”. 
+Specifically,
+worker keep track of (batches of) transactions,
 their hashes,
 and erasure coding shares;
 they only pass on hashed data and
-block header information to their primaries.
+block header information to their primaries. 
 The idea is to keep the network bandwidth usage of primaries
 as low as possible.
 Moreover,
@@ -880,7 +895,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
 \begin{description}
 \item[%
   \code{MessageEnum::TxReq}%
-  Transaction request collection (\onetx←)%
+  Transaction request collection ({\tx}←)%
   ]
   \tnote{worker\\ ← client}
   \todo{in the typhon sources for \texttt{`heterogeneous\_narwhal`},
@@ -904,7 +919,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
   Transaction requests should be buffered using reasonably fast memory % 
   (to ensure that all requests are eventually served); %
   transaction request fees may be imposed %
-  to control the rate of clients requests. %
+  to control the rate of client requests. %
   \endnote{%
     The matter of reasonably fast transaction buffer
     needs additional context,
@@ -914,31 +929,38 @@ primaries never send messages or other direct signals to their workers.\xspace%
     In the
     \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
     {code},
-    we instantly acknowledge the transactions received.
+    we instantly acknowledge each received transaction
+    by sending a message back to the sender of the transaction request.
     \\
     \code{MessageEnum::TxAck}
   }
   \begin{description}
   \item[%
     \code{???}%
-    {Transaction batching (\(\tx:= \tx:\onetx\))}%
+    {Transaction batching (\(\txs:= \txs:\tx\))}%
     ]%
     \tnote{[worker]}%
-    The worker adds the transaction request \onetx to the current batch \tx. %
-    This might trigger the completion of the batch. %
+    The worker adds the transaction request \tx to the current batch \txs. %
+    This happens unconditionally,
+    \ie there is always a single current transaction batch,
+    which might be possibly empty. 
+    Adding the received transaction request might trigger the completion of the batch. %
+    The current batch is locally identified by an integer, %
+    called the current \emph{take}. %
   \item[%
     \code{???}%
     {Batch completion (\tx{}!)}%
     ]%    
     \tnote{[worker]!}%
-    Completion of the batch results in
-    a number of new messages to be sent, 
-    as detailed in the section on batch distribution.
-    Moreover, %
-    the counter for batches is increased. 
+    Completion of the batch triggers
+    \begin{enumerate}
+    \item broadcast of a new worker hash (as detailed next)
+    \item incrementing the current take
+    \item resetting the current transaction request buffer to the empty list. 
+    \end{enumerate}
   \end{description}
 \item[%
-  Batch distribution (\tx⇒)%
+  Worker hash broadcast (\wh{}⇒)%
   ]
   \tnote{worker\\ ⇒ worker}
   Upon completion of a batch of transaction requests,\xspace%
@@ -958,8 +980,9 @@ primaries never send messages or other direct signals to their workers.\xspace%
   the underlying transaction data to mirror workers.
   In the simplest case, 
   this amounts to broadcasting full copies of the transaction data;
-  this is the approach that we focus on in this paper,
-  \ie all erasure coding shares are full copies.
+  this is the approach that we shall focus on in this paper,
+  \ie all erasure coding shares will be full copies
+  such that a single honest worker will suffice to retriever the data. 
   In general,
   transaction distribution can be divided into two steps.
   \todo[inline]{
@@ -970,12 +993,13 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \begin{description}
   \item[Erasure coding via copying (\es)]
     \tnote{[worker]}
-    We first cover the case of trivial erasure coding,
-    in line with the description of the homogeneous case~\cite{NT}. %
+    Recall that erasure coding will be trivial %
+    as described for the homogeneous case~\cite{NT}. %
     Thus, erasure coding shares of a transactions are simply copies.
-    We visually distinguish between “copies” of transactions
+    However,
+    we visually distinguish “copies” of transaction batches
     from the “original” transaction supplied by the client, 
-    using the symbols \tx\ and \es, respectively.
+    using two different symbols, namely \tx\ and \es, respectively. %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \todo[inline]{put fwd ref / future work }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
