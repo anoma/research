@@ -33,12 +33,12 @@
 %\usepackage[utf8]{inputenc}
 \usepackage{xspace}
 % macros
-\newcommand{\tnote}[1]{
+\newcommand{\xnote}[1]{
   \marginnote{\footnotesize #1}%
 }
 \newcommand{\rtnote}[1]{%
   \reversemarginpar%
-  \tnote{#1}%
+  \xnote{#1}%
   \normalmarginpar%
 }
 
@@ -872,7 +872,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
   (\emph{qua validator} -- the executor nodes on a validator do talk back).
 }
 
-\subsection{The pure availability protocol: worker actions}
+\subsection{Pre-execution protocol}
 \label{sec:base-protocol}
 \todo[inline]{%
   we need to ``announce'' headers
@@ -901,7 +901,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \code{MessageEnum::TxReq}%
   Transaction request collection ({\tx}←)%
   ]
-  \tnote{worker\\ ← client}
+  \xnote{worker\\ ← client}
   \todo{in the typhon sources for \texttt{`heterogeneous\_narwhal`},
     each transaction collection is \emph{immediately} followed
     by a \texttt{TxAck}
@@ -945,7 +945,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
     \code{???}%
     {Transaction batching (\(\txs:= \txs:\tx\))}%
     ]%
-    \tnote{[worker]}%
+    \xnote{[worker]}%
     Every worker stores the received transaction request to %
     \emph{the} current batch \txs, %
     which is essentially a (possibly empty) list of transaction requests. %
@@ -966,10 +966,9 @@ primaries never send messages or other direct signals to their workers.\xspace%
     \code{TxToAll}%
     {Transaction broadcasting (\tx{}⇝\es{}⇒)}%
     ]%
-    \tnote{%
+    \xnote{%
       worker\\
-      ⇒worker\\
-      →primary
+      ⇒worker
     }%
     Each received transaction request is broadcast to all mirror workers.
     In principle,
@@ -985,13 +984,17 @@ primaries never send messages or other direct signals to their workers.\xspace%
     the message also contains the current batch and %
     the sequence number of the transaction within the batch. %
   \item[%
-    \code{WHxToAll,WorkerHash}%
-    {Worker hash broadcast (\tx{!}\wh{}⇒)}%
+    \code{WHxToAll,WorkerHx}%
+    {Worker hash broadcast (\tx{!}\wh{}↑⇒)}%
     ]%
-    \tnote{worker\\ ⇒ worker}
+    \xnote{worker%
+      \\⇒ worker%
+      \\→ primary%
+    }
     The received  transaction request might trigger a new worker hash to be produced %
     (if it is ``time''\xspace%
     \footnote{%
+      \label{fn:time}
       At which exact moment worker hashes are compiled can depend on several
       factors, 
       \eg on a maximum number of transaction requests per worker hash 
@@ -1035,7 +1038,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
 \item[%
   \code{MessageEnum::TxToAll}%
   Transaction copy (\es{}←)%
-  ]\tnote{%
+  ]\xnote{%
     worker\\
     ←worker
   }%
@@ -1063,18 +1066,18 @@ primaries never send messages or other direct signals to their workers.\xspace%
     Storing transaction copies as above will be useful %
     for handling ``foreign'' worker hashes. %
 
-  \item[{Worker hash (\es!\wh[])}] 
+  \item[\code{WHxFwd}{Worker hash (\es!\wh[]↑)}] 
+    \xnote{%
+      worker\\
+      →primary%
+    }
     In case, %
-    the transaction was referenced to in a received worker hash, %
-    we have to trigger the corresponding re-action. %
-
+    the transaction was the last missing one to match a previously received worker hash, %
+    the worker hash is ``forwarded'' to its primary. %
   \end{description}
 
-
-
-
 % \item[Worker hash compilation (\wh)]
-%   \tnote{(worker)}
+%   \xnote{(worker)}
 %   Towards the end of a “validator round”,\endnote{%
 %     Is there any such thing as “validator round”?\\
 %     - sequence number\\
@@ -1114,64 +1117,41 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \code{WHxToAll}%
   Worker hash ({\wh[]←})%
   ]%
-  \tnote{%
+  \xnote{%
     worker\\%
     ← worker%
   }
-  When a worker receives a worker hash from a mirror worker %
-  
-
-  As a first reaction,
-  it checks whether enough
-  transactions have been received by the worker and,
-  if so,
-  whether the hash of the list of transaction matches the worker hash.
-
-\item[%
-  \code{MessageEnum::WHxFwd}%
-  Worker hash forwarding ({\wh[]⇡})%
-  ]
-  \tnote{worker\\ → primary} 
-  If a worker has successfully checked
-  the availability of the transactions of a received worker hash, %
-  it “forwards” the worker hash to its primary.\footnote{%
-    Validators will use this information
-    to send availability commitments to block headers of other primaries.
-  }
+  When a worker receives a worker hash from a mirror worker, %
+  it updates the worker hash storage.
 
   \begin{description}
   \item[%
-    \code{MessageEnum::WorkerHx}%
-    Worker hash provision (\wh↑)%
+    \code{MessageEnum::WHxFwd}%
+    Worker hash forwarding ({\wh[]!\wh[]↑})%
     ]
-    \tnote{worker\\ → primary}
-    The most recent worker hash is sent to the primary
-    for inclusion into the next header.
-    \todo{
-      How much “additional” information do we have
-      to include into the header
-      such that signing a header certificate becomes meaningful?
+    \xnote{worker\\ → primary} 
+    If a worker has successfully checked
+    that it has already stored the transactions of a received worker hash, %
+    it “forwards” the worker hash to its primary.\footnote{%
+      Validators will use this information
+      to send availability commitments to block headers of other primaries.
     }
-
-  \item[%
-    \code{MessageEnum::WHxToAll}%
-    Worker hash broadcast (\wh⇒)%
-    ]
-    \tnote{worker\\
-      ⇒worker 
-    } 
-    A worker broadcasts its most recent worker hash
-    to mirror workers.
-
   \end{description}
 \end{description}
 
-
+Recall that we have emphasized what workers do in reaction to \emph{receiving}
+messages, %
+giving also some details of how message dependencies lead to slightly different cases.
 
 \begin{figure}[htb]
   \centering
-  \todo[inline]{need to ``fix'' the \tx subscripts to be sequence numbers;
-    possibly adding also the batch number of the worker hash?
+  \todo[inline,caption={}]{%
+    \begin{itemize}
+    \item need to ``fix'' the \tx subscripts to be sequence numbers;
+      possibly adding also the batch number of the worker hash?
+    \item header announcements only need to send ``fingerprints'' of headers,
+      for the moment represented by \(\wh[]^*\)
+    \end{itemize}
   }
   %
   \tikzstyle{every node}+=[outer sep=0pt,inner sep=1pt]
@@ -1246,7 +1226,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
     \node[right=0ex of wh1'] (wh2') {\wh₂};
     \draw[->] (wh2) -- (wh2');
     % the following should be much later, but ... (unique harmless hack)
-    \node[right=1ex of wh2',fill=white] (hd3) {\hd};
+    \node[right=1ex of wh2',fill=white] (hd3) {{\hd[]}};
     \foreach \k in {1,2}
     \draw[dotted,bend right=9ex-3*\k ex] (hd3) to (wh\k'.center);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1268,7 +1248,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
         % and header creation (after second block)
         % ... and sending availability votes
         \ifthenelse{\equal{\whx}{2}}%
-        {\node[right=2ex of wh\whx_\p_\whx',fill=white,draw=none] (hd\p) {\hd};
+        {\node[right=2ex of wh\whx_\p_\whx',fill=white,draw=none] (hd\p) {\({\hd[]}^*\)};
           \foreach \k in {1,2}
           \draw[dotted,bend right=9ex-3*\k ex] (hd\p) to (wh\k_\p_\k'.center);
         }%
@@ -1279,15 +1259,20 @@ primaries never send messages or other direct signals to their workers.\xspace%
     % collect "foreign" whs into availability votes for a block
     \coordinate (ac) at ([xshift=2ex,yshift=2ex]hd1|-p3);
     \foreach \p in {1,2,4} { % for each "other" validator
-      \node[fill=white] (av\p) at (ac){\hd\makebox[0pt][l]{\ensuremath{{}_{\sim\p}}}};
+      \node[fill=white] (av\p) at (ac){{\hd[]}\makebox[0pt][l]{\ensuremath{{}_{\sim\p}}}};
       \coordinate (ac) at ([xshift=-1ex,yshift=-1ex]ac);
     }
     \foreach \p in {1,2,4} { % for each "other" validator
       \draw[->] (hd\p) -- (av\p.east);
-      \draw[ultra thick,red,double,->] (hd3) --node[auto]{trigger} (hd\p);
+      \draw[%ultra thick,red,double,
+      ->] (hd3) --
+      % node[auto]{trigger}
+      (hd\p);
     }
-    \draw[ultra thick,red,double,->] (hd3) --node[auto]{trigger} (hd5);
-    \node[fill=white] (av3) at (ac){\hd\makebox[0pt][l]{\ensuremath{{}_{\sim3}}}};
+    \draw[%ultra thick,red,double,
+    ->] (hd3) --%node[auto]{trigger} 
+    (hd5);
+    \node[fill=white] (av3) at (ac){{\hd[]}\makebox[0pt][l]{\ensuremath{{}_{\sim3}}}};
     \draw[->] (hd3) -- (av3);
     \begin{pgfonlayer}{background}
       \node[fit={(av3)(av1)([xshift=2ex]av1.north east)},fill=lightgray] (ac3) {};
@@ -1330,63 +1315,129 @@ primaries never send messages or other direct signals to their workers.\xspace%
   it is natural to collect signatures for the availability certificate
   on a “first come, first served” basis
 }
-
 %\end{comment}
+\subsection{Execution support protocol}
+\label{sec:exe-supp-protocol}
+
 \section{Primary actions}
+\label{sec:primary-actions}
+
+Primaries will follow a protocol %
+in which we can distinguish between matters of availability %
+and matters of integrity. %
+We first spell out both protocols at genesis
+and later describe the additional (re-)actions
+in the typical mode of operation.
 
 \subsection{Availability at genesis}
-The pure availability protocol: genesis actions
 
 \begin{description}
-\item[Genesis header compilation ({\hd[]})]
-  \tnote{[primary]}
-  If a primary has obtained a “complete set”
-  \todo{
-    \emph{“complete set”}
-    is an undefined term, right?
-    }%
-    of
-  worker hashes for the genesis round
-  from its workers,
-  it can compile a block header.
-  Compiling worker hashes into headers
-  works the same for worker hashes of local workers
-  and those generated from transactions received at other validators.%
-  \footnote{%
-    However,
-    the compiled worker hashes will have different roles,
-    depending on whether they are stemming from local workers or not.
-    In particular,
-    primaries will only need to generate
-    certificates of availability for “local” headers.
-  }
-  At genesis,
-  each header consists of
-  \begin{itemize}
-  \item the creator's identity and
-  \item and the list of worker hashes.
-  \end{itemize}
+\item[\code{WorkerHx}Worker hash arrival (\wh↑)]
+  \xnote{%
+    primary\\
+    ←worker
+  }%
+  When a worker hash (that was compiled by a local worker) is received,
+  the primary adds the worker hash to the current list of worker hashes.
+
   \begin{description}
-  \item[Header announcement / Signature request]
-    A primary announces the next \emph{header}
-    by sending information about
+  \item[\code{NextHeader}{Header announcement (\wh!\hd[])}]%
+    \xnote{%
+      primary \\
+      ⇒primary
+    }
+    The primary may announce the next header %
+    (if the primary considers it is ``time'' to do so---cf.\ Footnote~\ref{fn:time}).
+    The genesis header consists of
+    the current list of worker hashes,
+    tagged with the identifier of the primary;
+    the round number zero is implicit.
+    The message of the batch announcement only contains
+    the \emph{fingerprint} of a header, namely 
     \begin{itemize}
-    \item information about which worker hashes to be included
-      (as pairs of worker-ids and batch numbers)
-    \item the round number
+    \item the identifier of the primary
+    \item a list of pairs of a batch number and a worker id.
     \end{itemize}
-    \todo[inline]{it is, isn't it?}
-    .
-   
-  \item[Header collection]
-    The primary has to collect
+    The actual header itself consists of
+    \begin{itemize}
+    \item the identifier of the primary and
+    \item the list of worker hashes. 
+    \end{itemize}
 
   \end{description}
 
+% \item[Genesis header compilation ({\hd[]})]
+%   \xnote{[primary]}
+%   If a primary has obtained a “complete set”
+%   \todo{
+%     \emph{“complete set”}
+%     is an undefined term, right?
+%     }%
+%     of
+%   worker hashes for the genesis round
+%   from its workers,
+%   it can compile a block header.
+%   Compiling worker hashes into headers
+%   works the same for worker hashes of local workers
+%   and those generated from transactions received at other validators.%
+%   \footnote{%
+%     However,
+%     the compiled worker hashes will have different roles,
+%     depending on whether they are stemming from local workers or not.
+%     In particular,
+%     primaries will only need to generate
+%     certificates of availability for “local” headers.
+%   }
+%   At genesis,
+%   each header consists of
+%   \begin{itemize}
+%   \item the creator's identity and
+%   \item and the list of worker hashes.
+%   \end{itemize}
+%   \begin{description}
+%   \item[Header announcement / Signature request]
+%     A primary announces the next \emph{header}
+%     by sending information about
+%     \begin{itemize}
+%     \item information about which worker hashes to be included
+%       (as pairs of worker-ids and batch numbers)
+%     \item the round number
+%     \end{itemize}
+%     \todo[inline]{it is, isn't it?}
+%     .
+%   \item[Header collection]
+%     The primary has to collect
+%   \end{description}
 
- 
+
+\item[{\code{WorkerHx}Worker hash forward (\wh[]↑)}]
+  \xnote{%
+    primary\\
+    ←worker
+  }%
+  When a worker hash that stems from a worker on a different validator is received, %
+  the primary adds the worker hash to the current list of known worker hashes. %
+  Primaries keep a set of \emph{active} worker hashes for each validator %
+  and also a set of worker hash fingerprints. %
+
+  \begin{description}
+  \item[Header signature commitment (\wh[]!\(\hd_{\sim}\)] %
+    \xnote{primary\\
+      →primary
+    }
+    If the received worker hash completes was the last worker hash
+    that matches a previously received header fingerprint, %
+    the primary should commit to the header by signing it
+    and sending it back to the creator of the header fingerprint. %
+    We can now free the memory for the fingerprints \etc
+    (or wait until the certificate of availability has been received in response
+    to the commitment).
+    \todo{which one is the proper choice ?}
+  \end{description}
+
+\rule{\linewidth}{.5pt}
 \item[Availability voting/commitment (\hdₚ→)]
-  \tnote{primary\\ → primary}
+  \xnote{primary\\ → primary}
   A genesis header of a primary is acceptable
   if all its worker hashes have been forwarded
   by the local workers
@@ -1399,13 +1450,13 @@ The pure availability protocol: genesis actions
   (for the purpose of aggregation into availability certificates).
 
 \item[Commitment aggregation (\hdₚ←)]
-  \tnote{[primary]}
+  \xnote{[primary]}
   The signatures of received availability commitments
   are aggregated into certificates of availability
   for a header.
 
 \item[Certificate broadcast (\ac⇒)]
-  \tnote{primary\\ ⇒ primary}
+  \xnote{primary\\ ⇒ primary}
   Once a primary receives commitments
   from a global weak quorum for its genesis header,
   it broadcasts the certificate of availability. 
@@ -1469,13 +1520,13 @@ for the respective  creator of the header (for the same round).
 
 \begin{description}
 \item[Integrity signing \(\hdₚ\)]
-  \tnote{primary ⇒ primary}
+  \xnote{primary ⇒ primary}
   Signing and sending the header to the creator implies that
   (a correct) primary will not sign any other header
   of the same creator with the same round number.
 
 \item[Block aggregation (\bk)]
-  \tnote{[primary]}
+  \xnote{[primary]}
   Using
   the same signature aggregation mechanism that
   is used for availability certificates,
@@ -1486,7 +1537,7 @@ for the respective  creator of the header (for the same round).
   are headers signed by a learner-specific quorum.
 
 \item[Block broadcast \(\bk\)]
-  \tnote{primary ⇒ primary}
+  \xnote{primary ⇒ primary}
   The aggregated signatures of a block header form
   a \emph{learner-specific block}.
   The signature aggreator will broadcast
@@ -1626,7 +1677,7 @@ for the difference between headers at genesis and the typical phase).
 
 \begin{description}
 \item[Generating and broadcasting signed quorums]
-  \tnote{primary \\⇒ primary}
+  \xnote{primary \\⇒ primary}
   Once a validator has collected
   enough new  blocks (for a learner),
   it signs a learner-specific quorum of such blocks;
