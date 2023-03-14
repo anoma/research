@@ -194,6 +194,10 @@
 \newcommand{\txs}[1][theTX]{%
   \tx[#1]{}\ensuremath{\mathrm{s}}\xspace%
 }
+\newcommand{\TXS}[1][theTX]{%
+  \ensuremath{\overrightarrow{\tx[#1]}}%
+}
+
 % \newcommand{\tx}[1][]{%
 %   \tikz[baseline={([yshift=0pt]theNode.base)}]{%
 %     \node[ellipse,fill=black,inner sep=.5pt,outer sep=0pt] %
@@ -215,6 +219,7 @@
   {\textsc{tx}}%
 }
 \newcommand{\rnd}{\ensuremath{\mathrm{rnd}}}
+\newcommand{\bn}{\ensuremath{\mathrm{bn}}}
 \newcommand{\cnt}{\ensuremath{\mathrm{cnt}}}
 % \usepackage{ebgaramond}
 % \usepackage[cmintegrals,cmbraces]{newtxmath}
@@ -1034,19 +1039,39 @@ primaries never send messages or other direct signals to their workers.\xspace%
     worker\\
     ←worker
   }%
-  Upon receiving a transaction copy, %
-  the worker stores the copy locally %
-  such that it can be retrieved quickly via
-  \begin{itemize}
-  \item the id of the collecting worker,
-  \item the batch number of the batch to which it belongs, and
-  \item the sequence number of the batch to which it belongs.
-  \end{itemize}
-  Note that copies of transactions are \emph{not} signed by the worker. %
-  Signatures are deferred to worker hash broadcast. % 
-  No further action is necessary. %
-  Storing transaction copies as above will be useful %
-  for handling ``foreign'' worker hashes. %
+  For the proper handling of transaction copies and worker hashes
+  of mirror workers,
+  we keep for each mirror worker
+  a set of \emph{active batch numbers}
+  and a map from active batch numbers to
+  a set of (ranges of) sequence numbers of received transactions in that batch,
+  paired with a worker hash option,
+  depending on whether or not we have received the corresponding worker hash. 
+  \begin{description}
+  \item[Transaction storage] 
+    Upon receiving a transaction copy, %
+    the worker has to store the copy locally %
+    such that it can be retrieved quickly via
+    \begin{itemize}
+    \item the id of the collecting worker, 
+    \item the batch number of the batch to which it belongs, and
+    \item the sequence number of the batch to which it belongs.
+    \end{itemize}
+    Note that copies of transactions are \emph{not} signed by the worker. %
+    Signatures are deferred to worker hash broadcast. % 
+    No further action is necessary. %
+    Storing transaction copies as above will be useful %
+    for handling ``foreign'' worker hashes. %
+
+  \item[{Worker hash (\es!\wh[])}] 
+    In case, %
+    the transaction was referenced to in a received worker hash, %
+    we have to trigger the corresponding re-action. %
+
+  \end{description}
+
+
+
 
 % \item[Worker hash compilation (\wh)]
 %   \tnote{(worker)}
@@ -1084,40 +1109,18 @@ primaries never send messages or other direct signals to their workers.\xspace%
 %     the (hashes of the) erasure coding shares that
 %     they should have available. ?
 %   }
-\item[%
-  \code{MessageEnum::WorkerHx}%
-  Worker hash provision (\wh↑)%
-  ]
-  \tnote{worker\\ → primary}
-  The most recent worker hash is sent to the primary
-  for inclusion into the next header.
-  \todo{
-    How much “additional” information do we have
-    to include into the header
-    such that signing a header certificate becomes meaningful?
-  }
 
 \item[%
-  \code{MessageEnum::WHxToAll}%
-  Worker hash broadcast (\wh⇒)%
-  ]
-  \tnote{worker\\
-    ⇒worker 
-  } 
-  A worker broadcasts its most recent worker hash
-  to mirror workers.
-
-\item[%
-  \code{fn process\_w\_hx}%
-  Worker hash reception and checking ({\wh[]←})%
+  \code{WHxToAll}%
+  Worker hash ({\wh[]←})%
   ]%
   \tnote{%
     worker\\%
     ← worker%
   }
-  At any time,
-  a worker can receive a worker hash
-  from a mirror worker.
+  When a worker receives a worker hash from a mirror worker %
+  
+
   As a first reaction,
   it checks whether enough
   transactions have been received by the worker and,
@@ -1135,6 +1138,32 @@ primaries never send messages or other direct signals to their workers.\xspace%
     Validators will use this information
     to send availability commitments to block headers of other primaries.
   }
+
+  \begin{description}
+  \item[%
+    \code{MessageEnum::WorkerHx}%
+    Worker hash provision (\wh↑)%
+    ]
+    \tnote{worker\\ → primary}
+    The most recent worker hash is sent to the primary
+    for inclusion into the next header.
+    \todo{
+      How much “additional” information do we have
+      to include into the header
+      such that signing a header certificate becomes meaningful?
+    }
+
+  \item[%
+    \code{MessageEnum::WHxToAll}%
+    Worker hash broadcast (\wh⇒)%
+    ]
+    \tnote{worker\\
+      ⇒worker 
+    } 
+    A worker broadcasts its most recent worker hash
+    to mirror workers.
+
+  \end{description}
 \end{description}
 
 
@@ -1715,30 +1744,28 @@ to storing all blocks until genesis
   % }%‼
 
 \subfloat[Batch hash of worker~\(w\)]{
-  \#(\(\overrightarrow\tx\)):
+  \#(\(\TXS\)):
   \#
-    \(\left(\begin{tikzpicture}[baseline={(batch.center)}]
-      \node[anchor=west] (batch) {
-        \(\colorbox{lightgray}{\(\begin{array}[c]{c}
-          {\tx}\\%_{\to w}
-          {\tx}\\%_{\to w}
-          {\tx}\\%_{\to w}
-          {\tx}\\%_{\to w}
-          {\tx}\\%_{\to w}
+    \(\left(\strut
+          {\tx}:%\\%_{\to w}
+          {\tx}:%\\%_{\to w}
+          {\tx}:%\\%_{\to w}
+          {\tx}:%\\%_{\to w}
+          {\tx}:%\\%_{\to w}
           {\tx}%_{\to w}
-        \end{array}\)}\)
-    };
-      \end{tikzpicture}\right)\)
+          \right)\)
   }
   \subfloat[%
-  Worker hash (issued by~\(w\)),
-  including the round number \(\rnd\),
-  and the number of transactions~\(\|\protect\overrightarrow \tx\|\);
-  it is signed by~\(w\)]{
+  Worker hash (broadcast by \(w\)),
+  consisting of %
+  the batch hash  \(\#\TXS\), %
+  the batch number \(\bn\), %
+  and the number of transactions \(\|\TXS\|\), %
+  signed by~\(w\)]{
     \wh:
     \begin{tabular}[t]{@{}l@{}}
       \begin{tikzpicture}[baseline={([yshift=-.5ex]wh.center)}]
-        \node (wh){\(\left[ \#(\overrightarrow \tx), \rnd,  \|\overrightarrow \tx\| \right]_{w}\)};
+        \node (wh){\(\left[ \#(\overrightarrow \tx), \bn,  \|\overrightarrow \tx\| \right]_{{\sim}w}\)};
       \end{tikzpicture}
       %\footnotesize
     % {\color{violet} + info for correctness checking} \\
@@ -1787,6 +1814,7 @@ to storing all blocks until genesis
   \label{fig:data-structures}
 
 \end{figure}
+
 \FloatBarrier
 
 
