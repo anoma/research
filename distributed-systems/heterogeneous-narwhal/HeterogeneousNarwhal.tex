@@ -840,25 +840,26 @@ that mirror worker identifiers share the same subscript.
 For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
-Workers are mainly featuring in the availability protocol,
-and feature in the  integrity protocol only insofar as 
-they take care of “bookkeeping”. 
+Workers are mainly featuring in the availability protocol; %
+their role in the integrity protocol concerns merely “bookkeeping” matters. % 
 Specifically,
-worker keep track of (batches of) transactions,
+workers keep track of (batches of) transactions,
 their hashes,
-and erasure coding shares;
-they only pass on hashed data and
-block header information to their primaries. 
-The idea is to keep the network bandwidth usage of primaries
-as low as possible.
+and erasure coding shares---which shall be trivial, along the lines
+of~\cite{NT}.
+The only information that workers provide to their primaries  %
+are hash references to transaction request data. %
+In this way,
+we can save network bandwidth usage of primaries. %
 Moreover,
-as a secondary principle, 
+as a secondary principle, %
 primaries never send messages or other direct signals to their workers.\xspace%
 \footnote{%
   However, %
   workers receive signals upon successful execution of transactions, 
   which allows them to free up the transaction storage. 
 }%
+\todo{add some short discussion about executor nodes, \etc }
 \endnote{%
   Sharing the round number is the point where
   one might be tempted to deviate from the principle that
@@ -870,7 +871,8 @@ primaries never send messages or other direct signals to their workers.\xspace%
 \label{sec:base-protocol}
 \todo[inline]{%
   we need to ``announce'' headers
-  differently to what what is/was in the specs
+  ---
+  in contrast to what what is/was in the specs
   \tiny\tt(written March 7 2023, Tobias Heindel)
 }
 \todo[inline]{%
@@ -922,8 +924,6 @@ primaries never send messages or other direct signals to their workers.\xspace%
     needs additional context,
     possibly involving more specifics from the \ptop layer.
   }
-  The worker possibly has to react to the transaction request, 
-  depending on its current state.  
   \begin{description}
   \item[\code{MessageEnum::TxAck}
     Transaction request acknowledgment]
@@ -941,38 +941,48 @@ primaries never send messages or other direct signals to their workers.\xspace%
     {Transaction batching (\(\txs:= \txs:\tx\))}%
     ]%
     \tnote{[worker]}%
-    At each point in time, %
-    every worker stores \emph{the} current batch \txs, %
+    Every worker stores the received transaction request to %
+    \emph{the} current batch \txs, %
     which is essentially a (possibly empty) list of transaction requests. %
     The worker adds the transaction request \tx to the current batch \txs. %
     This happens unconditionally,
-    \ie there is always a unique current transaction batch. 
-    The current batch is locally identified by an integer, %
-    which we dub \emph{take}; %
-    within the take, transactions have consecutive sequence numbers, %
-    \eg the position in the transaction buffer (seen as a list). 
+    \ie there is always a unique current transaction batch \
+    and every transaction request has to be added to the current batch. %
+    New batches may be created over time %
+    and the sequence of batches are numbered sequentially. 
+    Within a batch, %
+    transactions are assigned sequence numbers; %
+    the sequence number of the transaction is essentially
+    the position in the current batch. %
+    Thus,
+    each transaction request is tagged with a unique pair of a
+    \emph{batch number} and a \emph{sequence number}. 
   \item[%
     \code{TxToAll}%
     {Transaction broadcasting (\tx{}⇝\es{}⇒)}%
     ]%
-    \tnote{worker\\
-      ⇒worker}%
+    \tnote{%
+      worker\\
+      ⇒worker\\
+      →primary
+    }%
     Each received transaction request is broadcast to all mirror workers.
     In principle,
-    we could use arbitrary erasure coding shares.
+    we could use arbitrary erasure coding schemes.
     However,
     in line with the original version of Narwhal \cite{NT}, %
     we use full copies as erasure codes.
     Despite the coincidence of erasure codes and the ``original'' data, %
-    we visually distinguish “copies” of transaction batches
+    we visually distinguish “the copy” of a transaction
     from the “original” transaction supplied by the client, 
     using two different symbols, namely \tx\ and \es, respectively. %
     When broadcasting copies of received transaction requests,
-    the message also contains the current take and the sequence number within the take. 
+    the message also contains the current batch and %
+    the sequence number of the transaction within the batch. %
   \item[%
     \code{WHxToAll,WorkerHash}%
-    {Worker hash broadcast trigger (\tx{!}\wh{}⇒)}%
-    ]%    
+    {Worker hash broadcast (\tx{!}\wh{}⇒)}%
+    ]%
     \tnote{worker\\ ⇒ worker}
     The received  transaction request might trigger a new worker hash to be produced %
     (if it is ``time''\xspace%
@@ -985,139 +995,95 @@ primaries never send messages or other direct signals to their workers.\xspace%
     to do so).
     In principle,
     it is up to the worker to decide,
-    as long as each worker hash contains at least one transaction. 
-    This step involves
+    as long as each worker hash contains at least one transaction. %
+    The worker hash broadcast involves the following steps: %
     \begin{enumerate}
-    \item incrementing the current take 
-    \item resetting the current transaction request buffer to the empty list
-    \item broadcast of a new worker hash.
-    \end{enumerate}
+    \item broadcasting the new worker hash to mirror workers; %
+    \item sending the new worker hash to the worker's primary; %
+    \item resetting the current transaction request buffer to the empty list; %
+    \item incrementing the batch number; %
+    \item last, but not least, %
+      storing the transactions of the current batch for retrieval. %
+      \todo{%
+        The present state of the specs (in flux),
+        we notify workers for matters of executing at the level of single transactions
+      }
+    \end{enumerate}%
+    {}\code{WorkerHashData,WorkerHashSignature}%
     The new worker hash consists of
     \begin{itemize}
-    \item the hash of the current batch \txs, 
-    \item the length of the current batch, 
-    \item the identifier of the current worker, 
-    \item a signature of the above data by the current worker. 
+    \item the hash of the current batch \txs, %
+    \item the length of the current batch, %
+    \item the identifier of the current worker, %
+    \item a signature of the above data by the current worker. %
     \end{itemize}
   \end{description}
   \endnote{%
-    If we want to perform proper erasure coding, 
-    we also have to replace a full broadcast by 
-    something more sophisticated. 
+    If we want to perform proper erasure coding,
+    we also have to replace a full broadcast by
+    something more sophisticated.
     \Eg each mirror worker receives a different message.
     We first cover the case of trivial erasure coding
     ‼[covering the case of proper erasure codining in ‽].
-  } 
-%   erasure coding shares of %
-%   the underlying transaction data to mirror workers.
-%   In the simplest case, 
-%   this amounts to broadcasting full copies of the transaction data;
-%   this is the approach that we shall focus on in this paper,
-%   \ie all erasure coding shares will be full copies
-%   such that a single honest worker will suffice to retriever the data. 
-%   In general,
-%   transaction distribution can be divided into two steps.
-%   \todo[inline]{
-%     we might require a
-%     \emph{position number} for transactions of the current batch, 
-%     and a sequence number (of the block to be produced)
-%   }
-%   \begin{description}
-%   \item[Erasure coding via copying (\es)]
-%     \tnote{[worker]}
-%     Recall that erasure coding will be trivial %
-%     as described for the homogeneous case~\cite{NT}. %
-%     Thus, erasure coding shares of a transactions are simply copies.
-%     However,
+  }
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     \todo[inline]{put fwd ref / future work }
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
-%   \item[%
-%     \code{MessageEnum::TxToAll}%
-%     Copy distribution (\es⇒)]
-%     \tnote{worker\\ ⇒ worker }
-%     Each share of the erasure code,
-%     \ie a copy of the transaction,
-%     is sent to every mirror worker.%
-%     \endnote{
-%       elaborate on the distribution scheme,
-%       and how the destination of each earasure share is determined
-%       (for the general erasure coding).
-%     }%
-%     \xspace
-%     We tag each transaction with a \emph{sequence number},
-%     \todo[color=red]{%
-%       YIKES !!!\\
-%       how do we know the validators round number? \\
-%       well, we \textsc{don't}
-%     }
-%     \todo[color=SkyBlue]{%
-%       as a solution,
-%       we introduce the \emph{take},
-%       which might be increasing faster than the round number
-%     }
-%     consisting of the validator round and
-%     the position in the list of transactions for
-%     the next block (header) in which the transaction will be included.
-%     % so that it becomes clear in which order the
-%     % transactions of the next block (header) will be listed.
-   
-  \begin{center}
-    \Large CONTINUE HERE
-  \end{center}
-  \item[%
-   \code{fn process\_tx\_req}%
-   Transaction copy (erasure code) \colorbox{SkyBlue}{reception}%
-   ]\tnote{[worker]}%
-   Upon receiving a transaction copy
-    (the specific form of erasure code, we are using)
-    we store a copy locally.
-   
-  Note that copies of transactions are \emph{not} signed by the worker.
-  Signatures are deferred to until after the last transaction 
-  of a validator round,
-  when the worker will sign the hash of the list of all broadcast transactions,
-  called a \emph{worker hash}.
-  
-
- 
-\item[Worker hash compilation (\wh)]
-  \tnote{(worker)}
-  Towards the end of a “validator round”,\endnote{%
-    Is there any such thing as “validator round”?\\
-    - sequence number\\
-    - validator height\\
-    - ...
+\item[%
+  \code{MessageEnum::TxToAll}%
+  Transaction copy (\es{}←)%
+  ]\tnote{%
+    worker\\
+    ←worker
   }%
-  \todo[inline,color=red,caption={}]{%
-    here now, we need to
-    \begin{enumerate}
-    \item introduce signals from primary to workers,
-    \item replace the round number by a “take” based mechanism
-    \end{enumerate}
-  }
-  \xspace
-  each worker produces its worker hash for the broadcast batch of transactions.
-  In detail,
-  a worker hash consists of
+  Upon receiving a transaction copy, %
+  the worker stores the copy locally %
+  such that it can be retrieved quickly via
   \begin{itemize}
-  \item the hash of the broadcast list of transactions,
-  \item the number of transactions, and
-  \item the \st{round number}\ul{take},
-    \todo[color=SkyBlue]{%
-      very much like in a movie,
-      we piece together each header form \textsc{take},
-      or any other single word for \emph{batch number}
-      }
+  \item the id of the collecting worker,
+  \item the batch number of the batch to which it belongs, and
+  \item the sequence number of the batch to which it belongs.
   \end{itemize}
-  signed by the worker.
-  \endnote{\color{red}
-    For general erasure coding:
-    \em Does this need to includes for each receiving worker,
-    the (hashes of the) erasure coding shares that
-    they should have available. ?
-  }
+  Note that copies of transactions are \emph{not} signed by the worker. %
+  Signatures are deferred to worker hash broadcast. % 
+  No further action is necessary. %
+  Storing transaction copies as above will be useful %
+  for handling ``foreign'' worker hashes. %
+
+% \item[Worker hash compilation (\wh)]
+%   \tnote{(worker)}
+%   Towards the end of a “validator round”,\endnote{%
+%     Is there any such thing as “validator round”?\\
+%     - sequence number\\
+%     - validator height\\
+%     - ...
+%   }%
+%   \todo[inline,color=red,caption={}]{%
+%     here now, we need to
+%     \begin{enumerate}
+%     \item introduce signals from primary to workers,
+%     \item replace the round number by a “take” based mechanism
+%     \end{enumerate}
+%   }
+%   \xspace
+%   each worker produces its worker hash for the broadcast batch of transactions.
+%   In detail,
+%   a worker hash consists of
+%   \begin{itemize}
+%   \item the hash of the broadcast list of transactions,
+%   \item the number of transactions, and
+%   \item the \st{round number}\ul{take},
+%     \todo[color=SkyBlue]{%
+%       very much like in a movie,
+%       we piece together each header form \textsc{take},
+%       or any other single word for \emph{batch number}
+%       }
+%   \end{itemize}
+%   signed by the worker.
+%   \endnote{\color{red}
+%     For general erasure coding:
+%     \em Does this need to includes for each receiving worker,
+%     the (hashes of the) erasure coding shares that
+%     they should have available. ?
+%   }
 \item[%
   \code{MessageEnum::WorkerHx}%
   Worker hash provision (\wh↑)%
@@ -1135,7 +1101,9 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \code{MessageEnum::WHxToAll}%
   Worker hash broadcast (\wh⇒)%
   ]
-  \tnote{worker\\ ⇒ worker } 
+  \tnote{worker\\
+    ⇒worker 
+  } 
   A worker broadcasts its most recent worker hash
   to mirror workers.
 
@@ -1174,7 +1142,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
 \begin{figure}[htb]
   \centering
   \todo[inline]{need to ``fix'' the \tx subscripts to be sequence numbers;
-    possibly adding also the take number of the worker hash?
+    possibly adding also the batch number of the worker hash?
   }
   %
   \tikzstyle{every node}+=[outer sep=0pt,inner sep=1pt]
@@ -1375,7 +1343,7 @@ The pure availability protocol: genesis actions
     by sending information about
     \begin{itemize}
     \item information about which worker hashes to be included
-      (as pairs of worker-ids and take numbers)
+      (as pairs of worker-ids and batch numbers)
     \item the round number
     \end{itemize}
     \todo[inline]{it is, isn't it?}
@@ -2016,6 +1984,11 @@ we update the state not in one single action, %
 but divide it maintaining %
 a ``database'' of messages on the one hand %
 and accompanying triggering information on the other hand. %
+Each trigger might result in a state update;
+there may be a cascade of triggers
+where, at least intuitively,
+the triggered effect result in triggering new effects. %
+
 \todo[inline,caption={}]{%
   revise this after going once through the protocol,
   filling descriptions of message dependencies
