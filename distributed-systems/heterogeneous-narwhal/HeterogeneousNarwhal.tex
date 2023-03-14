@@ -153,6 +153,9 @@
     {\node[rectangle,draw,fill=lightgray,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{black}{\footnotesize  WH}};}%
   }%
 }
+\newcommand{\whs}[1][ ]{%
+  \ensuremath{\text{\wh[#1]s}}%
+}
 
 \newcommand{\anItemInline}[6][theNode]{%
   % #1 the name of the node (just in case, remember picture is on)
@@ -895,7 +898,18 @@ primaries never send messages or other direct signals to their workers.\xspace%
   as we now have the header announcement, 
   one could logically move it to the primary's signature request ?
 }
-
+\todo[inline,color=green!80!black]{
+  defer all the data structure talk to the section on 
+  message dependency management
+  Section/Appendix\ref{sec:mess-depend-manag}
+}
+\todo[inline,color=yellow!80!white]{
+  \# issue:
+  we are still missing information about 
+  how long data has to be stored.
+  We might also want to defer this to
+  Section/Appendix\ref{sec:mess-depend-manag}
+}
 \begin{description}
 \item[%
   \code{MessageEnum::TxReq}%
@@ -908,7 +922,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
   }
   Each worker keeps listening
   for incoming transaction requests from clients.\footnote{%
-    The bandwith and amount of storage for storing incoming transactions
+    The bandwith and amount of storage for storing incoming transactions 
     \emph{should} be big enough
     to process all incoming transactions.
     We share this assumption with Byzantine set consensus \cite{RedBelly}.
@@ -1332,16 +1346,16 @@ in the typical mode of operation.
 \subsection{Availability at genesis}
 
 \begin{description}
-\item[\code{WorkerHx}Worker hash arrival (\wh↑)]
+\item[\code{WorkerHx}Worker hash arrival (\wh←)]
   \xnote{%
     primary\\
     ←worker
   }%
   When a worker hash (that was compiled by a local worker) is received,
-  the primary adds the worker hash to the current list of worker hashes.
+  the primary adds the worker hash to the current list of worker hashes \whs.
 
   \begin{description}
-  \item[\code{NextHeader}{Header announcement (\wh!\hd[])}]%
+  \item[\code{NextHeader}{Header announcement (\wh!\hd[]⇒)}]%
     \xnote{%
       primary \\
       ⇒primary
@@ -1410,7 +1424,7 @@ in the typical mode of operation.
 %   \end{description}
 
 
-\item[{\code{WorkerHx}Worker hash forward (\wh[]↑)}]
+\item[{\code{WorkerHx}Worker hash forward (\wh[]←)}]
   \xnote{%
     primary\\
     ←worker
@@ -1421,7 +1435,7 @@ in the typical mode of operation.
   and also a set of worker hash fingerprints. %
 
   \begin{description}
-  \item[Header signature commitment (\wh[]!\(\hd_{\sim}\)] %
+  \item[{Header signature commitment (\wh[]!\(\hd_{\sim}\)→)}] %
     \xnote{primary\\
       →primary
     }
@@ -1435,26 +1449,53 @@ in the typical mode of operation.
     \todo{which one is the proper choice ?}
   \end{description}
 
-\rule{\linewidth}{.5pt}
-\item[Availability voting/commitment (\hdₚ→)]
-  \xnote{primary\\ → primary}
-  A genesis header of a primary is acceptable
-  if all its worker hashes have been forwarded
-  by the local workers
-  (which are trusted to have checked these worker hashes).
-  The latter implies that the relevant erasure coding shares
-  are kept available.
-  An availability commitment is made
-  by signing the header
-  and sending the signed header to the creator
-  (for the purpose of aggregation into availability certificates).
 
-\item[Commitment aggregation (\hdₚ←)]
-  \xnote{[primary]}
+% \item[Availability voting/commitment (\hdₚ→)]
+%   \xnote{primary\\ → primary}
+%   A genesis header of a primary is acceptable
+%   if all its worker hashes have been forwarded
+%   by the local workers
+%   (which are trusted to have checked these worker hashes).
+%   The latter implies that the relevant erasure coding shares
+%   are kept available.
+%   An availability commitment is made
+%   by signing the header
+%   and sending the signed header to the creator
+%   (for the purpose of aggregation into availability certificates).
+
+\item[{Header announcement / signature request (\(\hd[]^*\)←)}] %
+  \xnote{%
+    primary\\
+    ←primary
+  }
+  If the primary receives a header fingerprint from a another primary, %
+  it is stored as long as the header might still be included into some learner-specific \Dag. %
+  \begin{description}
+  \item[{Header signature commitment (\(\hd[]^*!\hd_{\sim}\)→)}] %
+    \xnote{%
+      primary\\
+      →primary
+    }
+    If all referenced worker hashes have already been forwarded, %
+    the primary commits to the header by answering with a signature over the
+    header. 
+  \end{description}
+
+  \todo[inline]{%
+    we need flow diagrams to get rid of the ``code duplication'' !!!%
+  }
+  % CONTINUE HERE 
+
+
+\item[Commitment (\hdₚ←)]
+  \xnote{primary\\
+    ←primary
+  }
   The signatures of received availability commitments
   are aggregated into certificates of availability
   for a header.
 
+  \rule{\linewidth}{.5pt}
 \item[Certificate broadcast (\ac⇒)]
   \xnote{primary\\ ⇒ primary}
   Once a primary receives commitments
@@ -1879,6 +1920,7 @@ to storing all blocks until genesis
 
 
 \section{Message dependency management for actors}
+
 \todo[inline]{%
   possibly move to the main part of the  paper %
   although it is technically not needed for the high(est)-level spec
