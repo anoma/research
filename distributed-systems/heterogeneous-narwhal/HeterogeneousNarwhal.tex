@@ -71,7 +71,7 @@
 \newcommand{\Eg}[1][, ]{\emph{E.g.}#1}
 \newcommand{\etc}[1][ ]{\emph{etc.}\xspace}
 \newcommand{\fig}[1][]{Fig.~}
-\newcommand{\Learner}{%
+\newcommand{\Learners}{%
   % the set of learners
   \ensuremath{L}
 }
@@ -100,7 +100,7 @@
 \newunicodechar{”}{''}
 %\newunicodechar{②}{\circledX 2}
 \newunicodechar{ₐ}{\ifmmode_a\else\ensuremath{{}_a}\fi}
-\newunicodechar{ₚ}{\ifmmode_a\else\ensuremath{{}_q}\fi}
+\newunicodechar{ₚ}{\ifmmode_p\else\ensuremath{{}_p}\fi}
 \newunicodechar{‼}{\rough}
 \newunicodechar{‽}{\ensuremath{?!}}
 \newunicodechar{↑}{\ensuremath{\uparrow}}
@@ -150,7 +150,7 @@
   \tikz[baseline={([yshift=0pt]theNode.base)}]{%
     \ifthenelse{\equal{#1}{ }}%
     {\node[rectangle,fill=black,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{white}{\footnotesize \bf WH}};}%
-    {\node[rectangle,draw,fill=lightgray,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{black}{\footnotesize  WH}};}%
+    {\node[rectangle,rounded corners=0pt,draw,fill=lightgray,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{black}{\footnotesize  WH}};}%
   }%
 }
 \newcommand{\whs}[1][ ]{%
@@ -165,7 +165,7 @@
   % #5 text color (e.g., white)
   % #6 the actual text (e.g., \bf TX)
   \tikz[baseline={([yshift=0pt]#1.base)},remember picture]{%
-    \node[#2,fill=#3,draw=#4,inner sep=.5pt,outer sep=0pt] %
+    \node[fill=#3,draw=#4,inner sep=.5pt,outer sep=0pt,#2] %
     (#1){%
       \textcolor{#5}{%
         \small #6%
@@ -188,7 +188,7 @@
 
 \newcommand{\tx}[1][theTX]{%
   \anItemInline[#1]%
-  {ellipse}%
+  {rectangle,rounded corners=2pt,inner sep=1pt}%
   {gray}%
   {none}%
   {white}%
@@ -215,7 +215,7 @@
 % }
 \newcommand{\es}[1][theES]{%
   \anItemInline[#1]%
-  {ellipse}%
+  {rectangle,rounded corners=2pt,inner sep=1pt}%
   {white}%
   {black}%
   {black}%
@@ -596,17 +596,18 @@ we also discuss the preliminaries for \hnr's salient properties.
 The \hnr protocol is designed to take into account learner-specific assumptions, %
 first and foremost about liveness of sets of validators.\xspace%
 \footnote{% 
-  We keep the terminology introduced for %
-  Heterogeneous Paxos \cite{opodis20HPaxos}. %
+  The terminology about trust assumptions was introduced %
+  already for Heterogeneous Paxos \cite{opodis20HPaxos}. %
 } %
-We start by fixing a finite set of \emph{learners} \(Learners\), %
-each of which holds certain beliefs that 
-imply restrictions on the behavior of validators that is considered possible.\xspace%
+We start by fixing a finite set of \emph{learners} \(\Learners\); %
+each learner holds certain beliefs %
+and these beliefs impose restrictions on %
+the behavior of validators that is deemed possible.\xspace%
 \todo{%
   double check with Isaac %
   that it is safe to use the terms %
   validator and acceptor %
-  interchangeably 
+  interchangeably %
 }%
 Each learner is asked to commit to a set of \emph{quorums}\xspace%
 \todo{define\&explain}%
@@ -630,7 +631,7 @@ such that at least one of the quorums will be live at all times. %
 }
 In particular,
 the protocol description takes as input a function
-from learners to sets of quorums. 
+from learners to sets of (learner-specific) quorums.
 Let us mention once more, %
 as protocol designers, % 
 we assume each learner to have commited to a set of quorums, %
@@ -646,22 +647,27 @@ such that one of these quorums is live at all times %
   {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
   {\tla-specification}. 
 }
+
+
+
+
 \begin{definition}[Learner-specific quorum system]
   \label{def:trustlive}
   A \emph{learner-specific quorum system} is a function from 
   learners to sets of quorums.
   For a {learner-specific quorum system}~\(\Q{}\)
   and a learner \(a\), 
-  we denote the learners set of qourums by \(\Q{a}\), 
-  whose elements are the \emph{learner-specific quorum} of \(a\).
+  we denote the learner's set of qourums by \(\Q{a}\), 
+  whose elements are the \emph{learner-specific quorums} of \(a\).
   We use \(qₐ, q'ₐ,\) \etc to range over learner-specific quorums of learner \(a\).
 \end{definition} %
 One might even go as far and ask learners to choose %
-a maximal set of quorums that are compatible with their beliefs; %
+a maximal set of quorums that is compatible with their beliefs; %
 however, %
 all we need is a map from learners to sets of quorums. %
-Based on these we can formulate the remaining two core definitions. %
 
+Now, based on quorums systems, 
+we can formulate the remaining two core definitions. %
 Global weak quorums are important for matters of availability:
 if a global weak quorum is holding a copy of a particular transaction request, %
 then one copy should be available %
@@ -670,9 +676,10 @@ then one copy should be available %
   \label{def:global-weak-quorum}
   A \emph{global weak quorum} is %
   a set of validators \(X\) that is a weak quorum for each learner, %
-  i.e., \(X ∩ qₐ ≠ ∅\) %
-  for every learner~\(a ∈ \Learner\), and %
-  all \(qₐ ∈ \Q{a}\).
+  i.e., 
+  for every learner~\(a ∈ \Learners\) and %
+  all learner-specific quorums \(qₐ ∈ \Q{a}\), %
+  we have a non-empty intersection \(X ∩ qₐ ≠ ∅\). %
 \end{definition}
 
 
@@ -849,7 +856,7 @@ For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
 Workers are mainly featuring in the availability protocol; %
-their role in the integrity protocol concerns merely “bookkeeping” matters. % 
+their role in the integrity protocol concerns ``mere bookkeeping'' only. % 
 Specifically,
 workers keep track of (batches of) transactions,
 their hashes,
@@ -967,15 +974,15 @@ primaries never send messages or other direct signals to their workers.\xspace%
     This happens unconditionally,
     \ie there is always a unique current transaction batch \
     and every transaction request has to be added to the current batch. %
-    New batches may be created over time %
-    and the sequence of batches are numbered sequentially. 
+    New batches may be created over time, %
+    but each batch in this ``stream'' of batches has a unique number.
     Within a batch, %
-    transactions are assigned sequence numbers; %
-    the sequence number of the transaction is essentially
-    the position in the current batch. %
+    transactions are assigned consecutive sequence numbers; %
+    the sequence number of a transaction is essentially the position in the
+    current batch. %
     Thus,
-    each transaction request is tagged with a unique pair of a
-    \emph{batch number} and a \emph{sequence number}. 
+    each transaction request to a fixed worker can by identified by
+    its \emph{batch} and \emph{sequence number}. 
   \item[%
     \code{TxToAll}%
     {Transaction broadcasting (\tx{}⇝\es{}⇒)}%
@@ -991,12 +998,12 @@ primaries never send messages or other direct signals to their workers.\xspace%
     in line with the original version of Narwhal \cite{NT}, %
     we use full copies as erasure codes.
     Despite the coincidence of erasure codes and the ``original'' data, %
-    we visually distinguish “the copy” of a transaction
+    we visually distinguish the “copy” of a transaction
     from the “original” transaction supplied by the client, 
     using two different symbols, namely \tx\ and \es, respectively. %
     When broadcasting copies of received transaction requests,
-    the message also contains the current batch and %
-    the sequence number of the transaction within the batch. %
+    the message also provides the current batch number and %
+    the sequence number of the transaction within this batch. %
   \item[%
     \code{WHxToAll,WorkerHx}%
     {Worker hash broadcast (\tx{!}\wh{}↑⇒)}%
@@ -1005,7 +1012,8 @@ primaries never send messages or other direct signals to their workers.\xspace%
       \\⇒ worker%
       \\→ primary%
     }
-    The received  transaction request might trigger a new worker hash to be produced %
+    When a worker receives a transaction request,
+    this might trigger a new worker hash to be produced %
     (if it is ``time''\xspace%
     \footnote{%
       \label{fn:time}
@@ -1070,17 +1078,18 @@ primaries never send messages or other direct signals to their workers.\xspace%
     the worker has to store the copy locally %
     such that it can be retrieved quickly via
     \begin{itemize}
-    \item the id of the collecting worker, 
+    \item the \textsc{id} of the collecting worker, 
     \item the batch number of the batch to which it belongs, and
-    \item the sequence number of the batch to which it belongs.
+    \item the sequence number within the batch to which it belongs.
     \end{itemize}
     Note that copies of transactions are \emph{not} signed by the worker. %
     Signatures are deferred to worker hash broadcast. % 
-    No further action is necessary. %
     Storing transaction copies as above will be useful %
-    for handling ``foreign'' worker hashes. %
+    for handling ``foreign'' worker hashes, %
+    \ie worker hashes that refer to transactions that are collected at other
+    workers. 
 
-  \item[\code{WHxFwd}{Worker hash (\es!\wh[]↑)}] 
+  \item[\code{WHxFwd}{Worker hash forwarding (\es!\wh[]↑)}] 
     \xnote{%
       worker\\
       →primary%
@@ -1144,8 +1153,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
     Worker hash forwarding ({\wh[]!\wh[]↑})%
     ]
     \xnote{worker\\ → primary} 
-    If a worker has successfully checked
-    that it has already stored the transactions of a received worker hash, %
+    If a worker has already stored the transactions of a received worker hash, %
     it “forwards” the worker hash to its primary.\footnote{%
       Validators will use this information
       to send availability commitments to block headers of other primaries.
@@ -1155,7 +1163,10 @@ primaries never send messages or other direct signals to their workers.\xspace%
 
 Recall that we have emphasized what workers do in reaction to \emph{receiving}
 messages, %
-giving also some details of how message dependencies lead to slightly different cases.
+such that sending a message might be the final step of several, slightly
+different scenarios %
+(depending of which message from a \emph{set} of triggering messages arrives
+last and thus becomes \emph{the} trigger). %
 
 \begin{figure}[htb]
   \centering
@@ -1333,17 +1344,22 @@ giving also some details of how message dependencies lead to slightly different 
 \subsection{Execution support protocol}
 \label{sec:exe-supp-protocol}
 
+\todo{todo!}
 \section{Primary actions}
 \label{sec:primary-actions}
 
 Primaries will follow a protocol %
 in which we can distinguish between matters of availability %
 and matters of integrity. %
-We first spell out both protocols at genesis
+For the availability protocol,
+we shall treat first the special case at genesis 
 and later describe the additional (re-)actions
-in the typical mode of operation.
+in the typical mode of operation. %
+The integrity protocol is described in between the two;
+after all, the two protocols are closely intertwined. 
 
 \subsection{Availability at genesis}
+\label{sec:avail-at-genes}
 
 \begin{description}
 \item[\code{WorkerHx}Worker hash arrival (\wh←)]
@@ -1370,7 +1386,7 @@ in the typical mode of operation.
     the \emph{fingerprint} of a header, namely 
     \begin{itemize}
     \item the identifier of the primary
-    \item a list of pairs of a batch number and a worker id.
+    \item a list of pairs of a batch number and a worker \textsc{id}.
     \end{itemize}
     The actual header itself consists of
     \begin{itemize}
@@ -1439,10 +1455,11 @@ in the typical mode of operation.
     \xnote{primary\\
       →primary
     }
-    If the received worker hash completes was the last worker hash
-    that matches a previously received header fingerprint, %
-    the primary should commit to the header by signing it
-    and sending it back to the creator of the header fingerprint. %
+    If the received worker hash completes the list of known worker hashes
+    to match a previously received header fingerprint, %
+    the primary commits to the header by 
+    signing the header
+    and sending the signed header back to the creator of the header. %
     We can now free the memory for the fingerprints \etc
     (or wait until the certificate of availability has been received in response
     to the commitment).
@@ -1470,48 +1487,62 @@ in the typical mode of operation.
   }
   If the primary receives a header fingerprint from a another primary, %
   it is stored as long as the header might still be included into some learner-specific \Dag. %
+  \todo{double check the ``livetime''}
   \begin{description}
   \item[{Header signature commitment (\(\hd[]^*!\hd_{\sim}\)→)}] %
     \xnote{%
       primary\\
       →primary
     }
-    If all referenced worker hashes have already been forwarded, %
+    If all worker hashes of the received header fingerprint are known to the primary, 
     the primary commits to the header by answering with a signature over the
     header. 
   \end{description}
 
   \todo[inline]{%
-    we need flow diagrams to get rid of the ``code duplication'' !!!%
+    ideally, a  ``flowchart'' would get rid of the ``code duplication'' !!!%
+    \\
+    also, a dependency graph with ``joint'' triggering 
+    would be rather useful (to convey the main ideas)
   }
-  % CONTINUE HERE 
 
-
-\item[Commitment (\hdₚ←)]
-  \xnote{primary\\
+\item[Header signature (\hdₚ←)]
+  \xnote{%
+    primary\\
     ←primary
   }
-  The signatures of received availability commitments
-  are aggregated into certificates of availability
-  for a header.
+  The signature of a received availability commitment
+  is either stored or added to the aggregated signature ``under construction'',
+  leading towards a certificate of availability. %
+  If the received signature completes a global quorum, %
+  it triggers the broadcasting of %
+  the completed aggregated signature, %
+  \ie the certificate of availability. % 
+
+  \begin{description}
+  \item[{Broadcasting the availability certificate%
+      \hdₚ!\ac⇒}
+    ]
+    \xnote{primary\\
+      ⇒primary
+    }
+    If the received commitment completes a global weak quorum for
+    its genesis header,
+    it broadcasts the certificate of availability. 
+  \end{description}
 
   \rule{\linewidth}{.5pt}
-\item[Certificate broadcast (\ac⇒)]
-  \xnote{primary\\ ⇒ primary}
-  Once a primary receives commitments
-  from a global weak quorum for its genesis header,
-  it broadcasts the certificate of availability. 
 
-\item[optional header distribution]
-  ~\todo[inline]{%
-    Right now,
-    there seems no reason to add this ``safe guard'';
-    it might be confusing.
-  }
-  One might expect that header creators send their headers around.
-  However,
-  there is no need for this.%
-  \endnote{... at least in theory, we'll keep it slick for the moment}
+% \item[optional header distribution]
+%   ~\todo[inline]{%
+%     Right now,
+%     there seems no reason to add this ``safe guard'';
+%     it might be confusing.
+%   }
+%   One might expect that header creators send their headers around.
+%   However,
+%   there is no need for this.%
+%   \endnote{... at least in theory, we'll keep it slick for the moment}
  
   % has uploaded a worker hash
   % for the genesis round,
@@ -1591,7 +1622,7 @@ for the respective  creator of the header (for the same round).
 
 There is no conceptual difference between
 the integrity protocol at genesis,
-comparted to the typical case.
+compared to the typical case.
 The only difference is that
 headers in the general case
 will carry additional information.
