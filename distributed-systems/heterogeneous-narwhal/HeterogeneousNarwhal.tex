@@ -99,6 +99,8 @@
 \newunicodechar{“}{``}
 \newunicodechar{”}{''}
 %\newunicodechar{②}{\circledX 2}
+\usepackage{stmaryrd}
+\newunicodechar{↯}{\lightning}
 \newunicodechar{ₐ}{\ifmmode_a\else\ensuremath{{}_a}\fi}
 \newunicodechar{ₚ}{\ifmmode_p\else\ensuremath{{}_p}\fi}
 \newunicodechar{‼}{\rough}
@@ -272,7 +274,8 @@
 
 \begin{document}
 
-%\begin{comment}
+
+% \begin{comment}
 
 
 \begin{center}
@@ -914,7 +917,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \# issue:
   we are still missing information about 
   how long data has to be stored.
-  We might also want to defer this to
+  We might also want to defer this too
   Section/Appendix\ref{sec:mess-depend-manag}
 }
 \begin{description}
@@ -1531,8 +1534,6 @@ after all, the two protocols are closely intertwined.
     it broadcasts the certificate of availability. 
   \end{description}
 
-  \rule{\linewidth}{.5pt}
-
 % \item[optional header distribution]
 %   ~\todo[inline]{%
 %     Right now,
@@ -1574,45 +1575,65 @@ after all, the two protocols are closely intertwined.
 
 A (partial) execution of the availability protocol at genesis is
 illustrated in \fig\ref{fig:availability-protocol}.
+Also, %
+note that in some exceptional circumstances,
+a received header signature \(\hdₚ\) might also need 
+action according to the integrity protocol,
+as explained next. 
+
+
+\todo[inline,caption={}]{add flow charts for
+  \begin{enumerate}
+  \item workers
+  \item primaries
+  \end{enumerate}
+}
 
 \FloatBarrier
 
 \subsection{Integrity: the general case at once}
+\label{sec:integr-gener-case}
 First off,
 the integrity-protocol
 re-uses the sending of signed headers~\(\hdₚ\) to the creator
 (from the availability-protocol),
 as a commitment of the signer to
-one unique header for the  validator (and round), 
+one unique header for the  validator (and round),
 namely the first one signed and sent.
 Thus,
 correct validators will not sign and send any other header
-for the respective  creator of the header (for the same round).
+from the creator of the header (for the same round).
 
-
-\begin{description}
-\item[Integrity signing \(\hdₚ\)]
-  \xnote{primary ⇒ primary}
-  Signing and sending the header to the creator implies that
+\paragraph{Integrity signing}
+  \xnote{
+    ↯
+  }
+  \emph{Signing and sending the header to the creator implies that
   (a correct) primary will not sign any other header
-  of the same creator with the same round number.
+  of the same creator with the same round number.}
 
-\item[Block aggregation (\bk)]
-  \xnote{[primary]}
-  Using
-  the same signature aggregation mechanism that
-  is used for availability certificates,
-  validators will aggregate additional signatures
-  (besides the availability signature) for their block headers,
-  producing learner-specific \emph{blocks},
-  which, by definition,
-  are headers signed by a learner-specific quorum.
+\todo[inline]{a mess for the poor reader that has never heard of integrity
+  vs. availability ⁈}
+
+ \begin{description}
+\item[Header signature (\hdₚ←)]
+  \xnote{%
+    primary\\
+    ←primary
+  }
+  If the received signature of a header is also an \emph{integrity commitment}
+  and it completes a full learner-specific quorum of signatures, 
+  the additional signature triggers one (or several) learner-specific blocks.
 
 \item[Block broadcast \(\bk\)]
-  \xnote{primary ⇒ primary}
+  \xnote{%
+    primary \\
+    ⇒ primary
+  }
   The aggregated signatures of a block header form
-  a \emph{learner-specific block}.
-  The signature aggreator will broadcast
+  one ore more\emph{learner-specific} blocks.
+  For each such quorum, %
+  the signature aggregator will broadcast
   to all primaries that belong to some quorum of the respective learner.
   (Later,
   these will be used as references to
@@ -1737,15 +1758,8 @@ for the difference between headers at genesis and the typical phase).
   %
   \label{fig:integrity-protocol}
 \end{figure}
-\todo[caption={},inline]{%
-  blue blocks are sent to all validators in
-  \begin{enumerate}
-   \item[①] the signing quorum and
-   \item[②] \textsc{any other} blue quorum
-   \end{enumerate}
-}
 
-\subsection{Availability: the typical case}
+\subsection{Availability: the typical case for primaries}
 
 \begin{description}
 \item[Generating and broadcasting signed quorums]
@@ -2256,3 +2270,8 @@ message synthesizer ref(s)
 %%% TeX-engine: luatex
 %%% TeX-command-extra-options: "-shell-escape"
 %%% End:
+
+
+
+
+
