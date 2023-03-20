@@ -1,4 +1,5 @@
 \documentclass[dvipsnames]{article}
+\usepackage{manfnt}
 \usepackage[english]{babel}
 \usepackage{flowchart}
 \usepackage{markdown}
@@ -101,6 +102,7 @@
 %\newunicodechar{②}{\circledX 2}
 \usepackage{stmaryrd}
 \newunicodechar{↯}{\lightning}
+\newunicodechar{⚠}{\dbend}
 \newunicodechar{ₐ}{\ifmmode_a\else\ensuremath{{}_a}\fi}
 \newunicodechar{ₚ}{\ifmmode_p\else\ensuremath{{}_p}\fi}
 \newunicodechar{‼}{\rough}
@@ -129,6 +131,17 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes,positioning,fit,backgrounds}
+\usetikzlibrary{shapes.geometric
+}
+\newcommand{\warningsign}{%
+  % kudos to 
+  % https://tex.stackexchange.com/questions/
+  % 159669/how-to-print-a-warning-sign-triangle-with-exclamation-point
+  \tikz[baseline=-.75ex] 
+  \node[shape=regular polygon, regular polygon sides=3, inner sep=-1pt, draw, thick] {%
+    \raisebox{2pt}{\textbf{!}}%
+  };
+}
 \usetikzlibrary{patterns,intersections,calc}
 \newcommand{\qs}[1][~]{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[rectangle,
 ,double,inner sep=.5pt,outer sep=0pt,fill=black] (theNode){\textcolor{white}{\footnotesize \bf q#1}};}
@@ -271,11 +284,19 @@
 \newcommand{\hn}{Heterogeneous Narwhal\xspace}
 \usepackage[textsize=footnotesize]{./luatodonotes}%\usepackage{todonotes}%
 
+\includecomment{preface}
+\includecomment{theendnotes}
+\includecomment{theapx}
+%%%%% the following four lines  yield the reader's version
+% \excludecomment{preface}
+% \excludecomment{theendnotes}
+% \excludecomment{theapx}
+% \renewcommand{\todo}[2][]{}
+% \renewcommand{\endnote}[2][]{}
 
 \begin{document}
 
-
-% \begin{comment}
+\begin{preface}
 
 
 \begin{center}
@@ -382,7 +403,7 @@
   \end{description}%
 }
 \clearpage\cleardoublepage
-
+\end{preface}
 \maketitle
 
 \begin{abstract}
@@ -787,7 +808,6 @@ Roughly, we have two complementary protocols running concurrently:
  The integrity protocol makes sure that
  each validator can only produce one block in each of its (local) rounds.
 
-
 \end{comment}
 \section{Architecture and communication patterns}
 \label{sec:communication-patterns}
@@ -1171,6 +1191,7 @@ different scenarios %
 (depending of which message from a \emph{set} of triggering messages arrives
 last and thus becomes \emph{the} trigger). %
 
+
 \begin{figure}[htb]
   \centering
   \todo[inline,caption={}]{%
@@ -1343,7 +1364,7 @@ last and thus becomes \emph{the} trigger). %
   it is natural to collect signatures for the availability certificate
   on a “first come, first served” basis
 }
-%\end{comment}
+
 \subsection{Execution support protocol}
 \label{sec:exe-supp-protocol}
 
@@ -1593,9 +1614,11 @@ as explained next.
 
 \subsection{Integrity: the general case at once}
 \label{sec:integr-gener-case}
-First off,
-the integrity-protocol
-re-uses the sending of signed headers~\(\hdₚ\) to the creator
+First off,\todo{mention the two ways of interleaving:\\
+  - re-use of signatures\\
+  - additional new data to be kept available
+}
+the integrity-protocol re-uses the sending of signed headers~\(\hdₚ\) to the creator
 (from the availability-protocol),
 as a commitment of the signer to
 one unique header for the  validator (and round),
@@ -1605,54 +1628,106 @@ correct validators will not sign and send any other header
 from the creator of the header (for the same round).
 
 \paragraph{Integrity signing}
-  \xnote{
-    ↯
-  }
-  \emph{Signing and sending the header to the creator implies that
+  \xnote{⚠}
+  \emph{Signing and sending a header to its creator implies that
   (a correct) primary will not sign any other header
-  of the same creator with the same round number.}
+  of the same creator with the same round number. %
+  (Recall that the headers at genesis implicitly are of round zero.) %
+}
 
 \todo[inline]{a mess for the poor reader that has never heard of integrity
   vs. availability ⁈}
 
- \begin{description}
+The availability protocol for primaries will use
+counterparts to blocks in Narwhal, 
+which come with  references to a quorum of blocks,   
+namely \emph{learner-specific blocks} 
+and \emph{signed block quorums}, defined as follows:  
+a \emph{learner-specific block} is a block header signed by a learner-specific quorum
+and a \emph{signed quorum} is a quorum of blocks signed by a primary.
+Finally,
+a typical header (after genesis) consists of
+\begin{itemize}
+\item the identifier of a primary 
+\item a list of worker hashes
+\item an availability certificate for the previous header of the same primary
+\item the round number 
+\item a non-empty\todo{discuss with isaac} list of signed quorums\todo{subject
+    to further conditions}.
+\end{itemize}
+The first two items were already present in genesis block headers
+while the remaining three only come into play in later rounds. 
+With these definitions in place,
+we can describe the primary actions in the availability protocol. 
+
+
+\begin{description}
 \item[Header signature (\hdₚ←)]
   \xnote{%
     primary\\
     ←primary
   }
-  If the received signature of a header is also an \emph{integrity commitment}
-  and it completes a full learner-specific quorum of signatures, 
-  the additional signature triggers one (or several) learner-specific blocks.
+  If the received signature of a header
+  (interpreted as {integrity commitment})
+  completes a full 
+learner-specific quorum of signatures, 
+  the received signature triggers the broadcast of one (or several) learner-specific blocks.
 
-\item[Block broadcast \(\bk\)]
-  \xnote{%
-    primary \\
-    ⇒ primary
-  }
-  The aggregated signatures of a block header form
-  one ore more\emph{learner-specific} blocks.
-  For each such quorum, %
-  the signature aggregator will broadcast
-  to all primaries that belong to some quorum of the respective learner.
-  (Later,
-  these will be used as references to
-  previous blocks in the learner-specific \Dag[s]
-  see \ref{???}) %FIXME reference.
+\todo{fix inline blocks (see \LaTeX source)}
+% \begin{verbatim}
+% \usetikzlibrary {shapes.symbols}
+% \begin{tikzpicture}
+%   [every node/.style={signal, draw,  text=white, signal to=nowhere}]
+%   \node[fill=green!65!black, signal to=east] at (0,1) {To East};
+%   \node[fill=red!65!black, signal from=east] at (0,0) {From East};
+% \end{tikzpicture}
+% \end{verbatim}
+  \begin{description}
+  \item[Block broadcast (\hdₚ!\((\bk⇒)^+\))]
+    \xnote{%
+      primary \\
+      ⇒ primary
+    }
+    If the received header signature 
+    %The aggregated signatures of a block header lead to completion of
+    completes a \emph{learner-specific} block, 
+    for each such new block, %
+    the signature aggregator will broadcast a block
+    to all primaries that belong to some quorum of the respective
+    learner.\footnote{%
+      In other words, 
+      the broadcast is to  all primaries in the union of all quorums of
+      the respective learner. 
+    }
+    The (learner-specific) round number of a (learner-specific) block 
+    is derived from the block header that it is based on: 
+    \todo{double check the following with isaac}%
+    it defaults to zero, 
+    unless there is a signed quorum that is the last one for the respective learner
+    in the chain of block headers of the same primary
+    and
+    then it is one plus the signed quorum's round number.\xspace%
+    \footnote{%
+      Signed quorums will be used as references to previous blocks in %
+      the learner-specific \Dag[s],
+      as detailed in Section/Appendix\ref{???}. %FIXME reference.
+    }
+    \todo{fill in reference}
+  \end{description}
+
 \end{description}
 
-There is no conceptual difference between
+Note that there is no conceptual difference between
 the integrity protocol at genesis,
 compared to the typical case.
-The only difference is that
-headers in the general case
-will carry additional information.
-Thus,
-we can finish the description of the protocol,
-by filling in the additional data and steps in the typical phase
-of the availability-protocol
+The only difference is that headers need to carry 
+additional information, in general.
+Now, 
+we can finish the description of heterogeneous Narwhal,
+by filling in the of the availability-protocol
 (see also \fig\ref{fig:data-structures},
 for the difference between headers at genesis and the typical phase).
+\todo{we need to explain some place the difference in (possibly) using weak links }
 
 \begin{figure}[htb]
   \centering
@@ -1731,13 +1806,13 @@ for the difference between headers at genesis and the typical phase).
     }
     \coordinate (top) at (bkBlue3'.east|-p1);
     \coordinate (bottom) at (bkBlue3'.east|-p7);
-    \draw[double,very thick,dotted] ([xshift=1ex,yshift=1ex]top) -- ([xshift=1ex,yshift=-1ex]bottom);
+    \draw[double,very thick,dotted] ([xshift=1ex,yshift=1ex]top) -- ([xshift=3ex,yshift=-1ex]bottom);
     \coordinate (sigAgg) at ([xshift=20ex]bkBlue5');
     \foreach \p in {7,...,4} { % for each "other" blue validator, not 3
       \node[fill=white] (bk\p) at (sigAgg){\bk[blue]\makebox[0pt][l]{\ensuremath{{}_\p}}};
       %\draw[->] (bk\p') -- ([xshift=1ex,yshift=-.5ex]av\p.south east);
       \coordinate (sigAgg) at ([xshift=-1ex,yshift=-1ex]sigAgg);
-      \draw[->] (sigAgg|-p\p) -- (bk\p.south east);
+      \draw[->] ([xshift=-10ex]sigAgg|-p\p) -- (bk\p.south east);
     }   
     \begin{pgfonlayer}{background}
       \node[fit={(bkBlue5')([xshift=2ex]bk7.north east)(bk4.south west)},fill=lightgray] (BlueBlocks) {};
@@ -1752,8 +1827,8 @@ for the difference between headers at genesis and the typical phase).
     }
   }
   \caption[Integrity protocol]{%
-    The integrity protocol
-    (concluding each round that's was “opened” in the availability-protocol)%
+    The integrity protocol (on the left)
+    and the availability protocol (on the right)
   }
   %
   \label{fig:integrity-protocol}
@@ -1761,48 +1836,119 @@ for the difference between headers at genesis and the typical phase).
 
 \subsection{Availability: the typical case for primaries}
 
+\todo[inline,caption={}]{%
+    \begin{itemize}
+    \item %
+      the round number of a block header is one more than the round number
+      of the availability certificate it is referencing;
+      this is the \emph{primary round} 
+    \end{itemize}
+}
+
+\endnote{%
+  \emph{How do learner-specific blocks reference each other?} \\
+  via a sequence of references to the previous header they are based on,
+  using the last signed quorum of blocks so the same learner
+  When do learner-specific round numbers increase? \\
+  the can be read-off the current header,
+  i.e., the last header that was announced ;
+  thus, this number is relative to a particular validator
+}
+%
 \begin{description}
-\item[Generating and broadcasting signed quorums]
-  \xnote{primary \\⇒ primary}
-  Once a validator has collected
-  enough new  blocks (for a learner),
-  it signs a learner-specific quorum of such blocks;
-  the result is called a \emph{signed quorum}, 
-  for short.
-  All these blocks have to be from the same round. {\color{red} important ‼}
+\item[Block reception (\bk←)]
+  \xnote{%
+    primary\\%
+    ←primary%
+  }
+  If a received learner-specific blocks completes a quorum of blocks
+  (for the same learner),
+  they all carry the same round number, 
+  the primary signs and broadcasts the quorum 
+  \emph{unless} 
+  a signed quorum of a blocks of a higher round number has been broadcast already. 
+  \todo{%
+    one might add weak links though here, right isaac?%
+  }
+  \begin{description}
+  \item[Signed quorum broadcast (\bk!\qs⇒)] 
+    \xnote{%
+      primary\\%
+      ⇒primary%
+    }
+    Under the stated conditions,
+    the primary signs a list of quorums
+    (the order being the local order of reception). 
+    \todo{do we have to ``throw in '' the round number (?)
+      wouldn't hurt a lot, but if we don't need it, we don't need it ... 
+    }
+    \endnote{%
+      What exactly is the connection to reliable broadcast here?
+    }
+  \item[Header announcement ((\bk/\wh/\ac)!\(\hd^*\)⇒)]
+    If the primary has already enough worker hashes for a new block header, 
+    it has an availability certificate of its previous header
+    \todo{this should be the trigger for increasing the primaries round number}, 
+    and the produced signed quorum the first one it knows of,
+    a new block header fingerprint is announced. 
+    In the typical phase,
+    a header carries two additional data items, namely
+    \begin{itemize}
+    \item
+      the availability certificate of the previous header
+      of the header's creator/initiator
+    \item
+      a list of hashes of the signed quorums sent by the same primary
+      
+    \item the validators round number, obtained by incrementing the round number
+      of the block header that this referenced in the availability certificate. 
+    \end{itemize}
+    Other potential triggers are
+    \begin{itemize}
+    \item a (first) worker hash arriving,
+      in which case the header announcement includes the whole list of all
+      signed quorums (of maximal learner-specific heights)
+    \item the availability certificate being the missing data,
+      which then leads to all
+      signed quorums (of maximal learner-specific heights),
+      and as many worker hashes as possible/allowed. 
+    \end{itemize}
+  \end{description}
+% \item[Generating and broadcasting signed quorums]
+%   \xnote{primary \\⇒ primary}
+%   Once a validator has collected
+%   enough new  blocks (for a learner),
+%   it signs a learner-specific quorum of such blocks;
+%   the result is called a \emph{signed quorum}, 
+%   for short.
+%   All these blocks have to be from the same round. 
+%   \todo[color=red,inline]{this is important}
 
-  Under certain conditions,
-  in particular if there is exceptional delay for a specific learner,
-  one can forgoe announcing a proper signed quorum
-  and instead signs a \emph{dummy quorum} for a specific learner,
-  \ie a signature over the ID of the learner in question and the current round number. 
+  % Under certain conditions,
+  % in particular if there is exceptional delay for a specific learner,
+  % one can forgoe announcing a proper signed quorum
+  % and instead signs a \emph{dummy quorum} for a specific learner,
+  % \ie a signature over the ID of the learner in question and the current round number. 
 
-\item[General header compilation]
-  The biggest additional work and data
-  concerns the compilation of headers.
-  In the typical phase,
-  a header carries two additional data items, namely
-  \begin{itemize}
-  \item
-    the availability certificate of the previous header
-    of the header's creator/initiator
-  \item
-    hashes of the signed (dummy) quorums sent by the same validator
-  \end{itemize}
-
-\item[General header checking]
-  As signed quorums also serve as certificates of availability,
-  checking a signed quorum amounts to checking the signed certificates.\endnote{%
-    Somehow it seems overkill to have (hases of) signed quorums in the headers.   }
-  In a similar way,
-  the certificate of availability amounts to a checking of signatures.
 \end{description}
+
+\todo{we have elided the checks of validity of headers , 
+  which we describe later in detail ?
+}
 
 \todo[inline]{describe in detail how
 
-  the checking of the availability of the headers takes place}
+  the checking of the availability of the headers takes place
+}
 
 \subsection{Summary}
+\todo[inline]{probably it makes sense to have two ``copies'' of the integrity
+  protocol
+  as it is extremely short ... 
+  and we can remove the ``forward pointing'' defs of signed quorums and blocks
+  \\
+  then we can remove this
+}
 The availability protocol in a non-genesis round
 only differs in having
 \begin{enumerate}
@@ -1942,7 +2088,7 @@ to storing all blocks until genesis
   \subfloat[Header]{
     \(\hd\):\(
 \tikz[baseline={(x.base)}]{\node (x){
-\(\left(p,\overrightarrow\wh,\ac, \overrightarrow {\#(\qsₚ)}\right)\)
+\(\left(p,\overrightarrow\wh,\ac, \rnd, \overrightarrow {\#(\qsₚ)}\right)\)
 };}\)
   }
 
@@ -1961,6 +2107,7 @@ to storing all blocks until genesis
 \bibliographystyle{alpha}
 \bibliography{HN.bib}
 
+\begin{theapx}
 \appendix
 
 
@@ -2252,17 +2399,26 @@ message synthesizer ref(s)
   [37] L. Zheng. Making distributed computation secure by construction. PhD thesis,
   Cornell University, Ithaca, New York, USA, Jan. 2007.
 
-
   [39] L. Zheng and A. C. Myers. A language-based approach to secure quorum replication.
   In Proceedings of the Ninth Workshop on Programming Languages and Analysis for
   Security, PLAS’14, pages 27:27–27:39, New York, NY, USA, 2014. ACM. ISBN
   978-1-4503-2862-3. . URL http://doi.acm.org/10.1145/2637113.2637117.
 \end{verbatim}
 
+
+
+  
+\end{theapx}
+\begin{theendnotes}
+
 \section{Endnotes}
 \printendnotes
-\end{document}
 
+\end{theendnotes}
+
+
+
+\end{document}
 
 %%% Local Variables:
 %%% mode: latex
