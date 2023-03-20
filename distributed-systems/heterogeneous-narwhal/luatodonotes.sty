@@ -1,0 +1,699 @@
+%%
+%% This is file `luatodonotes.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% luatodonotes.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2014-2020 by Fabian Lipp <fabian.lipp@gmx.de>
+%% based on the todonotes package by
+%%   Henrik Skov Midtiby <henrikmidtiby@gmail.com>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.2 of this license
+%% or (at your option) any later version.  The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.2 or later is part of all distributions of LaTeX version
+%% 1999/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{luatodonotes}
+    [2020/02/16 v0.5 luatodonotes source and documentation.]
+
+\@ifpackageloaded{todonotes}{
+  \PackageError{luatodonotes}{%
+    Conflicting packages todonotes and luatodonotes\MessageBreak
+    loaded. Aborting.}{%
+    The package luatodonotes was designed as a replacement for todonotes. So it
+    is not possible (and not reasonable) to include both of them in the same
+    document.%
+    If you want to use luatodonotes you should delete the todonotes
+    package from\MessageBreak
+    your preamble.\MessageBreak}
+}{}
+\expandafter\def\csname ver@todonotes.sty\endcsname{2014/07/14}
+\RequirePackage{ifluatex}
+\ifluatex\else
+  \PackageError{luatodonotes}{LuaTeX is required for this package. Aborting.}{%
+    This package can only be used with the LuaTeX engine\MessageBreak
+    (command `lualatex'). Package loading has been stopped\MessageBreak
+    to prevent additional errors.}
+\fi
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{intersections}
+\usetikzlibrary{decorations.pathmorphing}
+\RequirePackage{luacode}
+\RequirePackage{atbegshi}
+\RequirePackage{xstring}
+\RequirePackage{zref-abspage}
+\RequirePackage{ifoddpage}
+\RequirePackage{soul}
+\RequirePackage{soulpos}
+\RequirePackage{etoolbox}
+\@ifpackagelater{luatexbase}{2013/05/04}{}{
+    \RequirePackage{luatex}
+}
+\newcommand{\@todonotes@text}{}%
+\newcommand{\@todonotes@backgroundcolor}{orange}
+\newcommand{\@todonotes@linecolor}{black!30}
+\newcommand{\@todonotes@bordercolor}{black}
+\newcommand{\@todonotes@leaderwidth}{1.6pt}
+\newcommand{\@todonotes@textsize}{\normalsize}
+\newcommand{\@todonotes@figwidth}{\linewidth}
+\newcommand{\@todonotes@figheight}{4cm}
+\newcommand{\@todonotes@figcolor}{black!40}
+\newcommand{\@todonotes@positioning}{inputOrderStacks}
+\newcommand{\@todonotes@splitting}{none}
+\newcommand{\@todonotes@leadertype}{opo}
+\newcommand{\@todonotes@interNoteSpace}{5pt}
+\newcommand{\@todonotes@noteInnerSep}{5pt}
+\newcommand{\@todonotes@routingAreaWidth}{0.4cm}
+\newcommand{\@todonotes@minNoteWidth}{2.0cm}
+\newcommand{\@todonotes@distanceNotesPageBorder}{0.5cm}
+\newcommand{\@todonotes@distanceNotesText}{0.2cm}
+\newcommand{\@todonotes@rasterHeight}{1cm}
+\newcommand{\@todonotes@additionalMargin}{2cm}
+\AtBeginDocument{
+\ifx\undefined\phantomsection
+\newcommand{\phantomsection}{}
+\fi
+}
+\newcommand{\@todonotes@todolistname}{Todo list}
+\newcommand{\@todonotes@MissingFigureText}{Figure}
+\newcommand{\@todonotes@MissingFigureUp}{Missing}
+\newcommand{\@todonotes@MissingFigureDown}{figure}
+\newcommand{\@todonotes@SetTodoListName}[1]
+    {\renewcommand{\@todonotes@todolistname}{#1}}
+\newcommand{\@todonotes@SetMissingFigureText}[1]
+    {\renewcommand{\@todonotes@MissingFigureText}{#1}}
+\newcommand{\@todonotes@SetMissingFigureUp}[1]
+    {\renewcommand{\@todonotes@MissingFigureUp}{#1}}
+\newcommand{\@todonotes@SetMissingFigureDown}[1]
+    {\renewcommand{\@todonotes@MissingFigureDown}{#1}}
+\newif{\if@todonotes@reverseMissingFigureTriangle}
+\DeclareOptionX{catalan}{
+    \@todonotes@SetTodoListName{Llista de feines pendents}%
+    \@todonotes@SetMissingFigureText{Figura}%
+    \@todonotes@SetMissingFigureUp{Figura}%
+    \@todonotes@SetMissingFigureDown{pendent}%
+}
+\DeclareOptionX{croatian}{%
+   \@todonotes@SetTodoListName{Popis obveza}%
+   \@todonotes@SetMissingFigureText{Slika}%
+   \@todonotes@SetMissingFigureUp{Nedostaje}%
+   \@todonotes@SetMissingFigureDown{slika}%
+}
+\DeclareOptionX{danish}{%
+    \@todonotes@SetTodoListName{G\o{}rem\aa{}lsliste}%
+    \@todonotes@SetMissingFigureText{Figur}%
+    \@todonotes@SetMissingFigureUp{Manglende}%
+    \@todonotes@SetMissingFigureDown{figur}%
+}
+\DeclareOptionX{dutch}{%
+   \@todonotes@SetTodoListName{Lijst van onafgewerkte taken}%
+   \@todonotes@SetMissingFigureText{Figuur}%
+   \@todonotes@SetMissingFigureUp{Ontbrekende}%
+   \@todonotes@SetMissingFigureDown{figuur}%
+}
+\DeclareOptionX{english}{%
+   \@todonotes@SetTodoListName{Todo list}%
+   \@todonotes@SetMissingFigureText{Figure}%
+   \@todonotes@SetMissingFigureUp{Missing}%
+   \@todonotes@SetMissingFigureDown{figure}%
+}
+\DeclareOptionX{french}{%
+    \@todonotes@SetTodoListName{Liste des points \`a traiter}%
+    \@todonotes@SetMissingFigureText{Figure}%
+    \@todonotes@SetMissingFigureUp{Figure}%
+    \@todonotes@SetMissingFigureDown{manquante}%
+    \@todonotes@reverseMissingFigureTrianglefalse
+}
+\DeclareOptionX{german}{%
+    \@todonotes@SetTodoListName{Liste der noch zu erledigenden Punkte}%
+    \@todonotes@SetMissingFigureText{Abbildung}%
+    \@todonotes@SetMissingFigureUp{Fehlende}%
+    \@todonotes@SetMissingFigureDown{Abbildung}%
+}
+\DeclareOptionX{italian}{
+    \@todonotes@SetTodoListName{Elenco delle cose da fare}%
+    \@todonotes@SetMissingFigureText{Figura}%
+    \@todonotes@SetMissingFigureUp{Figura}%
+    \@todonotes@SetMissingFigureDown{mancante}%
+}
+\DeclareOptionX{ngerman}{%
+    \@todonotes@SetTodoListName{Liste der noch zu erledigenden Punkte}%
+    \@todonotes@SetMissingFigureText{Abbildung}%
+    \@todonotes@SetMissingFigureUp{Fehlende}%
+    \@todonotes@SetMissingFigureDown{Abbildung}%
+}
+\DeclareOptionX{portuguese}{
+    \@todonotes@SetTodoListName{Lista de tarefas pendentes}%
+    \@todonotes@SetMissingFigureText{Figura}%
+    \@todonotes@SetMissingFigureUp{Figura}%
+    \@todonotes@SetMissingFigureDown{pendente}%
+}
+\DeclareOptionX{spanish}{
+    \@todonotes@SetTodoListName{Lista de tareas pendientes}%
+    \@todonotes@SetMissingFigureText{Figura}%
+    \@todonotes@SetMissingFigureUp{Figura}%
+    \@todonotes@SetMissingFigureDown{pendiente}%
+}
+\DeclareOptionX{swedish}{%
+    \@todonotes@SetTodoListName{Att g\"{o}ra-lista}%
+    \@todonotes@SetMissingFigureText{Figur}%
+    \@todonotes@SetMissingFigureUp{Figur}%
+    \@todonotes@SetMissingFigureDown{saknas}%
+}
+\newcounter{@todonotes@numberoftodonotes}
+\newcounter{@todonotes@numberofLinesInArea}
+\newif{\if@todonotes@obeyDraft}
+\DeclareOptionX{obeyDraft}{\@todonotes@obeyDrafttrue}
+\newif{\if@todonotes@isDraft}
+\DeclareOptionX{draft}{\@todonotes@isDrafttrue}
+\DeclareOptionX{draftcls}{\@todonotes@isDrafttrue}
+\DeclareOptionX{draftclsnofoot}{\@todonotes@isDrafttrue}
+\newif{\if@todonotes@obeyFinal}
+\DeclareOptionX{obeyFinal}{\@todonotes@obeyFinaltrue}
+\newif{\if@todonotes@isFinal}
+\DeclareOptionX{final}{\@todonotes@isFinaltrue}
+\newif{\if@todonotes@disabled}
+\DeclareOptionX{disable}{\@todonotes@disabledtrue}
+\newif{\if@todonotes@colorinlistoftodos}
+\DeclareOptionX{colorinlistoftodos}{\@todonotes@colorinlistoftodostrue}
+\DeclareOptionX{dvistyle}{\PackageWarningNoLine{luatodonotes}
+    {Parameter dvistyle is not supported by luatodonotes.
+    Ignoring this option}}
+\define@key{luatodonotes.sty}%
+    {color}{
+        \renewcommand{\@todonotes@backgroundcolor}{#1}
+        \renewcommand{\@todonotes@linecolor}{#1}}
+\define@key{luatodonotes.sty}%
+    {backgroundcolor}{\renewcommand{\@todonotes@backgroundcolor}{#1}}
+\define@key{luatodonotes.sty}%
+    {linecolor}{\renewcommand{\@todonotes@linecolor}{#1}}
+\define@key{luatodonotes.sty}%
+    {bordercolor}{\renewcommand{\@todonotes@bordercolor}{#1}}
+\define@key{luatodonotes.sty}%
+    {leaderwidth}{\renewcommand{\@todonotes@leaderwidth}{#1}}
+\newif{\if@todonotes@prependcaptionglobal}
+\@todonotes@prependcaptionglobalfalse
+\DeclareOptionX{prependcaption}{\@todonotes@prependcaptionglobaltrue}
+\define@key{luatodonotes.sty}%
+    {textwidth}{\PackageWarningNoLine{luatodonotes}
+    {Parameter textwidth is not supported by luatodonotes}}
+\define@key{luatodonotes.sty}%
+    {textsize}{\renewcommand{\@todonotes@textsize}{\csname #1\endcsname}}
+\newif{\if@todonotes@shadowenabled}
+\@todonotes@shadowenabledfalse
+\DeclareOptionX{shadow}{\@todonotes@shadowenabledtrue
+\usetikzlibrary{shadows}}
+\define@key{luatodonotes.sty}%
+    {figwidth}{\renewcommand{\@todonotes@figwidth}{#1}}
+\define@key{luatodonotes.sty}%
+    {figheight}{\renewcommand{\@todonotes@figheight}{#1}}
+\define@key{luatodonotes.sty}%
+    {figcolor}{\renewcommand{\@todonotes@figcolor}{#1}}
+\DeclareOptionX{po}%
+    {\setkeys{luatodonotes.sty}{leadertype=po,positioning=poLeadersAvoidLines}}
+\DeclareOptionX{s}%
+    {\setkeys{luatodonotes.sty}{leadertype=s,positioning=sLeaderNorthEastBelowStacks}}
+\DeclareOptionX{bezier}%
+    {\setkeys{luatodonotes.sty}{leadertype=sBezier,positioning=sLeaderNorthEastBelowStacks}}
+\DeclareOptionX{opo}%
+    {\setkeys{luatodonotes.sty}{leadertype=opo,positioning=inputOrderStacks}}
+\define@key{luatodonotes.sty}%
+    {positioning}{\renewcommand{\@todonotes@positioning}{#1}}
+\define@key{luatodonotes.sty}%
+    {splitting}{\renewcommand{\@todonotes@splitting}{#1}}
+\define@key{luatodonotes.sty}%
+    {leadertype}{\renewcommand{\@todonotes@leadertype}{#1}}
+\define@key{luatodonotes.sty}%
+    {interNoteSpace}{\renewcommand{\@todonotes@interNoteSpace}{#1}}
+\define@key{luatodonotes.sty}%
+    {noteInnerSep}{\renewcommand{\@todonotes@noteInnerSep}{#1}}
+\define@key{luatodonotes.sty}%
+    {routingAreaWidth}{\renewcommand{\@todonotes@routingAreaWidth}{#1}}
+\define@key{luatodonotes.sty}%
+    {minNoteWidth}{\renewcommand{\@todonotes@minNoteWidth}{#1}}
+\define@key{luatodonotes.sty}%
+    {distanceNotesPageBorder}%
+    {\renewcommand{\@todonotes@distanceNotesPageBorder}{#1}}
+\define@key{luatodonotes.sty}%
+    {distanceNotesText}{\renewcommand{\@todonotes@distanceNotesText}{#1}}
+\define@key{luatodonotes.sty}%
+    {rasterHeight}{\renewcommand{\@todonotes@rasterHeight}{#1}}
+\newif{\if@todonotes@additionalMarginEnabled}
+\@todonotes@additionalMarginEnabledfalse
+\define@key{luatodonotes.sty}%
+    {additionalMargin}[\@todonotes@additionalMargin]{%
+        \@todonotes@additionalMarginEnabledtrue
+        \renewcommand{\@todonotes@additionalMargin}{#1}}
+\newif{\if@todonotes@debugenabled}
+\@todonotes@debugenabledfalse
+\DeclareOptionX{debug}{\@todonotes@debugenabledtrue}
+\ProcessOptionsX*
+\if@todonotes@disabled
+\else
+    \if@todonotes@obeyDraft
+        \@todonotes@disabledtrue
+        \if@todonotes@isDraft
+            \@todonotes@disabledfalse
+        \fi
+    \fi
+    \if@todonotes@obeyFinal
+        \@todonotes@disabledfalse
+        \if@todonotes@isFinal
+            \@todonotes@disabledtrue
+        \fi
+    \fi
+\fi
+\if@todonotes@additionalMarginEnabled
+    \newlength{\@todonotes@modpaperwidth}
+    \AfterEndPreamble{%
+        \@todonotes@setAdditionalMargin%
+        \ifdefined\Gm@changelayout
+            \g@addto@macro{\Gm@changelayout}{\@todonotes@setAdditionalMargin}
+        \fi
+    }%
+\fi%
+\newcommand{\@todonotes@setAdditionalMargin}{
+    \setlength{\@todonotes@modpaperwidth}{\paperwidth}%
+    \addtolength{\@todonotes@modpaperwidth}{\@todonotes@additionalMargin}%
+    \addtolength{\@todonotes@modpaperwidth}{\@todonotes@additionalMargin}%
+    \ifdefined\pdfpagewidth\else\let\pdfpagewidth\pagewidth\fi
+    \pdfpagewidth=\@todonotes@modpaperwidth%
+    \addtolength{\hoffset}{\@todonotes@additionalMargin}%
+}
+\newdimen\@todonotes@extractx
+\newdimen\@todonotes@extracty
+\newsavebox\@todonotes@heightcalcbox
+\newdimen\@todonotes@heightcalcboxdepth
+\newdimen\@todonotes@heightcalcboxheight
+\newsavebox\@todonotes@notetextbox
+\newdimen\@todonotes@baselineskip
+\newdimen\@todonotes@normalbaselineskip
+\newdimen\@todonotes@fontsize
+\newdimen\@todonotes@currentsidemargin
+\directlua{require("luatodonotes")}
+\directlua{luatodonotes.noteInnerSep =
+    string.todimen("\luatexluaescapestring{\@todonotes@noteInnerSep}")}
+\directlua{luatodonotes.noteInterSpace =
+    string.todimen("\luatexluaescapestring{\@todonotes@interNoteSpace}")}
+\directlua{luatodonotes.routingAreaWidth =
+    string.todimen("\luatexluaescapestring{\@todonotes@routingAreaWidth}")}
+\directlua{luatodonotes.minNoteWidth =
+    string.todimen("\luatexluaescapestring{\@todonotes@minNoteWidth}")}
+\directlua{luatodonotes.distanceNotesPageBorder =
+    string.todimen("\luatexluaescapestring{\@todonotes@distanceNotesPageBorder}")}
+\directlua{luatodonotes.distanceNotesText =
+    string.todimen("\luatexluaescapestring{\@todonotes@distanceNotesText}")}
+\directlua{luatodonotes.rasterHeight =
+    string.todimen("\luatexluaescapestring{\@todonotes@rasterHeight}")}
+\directlua{luatodonotes.setPositioningAlgo("\luatexluaescapestring{\@todonotes@positioning}")}
+\directlua{luatodonotes.setSplittingAlgo("\luatexluaescapestring{\@todonotes@splitting}")}
+\directlua{luatodonotes.setLeaderType("\luatexluaescapestring{\@todonotes@leadertype}")}
+\ifdefined\pdflastypos\else\let\pdflastypos\lastypos\fi
+\def\@todonotes@pdflastypos{\the\pdflastypos}
+\newcommand{\@todonotes@lineposition}[3]{%
+    \directlua{luatodonotes.linePositionsAddLine(#1,#2,#3)}%
+}
+\newcommand{\@todonotes@nextpage}{%
+    \directlua{luatodonotes.linePositionsNextPage()}%
+}%
+\newcommand{\@todonotes@writeNextpageToLpo}{%
+    \ifdefined\tf@lpo%
+        \immediate\write\tf@lpo{\@backslashchar @todonotes@nextpage}%
+    \fi
+}
+\if@todonotes@debugenabled
+    \directlua{luatodonotes.todonotesDebug = true}
+    \newcommand{\@todonotes@AtBeginShipoutUpperLeft}
+        {\AtBeginShipoutUpperLeftForeground}
+\else
+    \directlua{luatodonotes.todonotesDebug = false}
+    \newcommand{\@todonotes@AtBeginShipoutUpperLeft}
+        {\AtBeginShipoutUpperLeft}
+\fi
+\newcommand{\@todonotes@before@tikzpict}{\begingroup%
+    \ifdefined\tikzexternaldisable\tikzexternaldisable\fi}
+\newcommand{\@todonotes@after@tikzpict}{\endgroup}
+\directlua{luatodonotes.initTodonotes()}
+\soulregister{\ }{0}
+\newlength{\todonotes@textmark@width}
+\newlength{\todonotes@textmark@fontsize}
+\newlength{\todonotes@textmark@linebelow}
+\newlength{\todonotes@textmark@lineabove}
+\ulposdef{\todonotes@textmark@highlight}{%
+    \setlength\todonotes@textmark@width\ulwidth%
+    \setlength\todonotes@textmark@fontsize{\f@size pt}%
+    \stepcounter{@todonotes@numberofLinesInArea}%
+    \ifulstarttype{0}%
+        {% begin of area
+        \def\todonotes@textmark@decoLeft{}%
+        \def\todonotes@textmark@shift{-2pt}%
+        \addtolength\todonotes@textmark@width{2pt}%
+        \setcounter{@todonotes@numberofLinesInArea}{1}}%
+        {\def\todonotes@textmark@decoLeft{@todonotes@todoarea}%
+        \def\todonotes@textmark@shift{-4pt}%
+        \addtolength\todonotes@textmark@width{4pt}}%
+    \ifulendtype{0}%
+        {% last line of area
+        \def\todonotes@textmark@decoRight{}%
+        \addtolength\todonotes@textmark@width{2pt}%
+        \directlua{luatodonotes.processLastLineInTodoArea()}}%
+        {\def\todonotes@textmark@decoRight{@todonotes@todoarea}%
+        \addtolength\todonotes@textmark@width{4pt}}%
+    \newcommand{\@todonotes@nodeNamePrefix}%
+        {@todonotes@\arabic{@todonotes@numberoftodonotes}%
+         @\arabic{@todonotes@numberofLinesInArea} }%
+    \hspace*{\todonotes@textmark@shift}{\smash{%
+        \@todonotes@before@tikzpict%
+        \begin{tikzpicture}[overlay,remember picture,
+            deco/.style={}]%
+            \setlength\todonotes@textmark@linebelow%
+                {-0.95\dimexpr\baselineskip-\f@size pt\relax}%
+            \setlength\todonotes@textmark@lineabove%
+                {\dimexpr\f@size pt+\todonotes@textmark@linebelow\relax}%
+            \coordinate
+                (\@todonotes@nodeNamePrefix areaSW)
+                at (0,\todonotes@textmark@linebelow);
+            \coordinate
+                (\@todonotes@nodeNamePrefix areaSE)
+                at (\todonotes@textmark@width, \todonotes@textmark@linebelow);
+            \coordinate
+                (\@todonotes@nodeNamePrefix areaNE)
+                at (\todonotes@textmark@width,\todonotes@textmark@lineabove);
+            \coordinate
+                (\@todonotes@nodeNamePrefix areaNW)
+                at (0,\todonotes@textmark@lineabove);
+            \draw[draw=green!70,fill=green,fill opacity=.2]
+                (\@todonotes@nodeNamePrefix areaSW)
+                decorate[\todonotes@textmark@decoLeft] {
+                    -- (\@todonotes@nodeNamePrefix areaNW)
+                }
+                -- (\@todonotes@nodeNamePrefix areaNE)
+                decorate[\todonotes@textmark@decoRight] {
+                    -- (\@todonotes@nodeNamePrefix areaSE)
+                }
+                -- cycle;
+        \end{tikzpicture}%
+        \@todonotes@after@tikzpict%
+    }}%
+}%
+\newcommand{\@todonotes@currentlinecolor}{}%
+\newcommand{\@todonotes@currentbackgroundcolor}{}%
+\newcommand{\@todonotes@currentbordercolor}{}%
+\define@key{todonotes}{color}{%
+    \renewcommand{\@todonotes@currentlinecolor}{#1}%
+    \renewcommand{\@todonotes@currentbackgroundcolor}{#1}}%
+\define@key{todonotes}{linecolor}{%
+    \renewcommand{\@todonotes@currentlinecolor}{#1}}%
+\define@key{todonotes}{backgroundcolor}{%
+    \renewcommand{\@todonotes@currentbackgroundcolor}{#1}}%
+\define@key{todonotes}{bordercolor}{%
+    \renewcommand{\@todonotes@currentbordercolor}{#1}}%
+\newcommand{\@todonotes@currentleaderwidth}{}%
+\define@key{todonotes}{leaderwidth}{%
+    \renewcommand{\@todonotes@currentleaderwidth}{#1}}%
+\newcommand{\@todonotes@sizecommand}{}%
+\define@key{todonotes}{size}{\renewcommand{\@todonotes@sizecommand}{#1}}%
+\newif\if@todonotes@localdisable%
+\define@key{todonotes}{disable}[]{\@todonotes@localdisabletrue}%
+\define@key{todonotes}{nodisable}[]{\@todonotes@localdisablefalse}%
+\newif\if@todonotes@appendtolistoftodos%
+\define@key{todonotes}{list}[]{\@todonotes@appendtolistoftodostrue}%
+\define@key{todonotes}{nolist}[]{\@todonotes@appendtolistoftodosfalse}%
+\newif\if@todonotes@inlinenote%
+\define@key{todonotes}{inline}[]{\@todonotes@inlinenotetrue}%
+\define@key{todonotes}{noinline}[]{\@todonotes@inlinenotefalse}%
+\newif\if@todonotes@prependcaption%
+\define@key{todonotes}{prepend}[]{\@todonotes@prependcaptiontrue}%
+\define@key{todonotes}{noprepend}[]{\@todonotes@prependcaptionfalse}%
+\newif\if@todonotes@line%
+\define@key{todonotes}{line}[]{\@todonotes@linetrue}%
+\define@key{todonotes}{noline}[]{\@todonotes@linefalse}%
+\define@key{todonotes}{fancyline}[]{\PackageWarningNoLine{luatodonotes}
+    {Parameter fancyline is not supported by luatodonotes}}%
+\define@key{todonotes}{nofancyline}[]{}%
+\newcommand{\@todonotes@author}{}%
+\newif\if@todonotes@authorgiven%
+\define@key{todonotes}{author}{%
+    \renewcommand{\@todonotes@author}{#1}%
+    \@todonotes@authorgiventrue}%
+\define@key{todonotes}{noauthor}[]{\@todonotes@authorgivenfalse}%
+\newcommand{\@todonotes@caption}{}%
+\newif\if@todonotes@captiongiven%
+\define@key{todonotes}{caption}%
+    {\renewcommand{\@todonotes@caption}{#1}%
+    \@todonotes@captiongiventrue}%
+\define@key{todonotes}{nocaption}[]{\@todonotes@captiongivenfalse}%
+\newcommand{\@todonotes@currentfigwidth}{\@todonotes@figwidth}
+\define@key{todonotes}%
+    {figwidth}{\renewcommand{\@todonotes@currentfigwidth}{#1-2pt}}
+\newcommand{\@todonotes@currentfigheight}{\@todonotes@figheight}
+\define@key{todonotes}%
+    {figheight}{\renewcommand{\@todonotes@currentfigheight}{#1-2pt}}
+\newcommand{\@todonotes@currentfigcolor}{\@todonotes@figcolor}
+\define@key{todonotes}%
+    {figcolor}{\renewcommand{\@todonotes@currentfigcolor}{#1}}
+\presetkeys%
+    {todonotes}%
+    {linecolor=\@todonotes@linecolor,%
+    backgroundcolor=\@todonotes@backgroundcolor,%
+    bordercolor=\@todonotes@bordercolor,%
+    leaderwidth=\@todonotes@leaderwidth,%
+    nodisable,%
+    noinline,%
+    nocaption,%
+    noauthor,%
+    figwidth=\@todonotes@figwidth,%
+    figheight=\@todonotes@figheight,%
+    figcolor=\@todonotes@figcolor,%
+    line, list, size=\@todonotes@textsize}{}%
+\newif\if@todonotes@areaselected%
+\newtoks\@todonotes@toks@currentlinecolor%
+\newtoks\@todonotes@toks@currentbackgroundcolor%
+\newtoks\@todonotes@toks@currentbordercolor%
+\newtoks\@todonotes@toks@currentleaderwidth%
+\newtoks\@todonotes@toks@sizecommand%
+\if@todonotes@disabled%
+    \newcommand{\listoftodos}[1][]{}
+    \newcommand{\@todo}[2][]{}
+    \newcommand{\@todoarea}[3][]{}
+    \newcommand{\missingfigure}[2][]{}
+\else % \if@todonotes@disabled
+\newcounter{todonotes@oldtocdepth}
+\newcommand{\listoftodos}[1][\@todonotes@todolistname]{%
+    \setcounter{todonotes@oldtocdepth}{\value{tocdepth}}%
+    \setcounter{tocdepth}{1}%
+    \@ifundefined{chapter}{\section*{#1}}{\chapter*{#1}} \@starttoc{tdo}%
+    \setcounter{tocdepth}{\value{todonotes@oldtocdepth}}%
+}
+\newcommand{\l@todo}
+    {\@dottedtocline{1}{0em}{2.3em}}
+\tikzset{@todonotes@todoarea/.style={
+    decoration={snake,amplitude=3.5pt,segment length=5pt}}}
+\tikzset{@todonotes@notestyleraw/.style={
+    line width=0.5pt,
+    inner sep = \@todonotes@noteInnerSep,
+    rounded corners=4pt}}
+\if@todonotes@shadowenabled
+    \tikzset{@todonotes@notestyle/.style={@todonotes@notestyleraw,
+        general shadow={shadow xshift=.5ex, shadow yshift=-.5ex,
+        opacity=1,fill=black!50}}}
+\else
+    \tikzset{@todonotes@notestyle/.style={@todonotes@notestyleraw}}
+\fi
+\tikzset{@todonotes@leader/.style={}}
+\tikzset{@todonotes@textmark/.style={rounded corners}}
+\tikzset{@todonotes@inlinenote/.style={
+    @todonotes@notestyle,
+    draw=\@todonotes@currentbordercolor,
+    fill=\@todonotes@currentbackgroundcolor,
+    text width=\linewidth - 1.6 ex - 4 pt}}
+\newcommand{\@todocommon}[2]{%
+\if@todonotes@prependcaptionglobal%
+\@todonotes@prependcaptiontrue%
+\else%
+\@todonotes@prependcaptionfalse%
+\fi%
+\renewcommand{\@todonotes@text}{#2}%
+\renewcommand{\@todonotes@caption}{#2}%
+\setkeys{todonotes}{#1}%
+\if@todonotes@localdisable%
+\else%
+\addtocounter{@todonotes@numberoftodonotes}{1}%
+\if@todonotes@appendtolistoftodos%
+    \phantomsection%
+    \if@todonotes@captiongiven%
+    \else%
+        \renewcommand{\@todonotes@caption}{#2}%
+    \fi%
+    \@todonotes@addElementToListOfTodos%
+\fi%
+\if@todonotes@captiongiven%
+    \if@todonotes@prependcaption%
+        \renewcommand{\@todonotes@text}{\@todonotes@caption: #2}%
+    \fi%
+\fi%
+\if@todonotes@inlinenote%
+    \@todonotes@drawInlineNote%
+\else%
+    \@todonotes@drawMarginNoteWithLine%
+\fi%\if@todonotes@inlinenote
+\fi%\if@todonotes@localdisable
+}%
+\newcommand{\@todo}[2][]{%
+    \@todonotes@areaselectedfalse%
+    \@todocommon{#1}{#2}%
+}%
+\newcommand{\@todoarea}[3][]{%
+    \@todonotes@areaselectedtrue%
+    \@todocommon{#1}{#2}%
+    \todonotes@textmark@highlight{#3}%
+    \@todonotes@before@tikzpict%
+    \begin{tikzpicture}[remember picture, overlay]%
+        \node [coordinate] (@todonotes@\arabic{@todonotes@numberoftodonotes} %
+            inTextEnd) {};%
+    \end{tikzpicture}%
+    \@todonotes@after@tikzpict%
+    \zref@label{@todonotes@\arabic{@todonotes@numberoftodonotes}@end}%
+}%
+\newcommand{\@todonotes@drawMarginNoteWithLine}{%
+    \@todonotes@before@tikzpict%
+    \begin{tikzpicture}[remember picture, overlay]%
+        \node [coordinate] (@todonotes@\arabic{@todonotes@numberoftodonotes} %
+            inText) {};%
+    \end{tikzpicture}%
+    \@todonotes@after@tikzpict%
+    \@todonotes@baselineskip=\baselineskip%
+    \@todonotes@normalbaselineskip=\normalbaselineskip%
+    \@todonotes@fontsize=\f@size pt%
+    \zref@label{@todonotes@\arabic{@todonotes@numberoftodonotes}}%
+    \if@todonotes@authorgiven%
+        \let\@todonotes@text@old=\@todonotes@text
+        \renewcommand{\@todonotes@text}{\@todonotes@author: \@todonotes@text@old}%
+    \fi%
+    \edef\@todonotes@tmp{\@todonotes@currentlinecolor}%
+    \@todonotes@toks@currentlinecolor=\expandafter{\@todonotes@tmp}%
+    \edef\@todonotes@tmp{\@todonotes@currentbackgroundcolor}%
+    \@todonotes@toks@currentbackgroundcolor=\expandafter{\@todonotes@tmp}%
+    \edef\@todonotes@tmp{\@todonotes@currentbordercolor}%
+    \@todonotes@toks@currentbordercolor=\expandafter{\@todonotes@tmp}%
+    \edef\@todonotes@tmp{\@todonotes@currentleaderwidth}%
+    \@todonotes@toks@currentleaderwidth=\expandafter{\@todonotes@tmp}%
+    \@todonotes@toks@sizecommand=\expandafter{\@todonotes@sizecommand}%
+    \savebox\@todonotes@notetextbox{%
+        \@parboxrestore
+        \@marginparreset
+        \@todonotes@sizecommand\@todonotes@text%
+        \@minipagefalse
+        \outer@nobreak
+    }%
+    \if@todonotes@line%
+        \def\@todonotes@param@drawLeader{true}%
+    \else%
+        \def\@todonotes@param@drawLeader{false}%
+    \fi%
+    \if@todonotes@areaselected%
+        \def\@todonotes@param@noteType{area}%
+    \else%
+        \def\@todonotes@param@noteType{}%
+    \fi%
+    \directlua{luatodonotes.addNoteToList(\arabic{@todonotes@numberoftodonotes},%
+        \@todonotes@param@drawLeader,\luastringO{\@todonotes@param@noteType})}%
+}%
+\newcommand{\@todonotes@addElementToListOfTodos}{%
+    \if@todonotes@colorinlistoftodos%
+        \addcontentsline{tdo}{todo}{%
+            \fcolorbox{\@todonotes@currentbordercolor}%
+                {\@todonotes@currentbackgroundcolor}%
+                {\textcolor{\@todonotes@currentbackgroundcolor}{o}}%
+            \ \@todonotes@caption}%
+    \else%
+        \addcontentsline{tdo}{todo}{\@todonotes@caption}%
+    \fi}%
+\newcommand{\@todonotes@drawInlineNote}{%
+    {\par\noindent%
+        \@todonotes@before@tikzpict%
+        \begin{tikzpicture}[remember picture]%
+        \draw node[@todonotes@inlinenote,font=\@todonotes@sizecommand]{%
+            \if@todonotes@authorgiven%
+                {\noindent \@todonotes@sizecommand %
+                    \@todonotes@author:\,\@todonotes@text}%
+            \else%
+                {\noindent \@todonotes@sizecommand \@todonotes@text}%
+            \fi};%
+        \end{tikzpicture}%
+        \@todonotes@after@tikzpict%
+    \par}%
+    }%
+\newcommand{\missingfigure}[2][]{%
+\setkeys{todonotes}{#1}%
+\addcontentsline{tdo}{todo}{\@todonotes@MissingFigureText: #2}%
+\par
+\noindent
+\@todonotes@before@tikzpict%
+\begin{tikzpicture}
+\draw[fill=\@todonotes@currentfigcolor, draw = black!40, line width=2pt]
+    (-2, -2.5) rectangle +(\@todonotes@currentfigwidth, \@todonotes@currentfigheight);
+\draw (2, -0.3) node[right, text
+    width=\@todonotes@currentfigwidth-4.5cm] {#2};
+\draw[red, fill=white, rounded corners = 5pt, line width=10pt]
+    (30:2cm) -- (150:2cm) -- (270:2cm) -- cycle;
+\draw (0, 0.3) node {\@todonotes@MissingFigureUp};
+\draw (0, -0.3) node {\@todonotes@MissingFigureDown};
+\end{tikzpicture}\hfill
+\@todonotes@after@tikzpict%
+}% Ending \missingfigure command
+\fi% Ending \@todonotes@ifdisabled
+\newcommand{\todototoc}
+{
+    \if@todonotes@disabled
+    \else
+    \addcontentsline{toc}{\@ifundefined{chapter}{section}{chapter}}{\@todonotes@todolistname}
+    \fi
+}
+\newcommand{\todo}[2][]{\@bsphack\@todo[#1]{#2}\@esphack\ignorespaces}%
+\newcommand{\todoarea}[3][]{\@bsphack\@todoarea[#1]{#2}{#3}\@esphack}%
+\if@todonotes@disabled
+\else
+\AtBeginShipout{%
+    \@todonotes@AtBeginShipoutUpperLeft{
+        \@todonotes@writeNextpageToLpo
+        \checkoddpage%
+        \ifoddpageoroneside%
+            \@todonotes@currentsidemargin=\the\oddsidemargin%
+        \else%
+            \@todonotes@currentsidemargin=\the\evensidemargin%
+        \fi\relax%
+        \BeginCatcodeRegime\CatcodeTableLaTeX
+        \directlua{luatodonotes.calcLabelAreaDimensions()}%
+        \directlua{luatodonotes.calcHeightsForNotes()}% has to be outside of tikzpicture
+        \raisebox{\voffset}{%
+            \hspace{-\hoffset}%
+            \@todonotes@before@tikzpict%
+            \begin{tikzpicture}[remember picture,overlay]
+                \directlua{luatodonotes.getInputCoordinatesForNotes()}
+                \directlua{luatodonotes.printNotes()}
+            \end{tikzpicture}%
+            \@todonotes@after@tikzpict%
+        }%
+        \directlua{luatodonotes.clearNotes()}%
+        \EndCatcodeRegime
+    }%
+}
+\fi % Ending \@todonotes@ifdisabled
+\endinput
+%%
+%% End of file `luatodonotes.sty'.
