@@ -287,7 +287,7 @@
 \includecomment{preface}
 \includecomment{theendnotes}
 \includecomment{theapx}
-%%%%% the following four lines  yield the reader's version
+%%%%% the following four lines yield the reader's version
 % \excludecomment{preface}
 % \excludecomment{theendnotes}
 % \excludecomment{theapx}
@@ -297,7 +297,6 @@
 \begin{document}
 
 \begin{preface}
-
 
 \begin{center}
   \huge %
@@ -435,17 +434,18 @@
     Setchain: Improving Blockchain Scalability
     with Byzantine Distributed Sets and Barriers}
   }
-  for inclusion into a total order of blocks,   %
-  which typically implies (eventual) execution of its transactions.
+  for inclusion into a total order of blocks;   %
+  the latter typically implies (eventual) execution of %
+  the respective transactions.
 
   % Such “global” \Dag[s] will be the topic of the present paper,
   % referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]},
   % for short.
 
   The paper focuses on the general principle of heterogenization
-  of \Dag-based mempools
   and presents the general idea by means of a specific example,
-  which we dub \emph{Heterogeneous Narhwhal-Rider}, or \hnr for short.
+  namely \emph{Heterogeneous Narhwhal-Rider},
+  or \hnr for short. 
   Very much like Heterogeneous Paxos is a heterogeneous version of Lamport's
   Paxos,
   \hnr is a heterogeneous version of
@@ -484,14 +484,14 @@ So, are we presenting yet another \Dag-based consensus protocol?
 
 Clearly, the answer is no; the research is active,
 and somebody might be in the very process of writing a new one.
-The present paper is rather explains how to heterogenize one example of
+The present paper rather explains how to heterogenize one example of
 \Dag-based mempools;
 we believe that this process applies to the whole family of \Dag-based mempools,
-which shall dub \Dag-pools. 
+which we shall dub \Dag-pools. 
 So,
 for the sake of specificity,
 we use a mix of Narwhal and \Dag-rider as a first guinea pig, %
-leading up to the general principle of heterogenization.
+experimenting with the general principle of heterogenization.
 
 Along the way,
 we shall find out that heterogenization applies differently to questions of availability and integrity \cite{charlotte}:
@@ -626,7 +626,7 @@ first and foremost about liveness of sets of validators.\xspace%
 We start by fixing a finite set of \emph{learners} \(\Learners\); %
 each learner holds certain beliefs %
 and these beliefs impose restrictions on %
-the behavior of validators that is deemed possible.\xspace%
+the behavior of validators that is deemed (im-)possible.\xspace%
 \todo{%
   double check with Isaac %
   that it is safe to use the terms %
@@ -688,6 +688,7 @@ such that one of these quorums is live at all times %
 One might even go as far and ask learners to choose %
 a maximal set of quorums that is compatible with their beliefs; %
 however, %
+for the operational aspects of the protocol,
 all we need is a map from learners to sets of quorums. %
 
 Now, based on quorums systems, 
@@ -1008,13 +1009,14 @@ primaries never send messages or other direct signals to their workers.\xspace%
     its \emph{batch} and \emph{sequence number}. 
   \item[%
     \code{TxToAll}%
-    {Transaction broadcasting (\tx{}⇝\es{}⇒)}%
+    {Transaction broadcasting (\tx{}!\es{}⇒)}%
     ]%
     \xnote{%
       worker\\
       ⇒worker
     }%
-    Each received transaction request is broadcast to all mirror workers.
+    If a worker receives a transaction request, % 
+    it will broadcast a copy to all mirror workers.
     In principle,
     we could use arbitrary erasure coding schemes.
     However,
@@ -1380,7 +1382,7 @@ we shall treat first the special case at genesis
 and later describe the additional (re-)actions
 in the typical mode of operation. %
 The integrity protocol is described in between the two;
-after all, the two protocols are closely intertwined. 
+after all, the two protocols are closely intertwined.
 
 \subsection{Availability at genesis}
 \label{sec:avail-at-genes}
@@ -2431,3 +2433,7 @@ message synthesizer ref(s)
 
 
 
+Hi Isaac, 
+
+question in my head :
+can we separate out reliable broadcast , which seems to be happening in the availability protocol ? 
