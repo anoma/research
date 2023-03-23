@@ -1719,8 +1719,8 @@ consists of
 \item a list of worker hashes
 \item an availability certificate for the previous header of the same primary
 \item the round number 
-\item a non-empty\todo{discuss with isaac} list of signed quorums\todo{subject
-    to further conditions}.
+\item a non-empty\todo{discuss with isaac} list of signed quorums,
+  at most one per learner. 
 \end{itemize}
 The first two items were already present in genesis block headers
 while the remaining three only come into play in later rounds. 
@@ -1967,7 +1967,8 @@ All other responses to messages are verbatim the same as at genesis.
       the availability certificate of the previous header
       (collected by the same primary)
     \item
-      a list of hashes of signed quorums sent by the same primary
+      a non-empty list of hashes of signed quorums sent by the same primary,
+      but at most one per learner
       \todo{double check with isaac}
     \item the primary's round number, obtained by incrementing the round number
       of the block header that this referenced in the availability certificate. 
