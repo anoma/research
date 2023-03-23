@@ -145,7 +145,7 @@
 }
 \usetikzlibrary{patterns,intersections,calc}
 \newcommand{\qs}[1][~]{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[rectangle,
-,double,inner sep=.5pt,outer sep=0pt,fill=black] (theNode){\textcolor{white}{\footnotesize \bf q#1}};}
+,double,inner sep=.5pt,outer sep=0pt,fill=black] (theNode){\textcolor{white}{\footnotesize \bf q#1}};}%
 }
 \newcommand{\bk}[1][green!60!black]{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[regular polygon, regular polygon sides=6
 ,double,inner sep=.5pt,outer sep=0pt,fill=#1] (theNode){\textcolor{white}{\footnotesize \bf bk}};}}
@@ -159,7 +159,6 @@
     }}%
   {\tikz[baseline={([yshift=0pt]theNode.base)}]{
       \node[rectangle,double,inner sep=1.5pt,outer sep=0pt,double,draw] (theNode){\textcolor{black}{\footnotesize \bf HD}};
-     
     }}%
 }
 \newcommand{\wh}[1][ ]{%
@@ -933,10 +932,10 @@ or other direct signals to their workers.\xspace%
   \\
   double check ‼
 }
-\todo[inline,color=green!80!black]{
-  defer all the data structure talk to the section on 
-  message dependency management
-  Section/Appendix\ref{sec:mess-depend-manag}
+\todo[inline,color=green!80!black]{%
+  defer all the data structure talk to the section on %
+  message dependency management%
+  Section/Appendix\ref{sec:mess-depend-manag}%
 }
 \todo[inline,color=yellow!80!white]{
   \# issue:
@@ -1418,19 +1417,43 @@ For the availability protocol,
 we shall treat first the special case at genesis 
 and later describe the additional (re-)actions
 in the typical mode of operation. %
-The integrity protocol is described in between the two;
-after all, the two protocols are closely intertwined.
+The integrity protocol is described in between the two; %
+after all, the two protocols are closely intertwined.\xspace%
+\footnote{%
+  Specifically, %
+  the integrity protocol produces blocks, %
+  and signed quorums of these are necessary for block headers (after genesis); %
+  however, %
+  header announcement and signing are part of the availability protocol. %
+}
+
+In the protocol description for validators, %
+we avoid copying text if a message has several triggers
+by simply listing the alternative triggers of a message
+(after the ``default'' trigger).
+For the pure availability protocol for workers,
+this would lead to a single heading
+for worker hash forwarding.
+\begin{center}
+  \bf{Worker hash forwarding (\((\wh[] / \es)\)!\wh↑)}
+\end{center}
+So,
+the primary trigger for worker hash forwarding are worker hashes,
+but transaction copies are alternative triggers  %
+(in cases of message delay irregularities). %
 
 \subsection{Availability at genesis}
 \label{sec:avail-at-genes}
 
+
+
 \begin{description}
-\item[\code{WorkerHx}Worker hash reception (\wh←)]
+\item[\code{WorkerHx}Worker hash completion (\wh←)]
   \xnote{%
     primary\\
     ←worker
   }%
-  When a worker hash is received (that was compiled by a local worker) is received,
+  When a worker hash (that was compiled by a local worker) is received,
   the primary adds the worker hash to the current list of worker hashes \whs.
 
   \begin{description}
@@ -1503,15 +1526,15 @@ after all, the two protocols are closely intertwined.
 %   \end{description}
 
 
-\item[{\code{WorkerHx}Worker hash forward (\wh[]←)}]
+\item[{\code{WorkerHx}Worker hash reception (\wh[]←)}]
   \xnote{%
     primary\\
     ←worker
   }%
   When a worker hash that stems from a worker on a different validator is received, %
   the primary adds the worker hash to the current list of known worker hashes. %
-  Primaries keep a set of \emph{active} worker hashes for each validator %
-  and also a set of worker hash fingerprints. %
+  % Primaries keep a set of \emph{active} worker hashes for each validator %
+  % and also a set of worker hash fingerprints. %
 
   \begin{description}
   \item[{Header signature commitment (\wh[]!\(\hd_{\sim}\)→)}] %
@@ -1523,10 +1546,10 @@ after all, the two protocols are closely intertwined.
     the primary commits to the header by 
     signing the header
     and sending the signed header back to the creator of the header. %
-    We can now free the memory for the fingerprints \etc
-    (or wait until the certificate of availability has been received in response
-    to the commitment).
-    \todo{which one is the proper choice ?}
+    % We can now free the memory for the fingerprints \etc
+    % (or wait until the certificate of availability has been received in response
+    % to the commitment).
+    % \todo{which one is the proper choice ?}
   \end{description}
 
 
@@ -1543,7 +1566,7 @@ after all, the two protocols are closely intertwined.
 %   and sending the signed header to the creator
 %   (for the purpose of aggregation into availability certificates).
 
-\item[{Header announcement / signature request (\(\hd[]^*\)←)}] %
+\item[{Header announcement (\(\hd[]^*\)←)}] %
   \xnote{%
     primary\\
     ←primary
@@ -1551,6 +1574,9 @@ after all, the two protocols are closely intertwined.
   If the primary receives a header fingerprint from a another primary, %
   it is stored as long as the header might still be included into some learner-specific \Dag. %
   \todo{double check the ``livetime''}
+  We also elide to mention that each correct validator has to check whether the
+  received data are consistent with the local observations. 
+
   \begin{description}
   \item[{Header signature commitment (\(\hd[]^*!\hd_{\sim}\)→)}] %
     \xnote{%
@@ -1583,8 +1609,8 @@ after all, the two protocols are closely intertwined.
   \ie the certificate of availability. % 
 
   \begin{description}
-  \item[{Broadcasting the availability certificate%
-      \hdₚ!\ac⇒}
+  \item[{Availability certificate broadcast %
+      (\hdₚ!\ac⇒)}
     ]
     \xnote{primary\\
       ⇒primary
@@ -1658,7 +1684,7 @@ First off,\todo{mention the two ways of interleaving:\\
   - additional new data to be kept available
 }
 the integrity-protocol re-uses the sending of signed headers~\(\hdₚ\) to the creator
-(from the availability-protocol),
+(from the availability-protocol)
 as a commitment of the signer to
 one unique header for the  validator (and round),
 namely the first one signed and sent.
@@ -1678,14 +1704,16 @@ from the creator of the header (for the same round).
   vs. availability ⁈}
 
 The availability protocol for primaries will use
-counterparts to blocks in Narwhal, 
+counterparts to blocks in Narwhal~\cite{NT}, %
 which come with  references to a quorum of blocks,   
 namely \emph{learner-specific blocks} 
 and \emph{signed block quorums}, defined as follows:  
 a \emph{learner-specific block} is a block header signed by a learner-specific quorum
 and a \emph{signed quorum} is a quorum of blocks signed by a primary.
 Finally,
-a typical header (after genesis) consists of
+a \emph{typical header},
+\ie one after genesis,
+consists of
 \begin{itemize}
 \item the identifier of a primary 
 \item a list of worker hashes
@@ -1755,17 +1783,16 @@ learner-specific quorum of signatures,
   \end{description}
 
 \end{description}
-
 Note that there is no conceptual difference between
 the integrity protocol at genesis,
 compared to the typical case.
 The only difference is that headers need to carry 
-additional information, in general.
+additional information.
 Now, 
 we can finish the description of heterogeneous Narwhal,
-by filling in the of the availability-protocol
+by filling in the missing detail of the availability-protocol after genesis
 (see also \fig\ref{fig:data-structures},
-for the difference between headers at genesis and the typical phase).
+for the difference between headers at genesis and afterwards).
 \todo{we need to explain some place the difference in (possibly) using weak links }
 
 \begin{figure}[htb]
@@ -1873,8 +1900,11 @@ for the difference between headers at genesis and the typical phase).
   \label{fig:integrity-protocol}
 \end{figure}
 
-\subsection{Availability: the typical case for primaries}
-
+\subsection{Availability after genesis}
+The only additional message that we have to respond to
+are blocks. 
+All other responses to messages are verbatim the same as at genesis.
+\todo{double check}
 \todo[inline,caption={}]{%
     \begin{itemize}
     \item %
@@ -1883,7 +1913,6 @@ for the difference between headers at genesis and the typical phase).
       this is the \emph{primary round} 
     \end{itemize}
 }
-
 \endnote{%
   \emph{How do learner-specific blocks reference each other?} \\
   via a sequence of references to the previous header they are based on,
@@ -1900,9 +1929,9 @@ for the difference between headers at genesis and the typical phase).
     primary\\%
     ←primary%
   }
-  If a received learner-specific blocks completes a quorum of blocks
-  (for the same learner),
-  they all carry the same round number, 
+  If a received learner-specific blocks completes a quorum of block
+  (for the same learner)
+  and they all carry the same round number, 
   the primary signs and broadcasts the quorum 
   \emph{unless} 
   a signed quorum of a blocks of a higher round number has been broadcast already. 
@@ -1917,32 +1946,33 @@ for the difference between headers at genesis and the typical phase).
     }
     Under the stated conditions,
     the primary signs a list of quorums
-    (the order being the local order of reception). 
+    (in the order that they were received)
+    and broadcasts them to all primaries. % 
     \todo{do we have to ``throw in '' the round number (?)
       wouldn't hurt a lot, but if we don't need it, we don't need it ... 
     }
     \endnote{%
       What exactly is the connection to reliable broadcast here?
     }
-  \item[Header announcement ((\bk/\wh/\ac)!\(\hd^*\)⇒)]
+  \item[Header announcement (\((\bk/\wh/\ac)\)!\(\hd^*\)⇒)]
     If the primary has already enough worker hashes for a new block header, 
     it has an availability certificate of its previous header
     \todo{this should be the trigger for increasing the primaries round number}, 
     and the produced signed quorum the first one it knows of,
-    a new block header fingerprint is announced. 
-    In the typical phase,
+    a new block header is announced by broadcasting its fingerprint. 
+    After genesis, %
     a header carries two additional data items, namely
     \begin{itemize}
     \item
       the availability certificate of the previous header
-      of the header's creator/initiator
+      (collected by the same primary)
     \item
-      a list of hashes of the signed quorums sent by the same primary
-      
-    \item the validators round number, obtained by incrementing the round number
+      a list of hashes of signed quorums sent by the same primary
+      \todo{double check with isaac}
+    \item the primary's round number, obtained by incrementing the round number
       of the block header that this referenced in the availability certificate. 
     \end{itemize}
-    Other potential triggers are
+    Alternative triggers are
     \begin{itemize}
     \item a (first) worker hash arriving,
       in which case the header announcement includes the whole list of all
@@ -1950,7 +1980,7 @@ for the difference between headers at genesis and the typical phase).
     \item the availability certificate being the missing data,
       which then leads to all
       signed quorums (of maximal learner-specific heights),
-      and as many worker hashes as possible/allowed. 
+      and as many worker hashes as possible. 
     \end{itemize}
   \end{description}
 % \item[Generating and broadcasting signed quorums]
