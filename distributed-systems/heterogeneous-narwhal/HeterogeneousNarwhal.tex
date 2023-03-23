@@ -58,7 +58,8 @@
 \newcommand{\statetright}{\textsf{stateright}}
 \newcommand{\Statetright}{\textsf{Stateright}}
 \newcommand{\tla}[1][]{\textsc{tla}\ensuremath{{}^{+}}\xspace}
-
+\newcommand{\mev}{\textsc{mev}\xspace}
+\newcommand{\Mev}{\textsc{Mev}\xspace}
 \newcommand{\hnr}{\textsc{hnr}\xspace}
 \newcommand{\Hnr}{\textsc{Hnr}\xspace}
 \newcommand{\ptop}{\textsc{p\oldstylenums{2}p}}
@@ -868,37 +869,42 @@ validator:\(\left\{\begin{tikzpicture}[baseline={(q.north)},remember picture,ysc
 
 
 
-\section{Worker actions (availability protocol)}
+\section{Worker actions (availability and executability)}
 \label{sec:worker-actions}
 Every validator has the same number of workers.
 Thus,
 each worker can be assigned a unique \emph{mirror worker}
 on every other validator.
 We shall adopt the convention
-that mirror worker identifiers share the same subscript.
+that  identifiers of mirror workers share the same subscript.
 For example,
 in \fig\ref{fig:validators},
 workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
-Workers are mainly featuring in the availability protocol; %
-their role in the integrity protocol concerns ``mere bookkeeping'' only. % 
+Workers are mainly featuring in the availability protocol, %
+which keeps the transaction available until execution. % 
 Specifically,
 workers keep track of (batches of) transactions,
 their hashes,
 and erasure coding shares---which shall be trivial, along the lines
-of~\cite{NT}.
-The only information that workers provide to their primaries  %
-are hash references to transaction request data. %
+of Narwhal and Tusk~\cite{NT}.
+The core information that workers provide to their primaries  %
+are hash references to transaction request data, %
+besides consecutive batch numbers and some signatures. %
 In this way,
-we can save network bandwidth usage of primaries. %
+primaries can save network bandwidth usage. %
 Moreover,
 as a secondary principle, %
-primaries never send messages or other direct signals to their workers.\xspace%
+primaries do not send messages %
+or other direct signals to their workers.\xspace%
 \footnote{%
   However, %
   workers receive signals upon successful execution of transactions, 
-  which allows them to free up the transaction storage. 
+  which allows them to free up the transaction storage
+  by executor nodes.
 }%
-\todo{add some short discussion about executor nodes, \etc }
+\todo{add some short discussion about executor nodes, \etc \\
+  also: is executor node still the right terminology ? 
+}
 \endnote{%
   Sharing the round number is the point where
   one might be tempted to deviate from the principle that
@@ -906,28 +912,26 @@ primaries never send messages or other direct signals to their workers.\xspace%
   (\emph{qua validator} -- the executor nodes on a validator do talk back).
 }
 
-\subsection{Pre-execution protocol}
+\subsection{The pure availability protocol (pre-execution)}
 \label{sec:base-protocol}
-\todo[inline]{%
-  we need to ``announce'' headers
+\endnote{%
+  we now ``announce'' headers
   ---
   in contrast to what what is/was in the specs
   \tiny\tt(written March 7 2023, Tobias Heindel)
 }
-\todo[inline]{%
-  so, signed qourums are an ``output'' of the integrity protocol,
-  and need to be made available
-  (such that it is possible to create new headers).
-  NEEDS EXPLAIN
-}
 
-\todo[inline]{%
-  worker hashes also should include an availability certificate %
-  of the header creator's previous header %
+
+\todo{%
+  at some point we discussed that
+  \emph{worker hashes also should include an availability certificate %
+  of the header creator's previous header} %
   \\
   However,
-  as we now have the header announcement, 
-  one could logically move it to the primary's signature request ?
+  as we now have the header announcement, %
+  we have moved it to the primary's signature request
+  \\
+  double check ‼
 }
 \todo[inline,color=green!80!black]{
   defer all the data structure talk to the section on 
@@ -938,7 +942,8 @@ primaries never send messages or other direct signals to their workers.\xspace%
   \# issue:
   we are still missing information about 
   how long data has to be stored.
-  We might also want to defer this too
+  We might want to have some executor node protocol here,
+  deferring some details to 
   Section/Appendix\ref{sec:mess-depend-manag}
 }
 \begin{description}
@@ -975,17 +980,6 @@ primaries never send messages or other direct signals to their workers.\xspace%
     possibly involving more specifics from the \ptop layer.
   }
   \begin{description}
-  \item[\code{MessageEnum::TxAck}
-    Transaction request acknowledgment]
-    Optionally, %
-    one may acknowledge the client's requests. 
-    \todo[inline,color=SkyBlue]{%
-      In the
-      \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
-      {code},
-      we instantly acknowledge each received transaction
-      by sending a message back to the sender of the transaction request.
-    }
   \item[%
     \code{???}%
     {Transaction batching (\(\txs:= \txs:\tx\))}%
@@ -993,20 +987,27 @@ primaries never send messages or other direct signals to their workers.\xspace%
     \xnote{[worker]}%
     Every worker stores the received transaction request to %
     \emph{the} current batch \txs, %
-    which is essentially a (possibly empty) list of transaction requests. %
-    The worker adds the transaction request \tx to the current batch \txs. %
+    which is list of transaction requests. %
+    % The worker adds the transaction request \tx to the current batch \txs. %
     This happens unconditionally,
-    \ie there is always a unique current transaction batch \
+    \ie there is always a unique current transaction batch 
     and every transaction request has to be added to the current batch. %
     New batches may be created over time, %
-    but each batch in this ``stream'' of batches has a unique number.
+    but each batch in this ``stream'' of batches has a unique \emph{batch number}.
     Within a batch, %
-    transactions are assigned consecutive sequence numbers; %
-    the sequence number of a transaction is essentially the position in the
-    current batch. %
+    transactions are assigned consecutive {sequence numbers}: %
+    the \emph{sequence number} of a transaction is 
+    the position in the current batch. %
     Thus,
-    each transaction request to a fixed worker can by identified by
-    its \emph{batch} and \emph{sequence number}. 
+    each transaction request by identified by
+    its \emph{batch}, \emph{sequence number} and the worker \textsc{id};
+    we shall refer to this as the \emph{fingerprint} of the transaction
+    request.\xspace%
+    \footnote{%
+      The order of transactions within a batch %
+      might be permuted before execution %
+      to avoid potential \mev. 
+    }
   \item[%
     \code{TxToAll}%
     {Transaction broadcasting (\tx{}!\es{}⇒)}%
@@ -1027,8 +1028,8 @@ primaries never send messages or other direct signals to their workers.\xspace%
     from the “original” transaction supplied by the client, 
     using two different symbols, namely \tx\ and \es, respectively. %
     When broadcasting copies of received transaction requests,
-    the message also provides the current batch number and %
-    the sequence number of the transaction within this batch. %
+    the message also includes the fingerprint of the transaction request.
+    \todo{and possibly time stamping information}
   \item[%
     \code{WHxToAll,WorkerHx}%
     {Worker hash broadcast (\tx{!}\wh{}↑⇒)}%
@@ -1038,19 +1039,28 @@ primaries never send messages or other direct signals to their workers.\xspace%
       \\→ primary%
     }
     When a worker receives a transaction request,
-    this might trigger a new worker hash to be produced %
-    (if it is ``time''\xspace%
+    this might trigger a new worker hash to be produced. %
+    %(if it is ``time''    to do so).
+    In principle,
+    the decision for when to send it is for the worker to decide %  
+    (as long as each worker hash contains at least one transaction %
+    and does not exceed a potential maximum size).\xspace%
     \footnote{%
       \label{fn:time}
       At which exact moment worker hashes are compiled can depend on several
       factors, 
       \eg on a maximum number of transaction requests per worker hash 
       or a maximum delay between the first and the last transaction request within a worker hash.
-    }
-    to do so).
-    In principle,
-    it is up to the worker to decide,
-    as long as each worker hash contains at least one transaction. %
+    } %
+
+    {}\code{WorkerHashData,WorkerHashSignature}%
+    The new worker hash consists of
+    \begin{itemize}
+    \item the hash of the current batch \txs, %
+    \item the length of the current batch, %
+    \item the identifier of the current worker, %
+    \item a signature of the above data by the current worker. %
+    \end{itemize}
     The worker hash broadcast involves the following steps: %
     \begin{enumerate}
     \item broadcasting the new worker hash to mirror workers; %
@@ -1064,14 +1074,18 @@ primaries never send messages or other direct signals to their workers.\xspace%
         we notify workers for matters of executing at the level of single transactions
       }
     \end{enumerate}%
-    {}\code{WorkerHashData,WorkerHashSignature}%
-    The new worker hash consists of
-    \begin{itemize}
-    \item the hash of the current batch \txs, %
-    \item the length of the current batch, %
-    \item the identifier of the current worker, %
-    \item a signature of the above data by the current worker. %
-    \end{itemize}
+
+  \item[\code{MessageEnum::TxAck}
+    Transaction request acknowledgment]
+    Optionally, %
+    one may acknowledge the client's requests. 
+    \todo[inline,color=SkyBlue]{%
+      In the
+      \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
+      {code},
+      we instantly acknowledge each received transaction
+      by sending a message back to the sender of the transaction request.
+    }
   \end{description}
   \endnote{%
     If we want to perform proper erasure coding,
@@ -1089,20 +1103,20 @@ primaries never send messages or other direct signals to their workers.\xspace%
     worker\\
     ←worker
   }%
-  For the proper handling of transaction copies and worker hashes
+  \todo{move to appendix / message dependency managment:\\
+    For the proper handling of transaction copies and worker hashes
   of mirror workers,
   we keep for each mirror worker
   a set of \emph{active batch numbers}
   and a map from active batch numbers to
   a set of (ranges of) sequence numbers of received transactions in that batch,
   paired with a worker hash option,
-  depending on whether or not we have received the corresponding worker hash. 
-  \begin{description}
-  \item[Transaction storage] 
-    Upon receiving a transaction copy, %
-    the worker has to store the copy locally %
-    such that it can be retrieved quickly via
-    \begin{itemize}
+  depending on whether or not we have received the corresponding worker hash.
+  }
+  Upon receiving a transaction copy, %
+  the worker has to store the copy locally %
+  such that its hash can be retrieved quickly via its fingerprint, \ie
+  \begin{itemize}
     \item the \textsc{id} of the collecting worker, 
     \item the batch number of the batch to which it belongs, and
     \item the sequence number within the batch to which it belongs.
@@ -1113,6 +1127,7 @@ primaries never send messages or other direct signals to their workers.\xspace%
     for handling ``foreign'' worker hashes, %
     \ie worker hashes that refer to transactions that are collected at other
     workers. 
+    \begin{description}
 
   \item[\code{WHxFwd}{Worker hash forwarding (\es!\wh[]↑)}] 
     \xnote{%
@@ -1121,7 +1136,17 @@ primaries never send messages or other direct signals to their workers.\xspace%
     }
     In case, %
     the transaction was the last missing one to match a previously received worker hash, %
-    the worker hash is ``forwarded'' to its primary. %
+    the worker hash is send to its primary.
+    The (pre-)condition\xspace%
+    \todo{%
+      This terminology clashes. What else? 
+      ``triggering condition'' ?!
+    } is that all transactions that are referenced in the worker
+    hash have already been received and stored.\xspace%
+    \footnote{%
+      This might be unexpected order of events,
+      but the sending of transaction data might be ``delayed''. 
+    } 
   \end{description}
 
 % \item[Worker hash compilation (\wh)]
@@ -1163,15 +1188,21 @@ primaries never send messages or other direct signals to their workers.\xspace%
 
 \item[%
   \code{WHxToAll}%
-  Worker hash ({\wh[]←})%
+  Worker hash reception ({\wh[]←})%
   ]%
   \xnote{%
     worker\\%
     ← worker%
   }
-  When a worker receives a worker hash from a mirror worker, %
-  it updates the worker hash storage.
-
+  When a worker receives a worker hash from a mirror worker %
+  there are two cases:
+  either it has already has received all the referenced transaction copies
+  (and can forward the worker hash to its primary) 
+  or it has to store the worker hash
+  (and the worker hash forwarding will be triggered by the last transaction
+  copy).\endnote{%
+    Well, and how long are we gonna wait for missing transactions of worker hashes?
+  }
   \begin{description}
   \item[%
     \code{MessageEnum::WHxFwd}%
@@ -1179,19 +1210,19 @@ primaries never send messages or other direct signals to their workers.\xspace%
     ]
     \xnote{worker\\ → primary} 
     If a worker has already stored the transactions of a received worker hash, %
-    it “forwards” the worker hash to its primary.\footnote{%
+    it sends the worker hash to its primary.\footnote{%
       Validators will use this information
       to send availability commitments to block headers of other primaries.
     }
   \end{description}
 \end{description}
 
-Recall that we have emphasized what workers do in reaction to \emph{receiving}
-messages, %
-such that sending a message might be the final step of several, slightly
-different scenarios %
+We have described the protocol in terms of %
+what workers do in reaction to \emph{receiving} messages. %
+This emphasizes that sending a message might be due to several, slightly
+different types of scenarios %
 (depending of which message from a \emph{set} of triggering messages arrives
-last and thus becomes \emph{the} trigger). %
+last and thus becomes {the} final trigger). %
 
 
 \begin{figure}[htb]
@@ -1338,6 +1369,12 @@ last and thus becomes \emph{the} trigger). %
   \caption{The availability protocol in the genesis round}
   \label{fig:availability-protocol}
 \end{figure}
+\todo[inline]{%
+  so, signed qourums are an ``output'' of the integrity protocol,
+  and need to be made available
+  (such that it is possible to create new headers).
+  NEEDS EXPLAIN
+}
 \todo[caption={}]{%
   concerning ``triggering'' the header construction,
   there are the following points
@@ -1388,12 +1425,12 @@ after all, the two protocols are closely intertwined.
 \label{sec:avail-at-genes}
 
 \begin{description}
-\item[\code{WorkerHx}Worker hash arrival (\wh←)]
+\item[\code{WorkerHx}Worker hash reception (\wh←)]
   \xnote{%
     primary\\
     ←worker
   }%
-  When a worker hash (that was compiled by a local worker) is received,
+  When a worker hash is received (that was compiled by a local worker) is received,
   the primary adds the worker hash to the current list of worker hashes \whs.
 
   \begin{description}
