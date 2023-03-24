@@ -2170,6 +2170,17 @@ to storing all blocks until genesis
 
 \FloatBarrier
 
+\section{Comparison with Narwhal}
+\label{sec:comp-narwhal}
+Let us see how the special case of a single learner amounts to %
+a slightly more complicated version of Narwhal.
+For workers nothing really chances.
+Note that due to the restriction that a new block header %
+has to contain at least one signed quorum (and at most one),
+this means that every new header must contain a signed quorum;
+moreover,
+the signed quorum is a quorum of signatures for %
+a previous block of the unique learner. %
 
 
 
