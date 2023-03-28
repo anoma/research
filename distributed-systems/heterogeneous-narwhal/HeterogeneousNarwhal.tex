@@ -2170,6 +2170,37 @@ to storing all blocks until genesis
 
 \FloatBarrier
 
+\section{Transaction life cycle}
+\label{sec:trans-life-cycle}
+
+A transaction goes through the following ``stages''
+on the validator it is submitted to. 
+\begin{itemize}
+\item 
+  submission to a worker, received as \tx\gets
+\item 
+  the transaction gets assembled into a worker hash \wh
+\item
+  the worker hash is included into a block header \hd 
+\item
+  the block header is announced
+\item 
+  the block header is provably available
+\item
+  the block header has reached integrity 
+\item 
+  much later,
+  the block is part of a signed quorum 
+\item even later,
+  the block is on a path to a consensus commited block 
+\item
+  the block is scheduled for execution
+\item 
+  the transaction is requested by the execution engine
+\item
+  the transaction is provably executed % and goes to transaction Nirvana
+\end{itemize}
+
 \section{Comparison with Narwhal}
 \label{sec:comp-narwhal}
 Let us see how the special case of a single learner amounts to %
@@ -2512,7 +2543,3 @@ message synthesizer ref(s)
 
 
 
-Hi Isaac, 
-
-question in my head :
-can we separate out reliable broadcast , which seems to be happening in the availability protocol ? 
