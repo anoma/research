@@ -2173,33 +2173,55 @@ to storing all blocks until genesis
 \section{Transaction life cycle}
 \label{sec:trans-life-cycle}
 
-A transaction goes through the following ``stages''
-on the validator it is submitted to. 
+A transaction goes through the following stages, %
+first on the worker,
+then on the primary,
+finally off to execution.\xspace%
+\endnote{%
+  before going to bit Nirvana ...
+}
+In more detail, %
+on a ``sunny day'', %
+the progress towards execution, step by step, %
+is as follows: %
 \begin{itemize}
-\item 
-  submission to a worker, received as \tx\gets
-\item 
-  the transaction gets assembled into a worker hash \wh
 \item
-  the worker hash is included into a block header \hd 
+  submission to a worker, received as \tx←
 \item
-  the block header is announced
+  the transaction gets assembled into a batch
+  that is referenced by a worker hash, 
+  which in turn is sent to the primary
+  and received as \wh
+\item
+  the worker hash is included into a block header \hd
+\item
+  the block header is announced, received as \(\hd^*\)
+\item
+  the block header is provably available, 
+  via reception of enough header signatures \(\hdₚ\)
+\item
+  the block header has reached integrity,
+  via reception of enough header signatures \(\hdₚ\),
+  \ie the transaction is now referenced by 
+  a learner-specific block \bk
+\item
+  the block gets distributed
+\item
+  the block gets a quorum of signatures \qs
 \item 
-  the block header is provably available
+  eventually,\xspace%
+  \footnote{%
+    In fact, %
+    this is the crucial point (see also \ref{??}). %
+    % 
+  } 
+  the block gets commited
 \item
-  the block header has reached integrity 
-\item 
-  much later,
-  the block is part of a signed quorum 
-\item even later,
-  the block is on a path to a consensus commited block 
-\item
-  the block is scheduled for execution
-\item 
-  the transaction is requested by the execution engine
-\item
-  the transaction is provably executed % and goes to transaction Nirvana
+  the block containing the transaction gets executed. 
 \end{itemize}
+\todo{describe in more detail execution
+  ... once we have that fixed
+}
 
 \section{Comparison with Narwhal}
 \label{sec:comp-narwhal}
