@@ -253,13 +253,7 @@
 \usepackage{comment}
 %\includecomment{comment}
 
-\title{%
-  Heterogenizing \Dag-based consensus (1/\(n\)):
-  \\
-  heterogeneous narwhal-rider
-}
-\author{Typhon Team Heliax}
-\date{\today}
+
 
 \newcommand{\code}[2][ ]{%
   \makebox[0pt][r]{\tiny%
@@ -293,6 +287,15 @@
 % \excludecomment{theapx}
 % \renewcommand{\todo}[2][]{}
 % \renewcommand{\endnote}[2][]{}
+
+
+\title{%
+  Heterogenizing \Dag-based consensus (1/\(n\)):%
+  \\%
+  heterogeneous narwhal-rider
+}
+\author{Typhon Team Heliax}
+\date{\today}
 
 \begin{document}
 
@@ -410,26 +413,30 @@
 
 \begin{abstract}
   \noindent
-  Blockchains exhibit \emph{linear} structure
-  as each block has a unique reference to \emph{the} previous block.
-  If instead,
-  each block may reference \emph{several} previous blocks,
+  Blockchains exhibit \emph{linear} structure as %
+  each block has a unique reference to \emph{the} previous block. %
+  If instead, %
+  each block may reference \emph{several} previous blocks, %
   we can build a \emph{directed acyclic graph} (\Dag) of blocks.\xspace%
   \footnote{%
-    Note that this includes block chains as one particular case.
+    Note that this includes blockchains as one particular case.
   }
-  In fact,
-  such “block \Dag[s]” are the basic data structure that
-  several recent consensus protocols rely on,
-  \eg \Dag-rider, Bullshark, and Narwhal\&Tusk.\footnote{%
-    The respective references are,
+  In fact, %
+  such “block \Dag[s]” are the basic data structure that %
+  a whole family of consensus protocols relies on, %
+  namely \Dag-rider, Bullshark, and Narwhal\&Tusk.\xspace%
+  \footnote{%
+    The respective references for these papers are, %
+    \cite{DagRider}, %
+    \cite{Bullshark}, %
+    and \cite{NT}. %
   }
-  These protocols build
+  These protocols build %
   a growing “global” \Dag of transaction data such that%
   ---among other things---%
-  ① every validator's local view is a sub-\Dag of the “ideal” global \Dag and %
-  ② every block of the “ideal” \Dag is
-  \emph{logged}\endnote{%
+  ① every validator's local view is a sub-\Dag of \emph{the} ``global'' \Dag and %
+  ② every block of the “global” \Dag is \emph{logged}\xspace%
+  \endnote{%
     Logging is terminology borrowed from César Sanchez:
     he likes to talk about \emph{log-chain}s,
     or more verbose “mempool \emph{log system}”
@@ -437,43 +444,42 @@
     Setchain: Improving Blockchain Scalability
     with Byzantine Distributed Sets and Barriers}
   }
-  for inclusion into a total order of blocks;   %
-  the latter typically implies eventual execution of %
-  the respective transactions, %
+  for inclusion into a total order of blocks; %
+  the latter typically implies %
+  eventual execution of the respective transactions, %
   \ie we aim for inclusion fairness. %
 
-  % Such “global” \Dag[s] will be the topic of the present paper,
-  % referred to as {Mempool \Dag[s]}, or \emph{mem-\slshape\Dag[s]},
-  % for short.
-
-  The paper describes the general heterogenization process for a paradigmatic example,
-  which results in \emph{Heterogeneous Narhwhal-Rider},
+  The paper applies the general idea of heterogenization to the Narwhal mempool; %
+  we dub the resulting protocol \emph{Heterogeneous Narhwhal-Rider}, %
   or \hnr for short. 
-  Very much like Heterogeneous Paxos is 
-  a heterogeneous version of Lamport's Paxos,
-  \hnr is a heterogeneous version of
-  the Narwhal mempool, extended with a variation of \Dag-rider's weak links.
-  % In principle,
-  % Heterogeneous Narwhal\&Paxos  an alternative for bridges,
+  Like Heterogeneous Paxos is a heterogeneous version of Lamport's Paxos, %
+  \hnr is a heterogeneous version of   the Narwhal mempool, %
+  extended with a variation of \Dag-rider's weak links%
+  ---whence the name.\xspace%
   \todo[caption={}]{%
-    In a follow up paper,
-    we actually need to explain how heterogeneous Narwhal is \\
+    Add to the conclusion sth. like : 
+    \itshape In a follow up paper,
+    we will cover how heterogeneous Narwhal is \\
     1. an alternative to bridges    \\
     2. which benefits / drawback we have, in general\\
     3. which parts are “implementation detail”.\\
+    4. and also add {
+      what exactly we mean by \emph{eventual finality} of the mem-\Dag[s].
+    }
     cf. (on page~\pageref{page:firstpage}):
     \textsc{not} part of this paper ...
   }
-  % However,
-  % in the present paper,
-  % we focus on \emph{eventual finality} of the mem-\Dag[s].
-  We conclude with a discussion of how heterogenization is a suitable tool
-  for building essentially any eco-system
-  on the spectrum that interpolates
-  Vitalik's \texttt{cross-chain} and \texttt{multi-chain} worlds.\todo{put in proper term,
-    that iscompatible with the Vitalik\\
-    cf. Charlotte's ``let's avoid the one big chain'' ,
-    or, in other words, 
+  We conclude with a discussion of how heterogenization is %
+  a suitable tool for building essentially any eco-system on %
+  the spectrum that interpolates between %
+  Vitalik's {cross-chain} and {multi-chain} worlds.\xspace%
+  \todo{at the very end, %
+    review this sentence,
+    in particular the terms \texttt{cross-chain} and \texttt{multi-chain},
+    with some ETH maxi whether we
+    are in line with Vitalik's dichotomy\\
+    cf. Charlotte's ``let's avoid the one big chain'', or
+    in other words, 
     we do not even have to restrict to ledger technology
   }
 \end{abstract}
