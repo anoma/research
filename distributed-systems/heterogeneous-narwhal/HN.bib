@@ -74,3 +74,42 @@ series = {PODC '18}
 
   doi={10.1109/SP40001.2021.00087}
 }
+
+@inproceedings{Bullshark,
+author = {Spiegelman, Alexander and Giridharan, Neil and Sonnino, Alberto and Kokoris-Kogias, Lefteris},
+title = {Bullshark: DAG BFT Protocols Made Practical},
+year = {2022},
+isbn = {9781450394505},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3548606.3559361},
+doi = {10.1145/3548606.3559361},
+abstract = {We present Bullshark, the first directed acyclic graph (DAG) based asynchronous Byzantine Atomic Broadcast protocol that is optimized for the common synchronous case. Like previous DAG-based BFT protocols [19, 25], Bullshark requires no extra communication to achieve consensus on top of building the DAG. That is, parties can totally order the vertices of the DAG by interpreting their local view of the DAG edges. Unlike other asynchronous DAG-based protocols, Bullshark provides a practical low latency fast-path that exploits synchronous periods and deprecates the need for notoriously complex view-change and view-synchronization mechanisms. Bullshark achieves this while maintaining all the desired properties of its predecessor DAG-Rider [25]. Namely, it has optimal amortized communication complexity, it provides fairness and asynchronous liveness, and safety is guaranteed even under a quantum adversary.In order to show the practicality and simplicity of our approach, we also introduce a standalone partially synchronous version of Bullshark, which we evaluate against the state of the art. The implemented protocol is embarrassingly simple (200 LOC on top of an existing DAG-based mempool implementation). It is highly efficient, achieving for example, 125,000 transactions per second with a 2 seconds latency for a deployment of 50 parties. In the same setting, the state of the art pays a steep 50% latency increase as it optimizes for asynchrony.},
+booktitle = {Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security},
+pages = {2705–2718},
+numpages = {14},
+keywords = {consensus protocol, byzantine fault tolerant},
+location = {Los Angeles, CA, USA},
+series = {CCS '22}
+}
+
+@inproceedings{DagRider,
+author = {Keidar, Idit and Kokoris-Kogias, Eleftherios and Naor, Oded and Spiegelman, Alexander},
+title = {All You Need is DAG},
+year = {2021},
+isbn = {9781450385480},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3465084.3467905},
+doi = {10.1145/3465084.3467905},
+abstract = {We present DAG-Rider, the first asynchronous Byzantine Atomic Broadcast protocol that achieves optimal resilience, optimal amortized communication complexity, and optimal time complexity. DAG-Rider is post-quantum safe and ensures that all values proposed by correct processes eventually get delivered. We construct DAG-Rider in two layers: In the first layer, processes reliably broadcast their proposals and build a structured Directed Acyclic Graph (DAG) of the communication among them. In the second layer, processes locally observe their DAGs and totally order all proposals with no extra communication.},
+booktitle = {Proceedings of the 2021 ACM Symposium on Principles of Distributed Computing},
+pages = {165–175},
+numpages = {11},
+keywords = {quantum safe, asynchrony, byzantine smr, atomic broadcast},
+location = {Virtual Event, Italy},
+series = {PODC'21}
+}
+
+  
+
