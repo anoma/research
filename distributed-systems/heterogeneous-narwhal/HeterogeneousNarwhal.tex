@@ -138,8 +138,10 @@ dvipsnames,handout]{article}
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes,positioning,fit,backgrounds}
-\usetikzlibrary{shapes.geometric
-}
+%\usetikzlibrary{decorations.pathmorphing, decorations.pathreplacing, decorations.shapes, } 
+\usetikzlibrary{decorations}
+\usetikzlibrary {decorations.pathreplacing} % for braces
+\usetikzlibrary{shapes.geometric}
 \newcommand{\warningsign}{%
   % kudos to 
   % https://tex.stackexchange.com/questions/
@@ -256,9 +258,8 @@ dvipsnames,handout]{article}
 %\setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
 
 %https://tex.stackexchange.com/questions/425098/which-opentype-math-fonts-are-available
-\usepackage{comment}
-%\includecomment{comment}
-
+% \usepackage{comment}
+% \includecomment{comment}
 
 
 \newcommand{\code}[2][ ]{%
@@ -283,9 +284,9 @@ dvipsnames,handout]{article}
 }
 \newcommand{\hn}{Heterogeneous Narwhal\xspace}
 
-\usepackage[textsize=footnotesize]{./luatodonotes}%
+%\usepackage[textsize=footnotesize]{./luatodonotes}%
 % don't use \todo{...} in floats, i.e., figures etc. 
-%\usepackage{todonotes}%
+\usepackage{todonotes}%
 
 \newenvironment{preface}{}{}%think includecomment
 \newenvironment{theendnotes}{}{}%think includecomment
@@ -317,13 +318,15 @@ dvipsnames,handout]{article}
 %\tikzset{external/force remake}
 \begin{document}
 
-% \begin{figure}
-%   \centering
-%   \tikzsetnextfilename{testthis}
-%   \begin{tikzpicture}
-%     \node{a};
-%   \end{tikzpicture}
-% \end{figure}
+
+\begin{figure}
+  \centering
+  \tikzsetnextfilename{test-this}
+  \begin{tikzpicture}
+    \node{testthis};
+  \end{tikzpicture}
+\end{figure}
+
 
 \begin{preface}
 
@@ -435,6 +438,8 @@ dvipsnames,handout]{article}
 }
 \clearpage\cleardoublepage
 \end{preface}
+
+
 
 \maketitle
 
@@ -812,6 +817,7 @@ transfer to \hnr.
 }
 
 
+
 \section{Synopsis: %
   how to heterogenize  ``global'' DAGs
 }
@@ -861,82 +867,82 @@ sub-protocols.
 
 \todo[inline,caption={}]{probably move the below ``hidden material'' (see \TeX-source)
   to an earlier point (context)}
-\begin{comment}
-note that he term global is problematic insofar 
-as only a fictive omniscient observer
-that sees all blocks that some validator may know it.
-However,
-the global \dag is of intersubjective relevance,
-as every \emph{local} view of any validator
-is a sub-graph of the “global” \Dag.
-Put differently,
-all local \Dag[s] are expected to be consistent
-in the sense as it makes sense to talk about the union of the (logical) \dag[s]. 
+% \begin{comment}
+% note that he term global is problematic insofar 
+% as only a fictive omniscient observer
+% that sees all blocks that some validator may know it.
+% However,
+% the global \dag is of intersubjective relevance,
+% as every \emph{local} view of any validator
+% is a sub-graph of the “global” \Dag.
+% Put differently,
+% all local \Dag[s] are expected to be consistent
+% in the sense as it makes sense to talk about the union of the (logical) \dag[s]. 
 
-A block in the \Dag can be \emph{committed}
-using an arbitrary consensus algorithm
-if it is referenced by a weak quorum
-(from the next “layer” in the \Dag)
-in every local view of the consensus participants.
+% A block in the \Dag can be \emph{committed}
+% using an arbitrary consensus algorithm
+% if it is referenced by a weak quorum
+% (from the next “layer” in the \Dag)
+% in every local view of the consensus participants.
 
-An example of such a “global” \Dag
-is shown in \fig\ref{fig:blue_dag}.
-In the present paper,
-we describe a protocol for concurrent building
-of \emph{entangled} \Dag[s] for a whole ecosystem of different ledgers,
-in the spirit of a multi-chain world.
+% An example of such a “global” \Dag
+% is shown in \fig\ref{fig:blue_dag}.
+% In the present paper,
+% we describe a protocol for concurrent building
+% of \emph{entangled} \Dag[s] for a whole ecosystem of different ledgers,
+% in the spirit of a multi-chain world.
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=.95\linewidth]{./blue_dag.png}
-  \caption{A mem-\Dag (self-references omitted)}
-  \label{fig:blue_dag}
-\end{figure}
-
-
-\begin{figure}[htb]
-  \centering
-  \begin{tikzpicture}
-    \node[draw] (avl) {transaction data};
-
-    \node[draw,right=1ex of avl] (dag) {``causal'' \Dag structure};
-    \begin{pgfonlayer}{background}
-    \node (x) [fill=lightgray,fit=(avl)(dag)] {};
-  \end{pgfonlayer}
-  \node[above=2ex of x,draw,double] {uniqueness of headers};
-\end{tikzpicture}\makebox[0pt][r]{\Large \bf \color{blue} make this Fig. something that actually helps (or delete)} \protect\todo{where to put the signed quorums ?!}
-  \caption%
-  [Interdependence of availability and integrity]%
-  {Illustration of
-    the interdependence of the availability and
-    integrity protocols}
-  \label{fig:availability-n-integrity}
-\end{figure}
+% \begin{figure}[htb]
+%   \centering
+%   \includegraphics[width=.95\linewidth]{./blue_dag.png}
+%   \caption{A mem-\Dag (self-references omitted)}
+%   \label{fig:blue_dag}
+% \end{figure}
 
 
+% \begin{figure}[htb]
+%   \centering
+%   \begin{tikzpicture}
+%     \node[draw] (avl) {transaction data};
 
-Roughly, we have two complementary protocols running concurrently:
- \begin{enumerate}
- \item the availability protocol; and
- \item the integrity protocol.
- \end{enumerate}
- The availability protocol makes sure
- that transaction data is available
- as long as necessary;\footnote{%
-   There is some fine print concerning
-   the conditions under which this is actually the case.
- }
- moreover,
- the availability protocol
- is tasked with keeping available
- the \emph{signed headers},
- \todo{explain \texttt{signed headers}}
- which the integrity protocol produces.
+%     \node[draw,right=1ex of avl] (dag) {``causal'' \Dag structure};
+%     \begin{pgfonlayer}{background}
+%     \node (x) [fill=lightgray,fit=(avl)(dag)] {};
+%   \end{pgfonlayer}
+%   \node[above=2ex of x,draw,double] {uniqueness of headers};
+% \end{tikzpicture}\makebox[0pt][r]{\Large \bf \color{blue} make this Fig. something that actually helps (or delete)} \protect\todo{where to put the signed quorums ?!}
+%   \caption%
+%   [Interdependence of availability and integrity]%
+%   {Illustration of
+%     the interdependence of the availability and
+%     integrity protocols}
+%   \label{fig:availability-n-integrity}
+% \end{figure}
 
- The integrity protocol makes sure that
- each validator can only produce one block in each of its (local) rounds.
 
-\end{comment}
+
+% Roughly, we have two complementary protocols running concurrently:
+%  \begin{enumerate}
+%  \item the availability protocol; and
+%  \item the integrity protocol.
+%  \end{enumerate}
+%  The availability protocol makes sure
+%  that transaction data is available
+%  as long as necessary;\footnote{%
+%    There is some fine print concerning
+%    the conditions under which this is actually the case.
+%  }
+%  moreover,
+%  the availability protocol
+%  is tasked with keeping available
+%  the \emph{signed headers},
+%  \todo{explain \texttt{signed headers}}
+%  which the integrity protocol produces.
+
+%  The integrity protocol makes sure that
+%  each validator can only produce one block in each of its (local) rounds.
+
+% \end{comment}
 
 
 
@@ -948,12 +954,14 @@ Roughly, we have two complementary protocols running concurrently:
  each validator has a unique \emph{primary} and %
  a number of \emph{workers} %
  (see \fig\ref{fig:validators}).
-\begin{figure}[htb]
-  \centering
 
-  validator:\(\left\{%
-    \begin{tikzpicture}[baseline={(p.south)},remember picture]
-    \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
+
+
+\begin{figure}[htb]
+  \centering%\footnotesize
+    \tikzsetnextfilename{scale_out_narwhal_architecture}
+  \begin{tikzpicture}[baseline={(p.south)},xscale=.9]
+  \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
     \foreach \i in {1,...,10}{
       \coordinate (p_\i) at  (p.160+20*\i);
     }
@@ -963,43 +971,37 @@ Roughly, we have two complementary protocols running concurrently:
     }
     \begin{pgfonlayer}{background}
       \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(w_1.south west)(w_10.south east)(p)] {};
+      \draw[decorate,decoration={brace},thick] (background.north east)   -- node[anchor=base west] {~validator}(background.south east);
     \end{pgfonlayer}
-  \end{tikzpicture}\right.\)
-\vspace{4ex}
-
-\tikz[remember picture]{\node[rectangle,fill=gray,draw] (c) {client};}\hfill~\\
-
-\vspace{4ex}
-
-validator:\(\left\{%
-  \begin{tikzpicture}[baseline={(q.north)},remember picture,yscale=-1]
-    \node[circle,draw,inner sep=1.5ex] (q) at (5.5,1.2) {q};
-    \foreach \i in {1,...,10}{
-      \coordinate (q_\i) at  (q.200-20*\i);
-    }
-    \foreach \i in {1,...,10}{
-      \node[rectangle,fill=lightgray](v_\i) at (\i,0){\(v_{\i}\)};
-      \draw[->] (v_\i.south) .. controls +(0,.2) .. (q_\i);
-    }
-    \begin{pgfonlayer}{background}
-      \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(v_1.north west)(v_10.north east)(q)] {};
-    \end{pgfonlayer}
-    % --------------------------------------------------------------------------------
-    \begin{scope}[overlay,thick]
-          \foreach \j in {1,...,10}
-    \draw[<->] (v_\j) -- (w_\j);
-
-    \draw[<->] (c.-15) .. controls +(2,0) and +(-1,-1) .. (v_3.north west);
-    \draw[<->] (c.15) .. controls +(2,0) and +(-1,1).. (w_7.south west);
-    \draw[<->] (p) -- (q);
+    %%% 
+    \begin{scope}[shift={(0,-2)},yscale=-1]
+      \node[circle,draw,inner sep=1.5ex] (q) at (5.5,1.2) {q};
+      \foreach \i in {1,...,10}{
+        \coordinate (q_\i) at  (q.200-20*\i);
+      }
+      \foreach \i in {1,...,10}{
+        \node[rectangle,fill=lightgray](v_\i) at (\i,0){\(v_{\i}\)};
+        \draw[->] (v_\i.south) .. controls +(0,.2) .. (q_\i);
+      }
+      \begin{pgfonlayer}{background}
+        \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(v_1.north west)(v_10.north east)(q)] {};
+        \draw[decorate,decoration={brace},thick] (background.north east)   -- node[anchor=base west] {~validator}(background.south east);
+      \end{pgfonlayer}
     \end{scope}
-  \end{tikzpicture}%
-\right.\)
+    \path (w_1) -- (v_1) coordinate[pos=.5](zzz);
+    \node[rectangle,fill=gray,draw,anchor=east] (c) at ([xshift=-7ex]zzz) {client};
+    \begin{scope}[thick]
+      \foreach \j in {1,...,10}
+      \draw[<->] (v_\j) -- (w_\j);
+
+      \draw[<->,dashed] (c.-15) .. controls +(2,0) and +(-1,1) .. (v_5.north west);
+      \draw[<->,dashed] (c.15) .. controls +(2,0) and +(-1,-1).. (w_7.south west);
+      \draw[<->,double] (p) -- (q);
+    \end{scope}
+   \end{tikzpicture}%
   \caption{The structure and communication patterns of validators}
   \label{fig:validators}
 \end{figure}
-
-
 
 
 \section{Worker actions (availability and executability)}
@@ -1819,6 +1821,7 @@ as explained next.
 
 \FloatBarrier
 
+
 \subsection{Integrity: the general case at once}
 \label{sec:integr-gener-case}
 First off,\todo{mention the two ways of interleaving:\\
@@ -2181,6 +2184,7 @@ casting an availability vote / sending a commitment message
 becomes a recursive commitment
 to storing all blocks until genesis
 (or the last block that some of learners might still want availabl).
+
 
 \section{Data structures}
 
