@@ -1,4 +1,6 @@
-\documentclass[dvipsnames,handout]{article}
+\documentclass[%
+dvipsnames,handout]{article}
+\usepackage{shellesc}%← for luatex to work with shell escape properly 
 \usepackage{manfnt}
 \usepackage[english]{babel}
 \usepackage{flowchart}
@@ -73,9 +75,13 @@
 \newcommand{\Eg}[1][, ]{\emph{E.g.}#1}
 \newcommand{\etc}[1][ ]{\emph{etc.}\xspace}
 \newcommand{\fig}[1][]{Fig.~}
-\newcommand{\Learners}{%
+\newcommand{\Accs}{%
+  % the set of acceptors
+  \mathbb{A}
+}
+\newcommand{\Lrnrs}{%
   % the set of learners
-  \ensuremath{L}
+  \mathbb{L}
 }
 \newcommand{\Q}[1]{%
   % trust live
@@ -276,11 +282,17 @@
   {\marginnote{\oldendnote[#1]{#2}}}%
 }
 \newcommand{\hn}{Heterogeneous Narwhal\xspace}
-\usepackage[textsize=footnotesize]{./luatodonotes}%\usepackage{todonotes}%
+
+\usepackage[textsize=footnotesize]{./luatodonotes}%
+% don't use \todo{...} in floats, i.e., figures etc. 
+%\usepackage{todonotes}%
 
 \newenvironment{preface}{}{}%think includecomment
 \newenvironment{theendnotes}{}{}%think includecomment
 \newenvironment{theapx}{}{}%think includecomment
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% the following four lines yield the reader's version
 % \excludecomment{preface}
 % \excludecomment{theendnotes}
@@ -297,7 +309,21 @@
 \author{Typhon Team Heliax}
 \date{\today}
 
+
+% \tikzset{external/export=false}
+\usetikzlibrary{external}
+\tikzexternalize % activate!
+\tikzset{external/only named=true}%important for todonote
+%\tikzset{external/force remake}
 \begin{document}
+
+% \begin{figure}
+%   \centering
+%   \tikzsetnextfilename{testthis}
+%   \begin{tikzpicture}
+%     \node{a};
+%   \end{tikzpicture}
+% \end{figure}
 
 \begin{preface}
 
@@ -409,6 +435,7 @@
 }
 \clearpage\cleardoublepage
 \end{preface}
+
 \maketitle
 
 \begin{abstract}
@@ -484,20 +511,24 @@
   }
 \end{abstract}
 
+
 \tableofcontents
 
 \section{Introduction}
 Directed acyclic graphs feature in % 
-several recently proposed consensus protocols \cite{}.\todo{→isaac?: 
+several recently proposed consensus protocols
+\cite{NT,DagRider,Bullshark}.\xspace%
+\todo{→isaac?: 
   which ones should I add here?
-} %
-So, are we presenting yet another \Dag-based consensus protocol?
+} 
+So, do we want to add just yet another \Dag-based consensus protocol?
 
-Clearly, the answer is no; the research field being extremely active,
+The authors' answer is a crisp \emph{No!} %
+The research field being extremely active,
 chances are somebody is in the very process of writing a new \Dag-based
 consensus protocol.
 The present paper rather explains how to heterogenize existing protocols,
-using one paradigmatic example.\footnote{
+starting with one paradigmatic example.\footnote{
   We are confident that the heterogenization process applies to the whole family of \Dag-based mempools.
   %which we shall dub \Dag-pools. 
 }
@@ -522,102 +553,113 @@ we shall find out that heterogenization applies differently to questions of avai
   \end{minipage}\\[\baselineskip]
 }
 
+
 \section{Context}
 \label{sec:context}
 \todo[inline,caption={}]{.. a little bit of story telling, providing enough context and
   examples such that the reader can picture instances of the abstract concepts
   to be described %
   \begin{itemize}
-  \item integrity vs.\ availability
+  \item integrity vs.\ availability  (Some quotes from Charlotte in the endnotes.)
+    \endnote{
+      Some quotes from Charlotte:
+      \begin{quote}
+        different observers have their own
+        beliefs about who might fail, and how
+        \\…\\
+        Blockchain applications implemented on Charlotte can
+        refer to each other’s blocks
+        \\…\\
+        new mechanisms for \emph{entanglement} of different block histories
+        \\…\\
+        least
+        ordering principle: only that which must be ordered, should be ordered
+        \\…\\
+        Authenticated Distributed Data Structure (ADDSs)
+        \\…\\
+        Charlotte ADDSs form the \emph{blockweb}
+        \\…\\
+        any \emph{observer} can specify their own threat model: %
+        the failures they believe the system should securely tolerate. %
+        \\…\\
+        As a new abstraction layer, Charlotte specifies rules for formatting blocks, referencing
+        blocks, and transmitting blocks across the network, and it also offers a formal model for reasoning
+        about data integrity and availability.
+        \\…\\
+        Users can express their assumptions about server behavior (including possible failures)
+        \\…\\
+        Charlotte to serve as a […] general ADDS framework
+        \\…\\
+        Charlotte ADDSs can \emph{intersect}, or share blocks
+        \\…\\
+        “what is the least ordering we actually need?”
+        \\…\\
+        Charlotte provides a common framework for data structures from separate
+        services to \ul{reference each other}.
+        \\…\\
+        Charlotte data structures are naturally composable: the \emph{union} of two data structures is itself a
+        data structure
+        \\…\\
+        the \emph{intersection} of two data
+        structures comprises the data that is part of both structures. We can think of \ul{cross-shard} transactions
+        appended to a sharded blockchain ADDS as data in the intersection of multiple shard ADDSs.
+      \end{quote}
+    }%
   \item ``learner-graph'' jazz
   \end{itemize}
-  Some quotes from Charlotte\endnote{
-    Some quotes from Charlotte in the endnotes
-      \begin{quote}
-    different observers have their own
-    beliefs about who might fail, and how
-    \\…\\
-    Blockchain applications implemented on Charlotte can
-    refer to each other’s blocks
-    \\…\\
-    new mechanisms for \emph{entanglement} of different block histories
-    \\…\\
-    least
-    ordering principle: only that which must be ordered, should be ordered
-    \\…\\
-    Authenticated Distributed Data Structure (ADDSs)
-    \\…\\
-    Charlotte ADDSs form the \emph{blockweb}
-    \\…\\
-    any \emph{observer} can specify their own threat model: %
-    the failures they believe the system should securely tolerate. %
-    \\…\\
-    As a new abstraction layer, Charlotte specifies rules for formatting blocks, referencing
-    blocks, and transmitting blocks across the network, and it also offers a formal model for reasoning
-    about data integrity and availability.
-    \\…\\
-    Users can express their assumptions about server behavior (including possible failures)
-    \\…\\
-    Charlotte to serve as a […] general ADDS framework
-    \\…\\
-    Charlotte ADDSs can \emph{intersect}, or share blocks
-    \\…\\
-    “what is the least ordering we actually need?”
-    \\…\\
-    Charlotte provides a common framework for data structures from separate
-    services to \ul{reference each other}.
-    \\…\\
-    Charlotte data structures are naturally composable: the \emph{union} of two data structures is itself a
-    data structure
-    \\…\\
-    the \emph{intersection} of two data
-    structures comprises the data that is part of both structures. We can think of \ul{cross-shard} transactions
-    appended to a sharded blockchain ADDS as data in the intersection of multiple shard ADDSs.
-  \end{quote}
-  }%
+  The full details are deferred,
+  \eg to the preliminaries. 
 }
 
 
 
-We want to establish a way of thinking that puts  %
-seemingly opposing views, such as multi-chain vs.\ cross-chain world, 
-on gradual spectrum. %
-We have also some specific goals, 
-which are qualitative: 
-\begin{itemize}
+We want to establish a way of thinking that reconciles  %
+seemingly opposing views, such as multi-chain vs.\ cross-chain world, %
+such that they spawn a gradual spectrum of which they are the end points. % 
+Besides this general idea, %
+we also pursue some specific \emph{qualitative} goals: %
+\begin{itemize} %
+  
 \item everyone should be able to  interact with any number of \base[s] of the ecosystems, %
   and %
 \item there is a unique definitive state of every \base.
 \end{itemize}
-
+In technical terms, %
+the person or service that acts or is inquiring the sate of the \base[s]
+is called a \emph{learner}. % 
 One good example of learners are \emph{executor nodes} %
 \cite{anoma_specs}\todo{%
   check / update link, % 
   \href{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}{execution} %
 }, %
-which are in charge of updating the state of one or several \base. %
-
+which are in charge of updating the state of one or several \base %
+according to a specific transaction that has been ordered by consensus. % 
 
 For technical considerations,
-the main points (for validators and/or executors) are
+the main points for validators are the following:
 \begin{itemize}
-\item they can participate in the production of as many \base[s] as they want
-\item as long as they keep a record of relevant %
+\item %
+  they can participate in the production of blocks for %
+  as many \base[s] as they want %
+\item %
+  as long as they keep a record of relevant %
   transaction data or the ensuing state changes. %
 \end{itemize}
-
 The latter point roughly corresponds to the availability protocol %
-while the former is mainly features in the integrity layer. % 
+while the former is mainly features in the integrity layer. %
 \todo{discuss the general set up of the execution engine / executor nodes:
   these are the prime examples of learners we ``have to'' care about
 }
+Let us now look at turn to a concise recapitulation of the involved concepts. %
+
 
 \section{Preliminaries}
 \label{sec:preliminaries}
-We start with a short review of the central concepts and definitions 
-that we rely on in our description of the \hnr protocol.
+We now describe the central concepts %
+that we rely on in our description of the \hnr protocol %
+and provide formal definitions. %
 Moreover,
-we also discuss the preliminaries for \hnr's salient properties. 
+we also introduce additional terminology to be able to describe \hnr's salient properties. % 
 
 \todo[inline,caption={}]{%
   ``copy'' relevant parts of %
@@ -630,8 +672,9 @@ we also discuss the preliminaries for \hnr's salient properties.
   \end{itemize}
 }
 
-\subsection{Quorums: learner-specific, global, and universal}
-\label{sec:core-defs}
+
+\subsection{Opinions about quorums: learner-specific and global}
+\label{sec:quorum-sets}
 
 The \hnr protocol is designed to take into account learner-specific assumptions, %
 first and foremost about liveness of sets of validators.\xspace%
@@ -639,7 +682,7 @@ first and foremost about liveness of sets of validators.\xspace%
   The terminology about trust assumptions was introduced %
   already for Heterogeneous Paxos \cite{opodis20HPaxos}. %
 } %
-We start by fixing a finite set of \emph{learners} \(\Learners\); %
+We start by fixing a finite set of \emph{learners} \(\Lrnrs\); %
 each learner holds certain beliefs %
 and these beliefs impose restrictions on %
 the behavior of validators that is deemed (im-)possible.\xspace%
@@ -690,7 +733,6 @@ such that one of these quorums is live at all times %
 
 
 
-
 \begin{definition}[Learner-specific quorum system]
   \label{def:trustlive}
   A \emph{learner-specific quorum system} is a function from 
@@ -718,18 +760,46 @@ then one copy should be available %
   A \emph{global weak quorum} is %
   a set of validators \(X\) that is a weak quorum for each learner, %
   i.e., 
-  for every learner~\(a ∈ \Learners\) and %
+  for every learner~\(a ∈ \Lrnrs\) and %
   all learner-specific quorums \(qₐ ∈ \Q{a}\), %
   we have a non-empty intersection \(X ∩ qₐ ≠ ∅\). %
 \end{definition}
+Finally, %
+we make the simplifying assumption %
+that learners agree with us on the following two points:
+\begin{enumerate}
+\item there is a common set of acceptors \(\Accs\),
+  obtained as the union of the (unions of the) learner-specific quorums and that  
+\item 
+  w.l.o.g.\ we can assume that %
+  \(qₐ ∈ \Q{a}\) and \(x ∈ \Accs\) %
+  imply \(qₐ \cup \{x\} ∈ \Q{a}\). %
+\end{enumerate}
+For the second point, %
+the reasoning is that if the larger set \(qₐ \cup \{x\}\) is live, %
+then in particular the ``original'' quorum \(qₐ\) must be live. %
+\endnote{%
+  Probably we don't need universal quorums. % 
+  \begin{minipage}[t][\arraycolsep][t]{1.0\linewidth}
+    \begin{definition}[Universal Quorum]
+      \label{def:universal-quorum}
+      A \emph{universal quorum} is a set of quorums
+      that contains at least one learner-specific quorum for each learner.
+    \end{definition}
+  \end{minipage}
+  Or, do we?
+}
+
+\subsection{Opinions about safety: single learner point of view}
+\label{sec:asymmetric-safety}
+Besides assumptions about liveness
+we also require assumptions about safety, %
+which we need later to describe how and under which conditions %
+the \Dag properties of the Narwhal protocol %
+transfer to \hnr. 
 
 
-\todo{explain where we need universal quorums}%
-\begin{definition}[Universal Quorum]
-  \label{def:universal-quorum}
-  A \emph{universal quorum} is a set of quorums
-  that contains at least one learner-specific quorum for each learner.
-\end{definition}
+
 
 \subsection{Discussion of desirable properties}
 \label{sec:property-discussion}
@@ -867,6 +937,10 @@ Roughly, we have two complementary protocols running concurrently:
  each validator can only produce one block in each of its (local) rounds.
 
 \end{comment}
+
+
+
+
 \section{Architecture and communication patterns}
 \label{sec:communication-patterns}
  \Hnr incorporates Narwhal's~\cite{NT}
@@ -877,7 +951,8 @@ Roughly, we have two complementary protocols running concurrently:
 \begin{figure}[htb]
   \centering
 
-validator:\(\left\{\begin{tikzpicture}[baseline={(p.south)},remember picture]
+  validator:\(\left\{%
+    \begin{tikzpicture}[baseline={(p.south)},remember picture]
     \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
     \foreach \i in {1,...,10}{
       \coordinate (p_\i) at  (p.160+20*\i);
@@ -896,7 +971,8 @@ validator:\(\left\{\begin{tikzpicture}[baseline={(p.south)},remember picture]
 
 \vspace{4ex}
 
-validator:\(\left\{\begin{tikzpicture}[baseline={(q.north)},remember picture,yscale=-1]
+validator:\(\left\{%
+  \begin{tikzpicture}[baseline={(q.north)},remember picture,yscale=-1]
     \node[circle,draw,inner sep=1.5ex] (q) at (5.5,1.2) {q};
     \foreach \i in {1,...,10}{
       \coordinate (q_\i) at  (q.200-20*\i);
@@ -917,7 +993,8 @@ validator:\(\left\{\begin{tikzpicture}[baseline={(q.north)},remember picture,ysc
     \draw[<->] (c.15) .. controls +(2,0) and +(-1,1).. (w_7.south west);
     \draw[<->] (p) -- (q);
     \end{scope}
-  \end{tikzpicture}\right.\)
+  \end{tikzpicture}%
+\right.\)
   \caption{The structure and communication patterns of validators}
   \label{fig:validators}
 \end{figure}
@@ -1425,12 +1502,15 @@ last and thus becomes {the} final trigger). %
   \caption{The availability protocol in the genesis round}
   \label{fig:availability-protocol}
 \end{figure}
+
+
 \todo[inline]{%
   so, signed qourums are an ``output'' of the integrity protocol,
   and need to be made available
   (such that it is possible to create new headers).
   NEEDS EXPLAIN
 }
+
 \todo[caption={}]{%
   concerning ``triggering'' the header construction,
   there are the following points
@@ -1459,6 +1539,9 @@ last and thus becomes {the} final trigger). %
   it is natural to collect signatures for the availability certificate
   on a “first come, first served” basis
 }
+
+
+
 
 \subsection{Execution support protocol}
 \label{sec:exe-supp-protocol}
@@ -1499,8 +1582,10 @@ the primary trigger for worker hash forwarding are worker hashes,
 but transaction copies are alternative triggers  %
 (in cases of message delay irregularities). %
 
+
 \subsection{Availability at genesis}
 \label{sec:avail-at-genes}
+
 
 
 
@@ -1852,6 +1937,7 @@ by filling in the missing detail of the availability-protocol after genesis
 for the difference between headers at genesis and afterwards).
 \todo{we need to explain some place the difference in (possibly) using weak links }
 
+
 \begin{figure}[htb]
   \centering
   \tikzstyle{every node}+=[outer sep=0pt,inner sep=1pt]
@@ -1945,9 +2031,6 @@ for the difference between headers at genesis and afterwards).
       \draw (BlueBlocks.east) -- (qs\p);
     }
   \end{tikzpicture}%
-    \todo{for cooler patternage
-      \url{https://tex.stackexchange.com/questions/597172/tikz-set-the-line-width-of-the-pattern}
-    }
   }
   \caption[Integrity protocol]{%
     The integrity protocol (on the left)
@@ -1956,6 +2039,9 @@ for the difference between headers at genesis and afterwards).
   %
   \label{fig:integrity-protocol}
 \end{figure}
+\todo{for cooler patternage in Figure~\ref{fig:integrity-protocol}
+ \url{https://tex.stackexchange.com/questions/597172/tikz-set-the-line-width-of-the-pattern}
+ }
 
 \subsection{Availability after genesis}
 The only additional message that we have to respond to
@@ -2504,9 +2590,10 @@ the triggered effect result in triggering new effects. %
   filling descriptions of message dependencies
 }
 
+
 \begin{figure}[htb]
   \centering
-    \begin{tikzpicture}[>=latex',font={\sf \footnotesize}]
+  \begin{tikzpicture}[>=latex',font={\sf \footnotesize}]
       \def\smbwd{2cm}
       \node (terminal1) at (0,0) [draw, terminal,
       minimum width=\smbwd,
