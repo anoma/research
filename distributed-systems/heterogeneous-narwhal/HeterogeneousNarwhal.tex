@@ -1,5 +1,5 @@
 \documentclass[%
-dvipsnames,handout]{article}
+dvipsnames,handout,draft]{article}
 \usepackage{shellesc}%← for luatex to work with shell escape properly 
 \usepackage{manfnt}
 \usepackage[english]{babel}
@@ -89,6 +89,11 @@ dvipsnames,handout]{article}
   % trust live
   Q_{#1}%
 }
+\newcommand{\q}[2][]{%
+  % a quorum of learner a
+  q#1_{#2}%
+}
+
 \newcommand{\rough}[1][ ]{%
   %\fbox{\color{blue!70!black}!!}%
   \ifthenelse{\equal{#1}{ }}%
@@ -329,11 +334,9 @@ dvipsnames,handout]{article}
 %     \node{testthis};
 %   \end{tikzpicture}
 % \end{figure}
-% \end{document}
 % **********************************************************************
 
 \begin{preface}
-
 \begin{center}
   \huge%
   notes to prospective co-authors, %
@@ -402,14 +405,14 @@ dvipsnames,handout]{article}
       alternatively,
       for the sake of simplicity,
       one might want to imagine an omniscient observer:
-      it ``magically'' captures the ``true'' learner-craftable graph
+      it “magically” captures the “true” learner-craftable graph
       and gives it to the consensus designer;      
       however,
       the more honest version is that
       learners  either
       \begin{itemize}
       \item actively communicate their assumptions (truthfully or not)
-      \item ``buy into'' a pre-fabricated learner graph, produced by the consensus designer.
+      \item “buy into” a pre-fabricated learner graph, produced by the consensus designer.
       \end{itemize}
       In fact,
       the simplest assumption is the last one:
@@ -443,8 +446,6 @@ dvipsnames,handout]{article}
 \clearpage\cleardoublepage
 \end{preface}
 
-
-
 \maketitle
 
 \begin{abstract}
@@ -470,7 +471,7 @@ dvipsnames,handout]{article}
   These protocols build %
   a growing “global” \Dag of transaction data such that%
   ---among other things---%
-  ① every validator's local view is a sub-\Dag of \emph{the} ``global'' \Dag and %
+  ① every validator's local view is a sub-\Dag of \emph{the} “global” \Dag and %
   ② every block of the “global” \Dag is \emph{logged}\xspace%
   \endnote{%
     Logging is terminology borrowed from César Sanchez:
@@ -514,7 +515,7 @@ dvipsnames,handout]{article}
     in particular the terms \texttt{cross-chain} and \texttt{multi-chain},
     with some ETH maxi whether we
     are in line with Vitalik's dichotomy\\
-    cf. Charlotte's ``let's avoid the one big chain'', or
+    cf. Charlotte's “let's avoid the one big chain”, or
     in other words, 
     we do not even have to restrict to ledger technology
   }
@@ -618,7 +619,7 @@ we shall find out that heterogenization applies differently to questions of avai
         appended to a sharded blockchain ADDS as data in the intersection of multiple shard ADDSs.
       \end{quote}
     }%
-  \item ``learner-graph'' jazz
+  \item “learner-graph” jazz
   \end{itemize}
   The full details are deferred,
   \eg to the preliminaries. 
@@ -661,7 +662,7 @@ the main points for validators are the following:
 The latter point roughly corresponds to the availability protocol %
 while the former is mainly features in the integrity layer. %
 \todo{discuss the general set up of the execution engine / executor nodes:
-  these are the prime examples of learners we ``have to'' care about
+  these are the prime examples of learners we “have to” care about
 }
 Let us now look at turn to a concise recapitulation of the involved concepts. %
 
@@ -677,7 +678,7 @@ we also introduce terminology
 that will allow us to describe \hnr's salient properties precisely. % 
 
 \todo[inline,caption={}]{%
-  ``copy'' relevant parts of %
+  “copy” relevant parts of %
   the heterogeneous paxos tech report%
   \\
   this can be split up into
@@ -756,7 +757,7 @@ such that one of these quorums is live at all times %
   and a learner \(a\), 
   we denote the learner's set of qourums by \(\Q{a}\), 
   whose elements are the \emph{learner-specific quorums} of \(a\).
-  We use \(qₐ, q'ₐ,\) \etc to range over learner-specific quorums of learner \(a\).
+  We use \(\q{a}, \q[']a,\) \etc to range over learner-specific quorums of learner \(a\).
 \end{definition} %
 One might even go as far and ask learners to choose %
 a maximal set of quorums that is compatible with their beliefs; %
@@ -769,30 +770,30 @@ we can formulate the second core definition. %
 Global weak quorums are important for matters of availability:
 if a global weak quorum is holding a copy of a particular transaction request, %
 then one copy should be available %
-(as a ``shared belief'' of all learners). %
+(as a “shared belief” of all learners). %
 \begin{definition}[Global weak quorum]
   \label{def:global-weak-quorum}
   A \emph{global weak quorum} is %
   a set of validators \(X\) that is a weak quorum for each learner, %
   i.e., 
   for every learner~\(a ∈ \Lrnrs\) and %
-  all learner-specific quorums \(qₐ ∈ \Q{a}\), %
-  we have a non-empty intersection \(X ∩ qₐ ≠ ∅\). %
+  all learner-specific quorums \(\q{a} ∈ \Q{a}\), %
+  we have a non-empty intersection \(X ∩ \q{a} ≠ ∅\). %
 \end{definition}
 Finally, %
 we make the simplifying assumption %
 that learners agree with us on the following two points:
 \begin{enumerate}
 \item there is a common set of acceptors \(\Accs\),
-  obtained as the union of the (unions of the) learner-specific quorums and that  
+  obtained as the union of the (unions of the) learner-specific quorums that  
 \item 
-  w.l.o.g.\ we can assume that %
-  \(qₐ ∈ \Q{a}\) and \(x ∈ \Accs\) %
-  imply \(qₐ \cup \{x\} ∈ \Q{a}\). %
+  we can assume that %
+  \(\q{a} ∈ \Q{a}\) and \(x ∈ \Accs\) %
+  imply \(\q{a} \cup \{x\} ∈ \Q{a}\), w.l.o.g. %
 \end{enumerate}
 For the second point, %
-the reasoning is that if the larger set \(qₐ \cup \{x\}\) is live, %
-then in particular the ``original'' quorum \(qₐ\) must be live. %
+the reasoning is that if the larger set \(\q{a} \cup \{x\}\) is live, %
+then in particular the “original” quorum \(\q{a}\) must be live. %
 \endnote{%
   Probably we don't need universal quorums. % 
   \begin{minipage}[t][\arraycolsep][t]{1.0\linewidth}
@@ -805,19 +806,56 @@ then in particular the ``original'' quorum \(qₐ\) must be live. %
   Or, do we?
 }
 
-\subsection{Opinions about safety: single learner point of view}
+
+\todo[inline,caption={}]{
+  Learner graph assumption
+
+  for every \(a,b \in \Lrnrs\), \\ %
+  for every safe set \(s \in a-b\), \\%
+  for every \(\q{a} \in \Q{a}\), \\ 
+  for every \(\q{b} \in \Q{b}\), \\
+  \(s\cap \q{a} \cap \q{b} \neq \varnothing\) \\
+
+% \begin{verbatim}
+% ASSUME LearnerGraphAssumptionValidity ==
+%     \A E \in TrustSafe : \A Q1, Q2 \in ByzQuorum :
+%         [lr |-> E.from, q |-> Q1] \in TrustLive /\
+%         [lr |-> E.to, q |-> Q2] \in TrustLive =>
+%         \E N \in E.q : N \in Q1 /\ N \in Q2
+% \end{verbatim}
+}
+\subsection{Opinions about safety: single-learner point of view}
 \label{sec:asymmetric-safety}
-Besides assumptions about liveness
-we also use assumptions about safety, %
-that allow us to describe how and under which conditions %
-the \Dag properties of the Narwhal protocol %
-transfer to \hnr. 
+Besides assumptions about liveness %
+we also ask learners to commit to assumptions about (absence of) Byzantine behavior  %
+such that we can state conditions under which %
+\Dag properties of the Narwhal protocol will transfer to \hnr. %
+Roughly, %
+we could ask each learner \(a∈\Lrnrs\) %
+to commit to ``safe'' sets of validators that they %
+believe to be “big enough” and consist of %
+“sufficiently trustworthy” validators---%
+w.r.t.\ every other \base \(b\).
+The precise sense of what counts as big enough is rather simple:
+for every pair of learner-specific quorums \(\q{a},\q{b}\), %
+every ``safe'' set must intersect with both learner-specific quorums. %
+In particular, %
+global weak quorums would be big enough. %
 
+ such that 
+\(a\) and \(b\), for each other \base \(b\); %
+i.e., sets of validators that would aim for consistency between learners “own” \base \(a\) and any other \base \(b\).\footnote{%
+  This includes the case where \(a=b\), %
+  which amounts to asking for sets of non-Byzantine nodes. %
+}
 
+commit to a set of safe sets such that %
+if at least one of its elements consists of correct validators only %
+they expect to see agreement between \base[s] \(a\) and \(b\) %
+provided that it also intersects non-trivially with %
+every pair of qourums \(\q{a}\) and \(\q{b}\). %
 
-
-
-
+\end{document}
 \subsection{Discussion of desirable properties}
 \label{sec:property-discussion}
 
@@ -831,10 +869,10 @@ transfer to \hnr.
 
 
 \section{Synopsis: %
-  how to heterogenize  ``global'' DAGs
+  how to heterogenize  “global” DAGs
 }
 \label{sec:overview}
-Running  Narwhal \cite{NT} leads to a continuously growing ``global'' \Dag of blocks that %
+Running  Narwhal \cite{NT} leads to a continuously growing “global” \Dag of blocks that %
 all validators agree on at every given point in time %
 if enough of them are correct and alive.
 For the sake of simplicity,
@@ -842,7 +880,7 @@ we
 \begin{enumerate}
 \item
   put ourselves into the seat of the omniscient observer
-  (such that it makes sense to talk about the ``global'' \Dag although it cannot be known) %
+  (such that it makes sense to talk about the “global” \Dag although it cannot be known) %
   and
 \item
   we disregard the hash referencing mechanism for transaction data
@@ -877,7 +915,7 @@ sub-protocols.
 % each referencing a quorum of previous blocks (of the respective learner);
 
 
-\todo[inline,caption={}]{probably move the below ``hidden material'' (see \TeX-source)
+\todo[inline,caption={}]{probably move the below “hidden material” (see \TeX-source)
   to an earlier point (context)}
 % \begin{comment}
 % note that he term global is problematic insofar 
@@ -917,7 +955,7 @@ sub-protocols.
 %   \begin{tikzpicture}
 %     \node[draw] (avl) {transaction data};
 
-%     \node[draw,right=1ex of avl] (dag) {``causal'' \Dag structure};
+%     \node[draw,right=1ex of avl] (dag) {“causal” \Dag structure};
 %     \begin{pgfonlayer}{background}
 %     \node (x) [fill=lightgray,fit=(avl)(dag)] {};
 %   \end{pgfonlayer}
@@ -1062,7 +1100,7 @@ or other direct signals to their workers.\xspace%
 \subsection{The pure availability protocol (pre-execution)}
 \label{sec:base-protocol}
 \endnote{%
-  we now ``announce'' headers
+  we now “announce” headers
   ---
   in contrast to what what is/was in the specs
   \tiny\tt(written March 7 2023, Tobias Heindel)
@@ -1140,7 +1178,7 @@ or other direct signals to their workers.\xspace%
     \ie there is always a unique current transaction batch 
     and every transaction request has to be added to the current batch. %
     New batches may be created over time, %
-    but each batch in this ``stream'' of batches has a unique \emph{batch number}.
+    but each batch in this “stream” of batches has a unique \emph{batch number}.
     Within a batch, %
     transactions are assigned consecutive {sequence numbers}: %
     the \emph{sequence number} of a transaction is 
@@ -1170,7 +1208,7 @@ or other direct signals to their workers.\xspace%
     However,
     in line with the original version of Narwhal \cite{NT}, %
     we use full copies as erasure codes.
-    Despite the coincidence of erasure codes and the ``original'' data, %
+    Despite the coincidence of erasure codes and the “original” data, %
     we visually distinguish the “copy” of a transaction
     from the “original” transaction supplied by the client, 
     using two different symbols, namely \tx\ and \es, respectively. %
@@ -1187,7 +1225,7 @@ or other direct signals to their workers.\xspace%
     }
     When a worker receives a transaction request,
     this might trigger a new worker hash to be produced. %
-    %(if it is ``time''    to do so).
+    %(if it is “time”    to do so).
     In principle,
     the decision for when to send it is for the worker to decide %  
     (as long as each worker hash contains at least one transaction %
@@ -1271,7 +1309,7 @@ or other direct signals to their workers.\xspace%
     Note that copies of transactions are \emph{not} signed by the worker. %
     Signatures are deferred to worker hash broadcast. % 
     Storing transaction copies as above will be useful %
-    for handling ``foreign'' worker hashes, %
+    for handling “foreign” worker hashes, %
     \ie worker hashes that refer to transactions that are collected at other
     workers. 
     \begin{description}
@@ -1287,12 +1325,12 @@ or other direct signals to their workers.\xspace%
     The (pre-)condition\xspace%
     \todo{%
       This terminology clashes. What else? 
-      ``triggering condition'' ?!
+      “triggering condition” ?!
     } is that all transactions that are referenced in the worker
     hash have already been received and stored.\xspace%
     \footnote{%
       This might be unexpected order of events,
-      but the sending of transaction data might be ``delayed''. 
+      but the sending of transaction data might be “delayed”. 
     } 
   \end{description}
 
@@ -1376,9 +1414,9 @@ last and thus becomes {the} final trigger). %
   \centering
   \todo[inline,caption={}]{%
     \begin{itemize}
-    \item need to ``fix'' the \tx subscripts to be sequence numbers;
+    \item need to “fix” the \tx subscripts to be sequence numbers;
       possibly adding also the batch number of the worker hash?
-    \item header announcements only need to send ``fingerprints'' of headers,
+    \item header announcements only need to send “fingerprints” of headers,
       for the moment represented by \(\wh[]^*\)
     \end{itemize}
   }
@@ -1519,18 +1557,18 @@ last and thus becomes {the} final trigger). %
 
 
 \todo[inline]{%
-  so, signed qourums are an ``output'' of the integrity protocol,
+  so, signed qourums are an “output” of the integrity protocol,
   and need to be made available
   (such that it is possible to create new headers).
   NEEDS EXPLAIN
 }
 
 \todo[caption={}]{%
-  concerning ``triggering'' the header construction,
+  concerning “triggering” the header construction,
   there are the following points
   \\
   1. when a the triggering signing request is \emph{received} by a primary,
-  we might need to ``wait'' for the corresponding worker hashes
+  we might need to “wait” for the corresponding worker hashes
   \\
   2. new signing for more recent rounds make old ones obsolete
   \\
@@ -1584,7 +1622,7 @@ after all, the two protocols are closely intertwined.\xspace%
 In the protocol description for validators, %
 we avoid copying text if a message has several triggers
 by simply listing the alternative triggers of a message
-(after the ``default'' trigger).
+(after the “default” trigger).
 For the pure availability protocol for workers,
 this would lead to a single heading
 for worker hash forwarding.
@@ -1619,7 +1657,7 @@ but transaction copies are alternative triggers  %
       ⇒primary
     }
     The primary may announce the next header %
-    (if the primary considers it is ``time'' to do so---cf.\ Footnote~\ref{fn:time}).
+    (if the primary considers it is “time” to do so---cf.\ Footnote~\ref{fn:time}).
     The genesis header consists of
     the current list of worker hashes,
     tagged with the identifier of the primary;
@@ -1729,7 +1767,7 @@ but transaction copies are alternative triggers  %
   }
   If the primary receives a header fingerprint from a another primary, %
   it is stored as long as the header might still be included into some learner-specific \Dag. %
-  \todo{double check the ``livetime''}
+  \todo{double check the “livetime”}
   We also elide to mention that each correct validator has to check whether the
   received data are consistent with the local observations. 
 
@@ -1745,9 +1783,9 @@ but transaction copies are alternative triggers  %
   \end{description}
 
   \todo[inline]{%
-    ideally, a  ``flowchart'' would get rid of the ``code duplication'' !!!%
+    ideally, a  “flowchart” would get rid of the “code duplication” !!!%
     \\
-    also, a dependency graph with ``joint'' triggering 
+    also, a dependency graph with “joint” triggering 
     would be rather useful (to convey the main ideas)
   }
 
@@ -1757,7 +1795,7 @@ but transaction copies are alternative triggers  %
     ←primary
   }
   The signature of a received availability commitment
-  is either stored or added to the aggregated signature ``under construction'',
+  is either stored or added to the aggregated signature “under construction”,
   leading towards a certificate of availability. %
   If the received signature completes a global quorum, %
   it triggers the broadcasting of %
@@ -1779,7 +1817,7 @@ but transaction copies are alternative triggers  %
 % \item[optional header distribution]
 %   ~\todo[inline]{%
 %     Right now,
-%     there seems no reason to add this ``safe guard'';
+%     there seems no reason to add this “safe guard”;
 %     it might be confusing.
 %   }
 %   One might expect that header creators send their headers around.
@@ -2106,7 +2144,7 @@ All other responses to messages are verbatim the same as at genesis.
     the primary signs a list of quorums
     (in the order that they were received)
     and broadcasts them to all primaries. % 
-    \todo{do we have to ``throw in '' the round number (?)
+    \todo{do we have to “throw in ” the round number (?)
       wouldn't hurt a lot, but if we don't need it, we don't need it ... 
     }
     \endnote{%
@@ -2170,10 +2208,10 @@ All other responses to messages are verbatim the same as at genesis.
 }
 
 \subsection{Summary}
-\todo[inline]{probably it makes sense to have two ``copies'' of the integrity
+\todo[inline]{probably it makes sense to have two “copies” of the integrity
   protocol
   as it is extremely short ... 
-  and we can remove the ``forward pointing'' defs of signed quorums and blocks
+  and we can remove the “forward pointing” defs of signed quorums and blocks
   \\
   then we can remove this
 }
@@ -2340,7 +2378,7 @@ finally off to execution.\xspace%
   before going to bit Nirvana ...
 }
 In more detail, %
-on a ``sunny day'', %
+on a “sunny day”, %
 the progress towards execution, step by step, %
 is as follows: %
 \begin{itemize}
@@ -2422,7 +2460,7 @@ Typically,
 sending a message according to some protocol %
 is a reaction to having received one or several messages.\xspace%
 \footnote{%
-  Elapsing timers act very much like ``local messages'' %
+  Elapsing timers act very much like “local messages” %
   (cf.\ \statetright's \href%
   {docs.rs/stateright/latest/stateright/actor/trait.Actor.html}%
   {\texttt{on\_tiemeout}}%
@@ -2445,7 +2483,7 @@ and returns  a set of messages to be sent.
 %This amounts to specifying an actor based implementation of the protocol. %
 We shall explain that %
 it was indeed appropriate to disregard questions of message dependency management
-``without loss of generality'' %
+“without loss of generality” %
 in our high-level description of \hnr. %
 
 % When receiving a message, we have to first 
@@ -2509,7 +2547,7 @@ if we consider fully general quorum systems. %
 \begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
   \todo{the below works only for systems in there is a single node in every
     quorum -- a veto node
-    alternatively, one could put things ``upside down'',
+    alternatively, one could put things “upside down”,
     and let the leaves report on success -- 
     provided that every quorum has a node that does not belong to any other
     quorum (every neighborhood has a grumpy person)
@@ -2594,7 +2632,7 @@ filtering, trigger detection, message synthesis, (local) state update. %
 In fact, %
 we update the state not in one single action, %
 but divide it maintaining %
-a ``database'' of messages on the one hand %
+a “database” of messages on the one hand %
 and accompanying triggering information on the other hand. %
 Each trigger might result in a state update;
 there may be a cascade of triggers
@@ -2718,7 +2756,7 @@ message synthesizer ref(s)
 
 
 \todo[author=YourName]{%   
-  Your ``PR'' here
+  Your “PR” here
 }
 
 \end{document}
