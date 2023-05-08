@@ -46,12 +46,14 @@ dvipsnames,handout]{article}
 }
 
 \newcommand{\base}[1][ ]{%
-  base ledger%
-  \ifthenelse{\equal{#1}{ }}{}{#1}
+  b\ase[#1]%
 }
 \newcommand{\Base}[1][ ]{%
-  Base ledger
-  \ifthenelse{\equal{#1}{ }}{}{#1}
+  B\ase[#1]%
+}
+\newcommand{\ase}[1][ ]{%
+  ase ledger%
+  \ifthenelse{\equal{#1}{ }}{}{#1}\xspace%
 }
 
 % \dag is defined to produce † unfortunately
@@ -317,21 +319,23 @@ dvipsnames,handout]{article}
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
 \begin{document}
-
-
-\begin{figure}
-  \centering
-  \tikzsetnextfilename{test-this}
-  \begin{tikzpicture}
-    \node{testthis};
-  \end{tikzpicture}
-\end{figure}
-
+% **********************************************************************
+% for testing externalization 
+% **********************************************************************
+% \begin{figure}
+%   \centering
+%   \tikzsetnextfilename{test-this}
+%   \begin{tikzpicture}
+%     \node{testthis};
+%   \end{tikzpicture}
+% \end{figure}
+% \end{document}
+% **********************************************************************
 
 \begin{preface}
 
 \begin{center}
-  \huge %
+  \huge%
   notes to prospective co-authors, %
   colleagues, and friends %
 \end{center}
@@ -561,6 +565,10 @@ we shall find out that heterogenization applies differently to questions of avai
 
 \section{Context}
 \label{sec:context}
+\todo[inline,caption={},color=yellow]{%
+  this section needs to be written after we've narrowed down the audience %
+  }%
+\color{gray}
 \todo[inline,caption={}]{.. a little bit of story telling, providing enough context and
   examples such that the reader can picture instances of the abstract concepts
   to be described %
@@ -630,15 +638,15 @@ we also pursue some specific \emph{qualitative} goals: %
 \item there is a unique definitive state of every \base.
 \end{itemize}
 In technical terms, %
-the person or service that acts or is inquiring the sate of the \base[s]
+the person or service that requests to change or read the state of the \base[s]
 is called a \emph{learner}. % 
 One good example of learners are \emph{executor nodes} %
 \cite{anoma_specs}\todo{%
   check / update link, % 
   \href{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}{execution} %
 }, %
-which are in charge of updating the state of one or several \base %
-according to a specific transaction that has been ordered by consensus. % 
+which are in charge of updating the state of one or several \base[s] %
+according to a block of transactions that have been ordered by consensus. % 
 
 For technical considerations,
 the main points for validators are the following:
@@ -657,6 +665,7 @@ while the former is mainly features in the integrity layer. %
 }
 Let us now look at turn to a concise recapitulation of the involved concepts. %
 
+\color{black}
 
 \section{Preliminaries}
 \label{sec:preliminaries}
@@ -664,7 +673,8 @@ We now describe the central concepts %
 that we rely on in our description of the \hnr protocol %
 and provide formal definitions. %
 Moreover,
-we also introduce additional terminology to be able to describe \hnr's salient properties. % 
+we also introduce terminology 
+that will allow us to describe \hnr's salient properties precisely. % 
 
 \todo[inline,caption={}]{%
   ``copy'' relevant parts of %
@@ -677,6 +687,7 @@ we also introduce additional terminology to be able to describe \hnr's salient p
   \end{itemize}
 }
 
+We fix a finite set of \emph{learners} \(\Lrnrs\). %
 
 \subsection{Opinions about quorums: learner-specific and global}
 \label{sec:quorum-sets}
@@ -687,10 +698,9 @@ first and foremost about liveness of sets of validators.\xspace%
   The terminology about trust assumptions was introduced %
   already for Heterogeneous Paxos \cite{opodis20HPaxos}. %
 } %
-We start by fixing a finite set of \emph{learners} \(\Lrnrs\); %
-each learner holds certain beliefs %
-and these beliefs impose restrictions on %
-the behavior of validators that is deemed (im-)possible.\xspace%
+Each learner holds certain beliefs %
+according to which a given behavior of a validator is deemed %
+possible or not.\xspace%
 \todo{%
   double check with Isaac %
   that it is safe to use the terms %
@@ -724,7 +734,7 @@ Let us mention once more, %
 as protocol designers, % 
 we assume each learner to have commited to a set of quorums, %
 such that one of these quorums is live at all times %
-(and that this is compatible with the learner's believes).\xspace%
+(and that this is compatible with the learner's beliefs).\xspace%
 \footnote{%
   This is formalized as
   \href%
@@ -733,7 +743,7 @@ such that one of these quorums is live at all times %
   in the
   \href%
   {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
-  {\tla-specification}. 
+  {\tla-specification}.%
 }
 
 
@@ -755,7 +765,7 @@ for the operational aspects of the protocol,
 all we need is a map from learners to sets of quorums. %
 
 Now, based on quorums systems, 
-we can formulate the remaining two core definitions. %
+we can formulate the second core definition. %
 Global weak quorums are important for matters of availability:
 if a global weak quorum is holding a copy of a particular transaction request, %
 then one copy should be available %
@@ -798,10 +808,12 @@ then in particular the ``original'' quorum \(qₐ\) must be live. %
 \subsection{Opinions about safety: single learner point of view}
 \label{sec:asymmetric-safety}
 Besides assumptions about liveness
-we also require assumptions about safety, %
-which we need later to describe how and under which conditions %
+we also use assumptions about safety, %
+that allow us to describe how and under which conditions %
 the \Dag properties of the Narwhal protocol %
 transfer to \hnr. 
+
+
 
 
 
