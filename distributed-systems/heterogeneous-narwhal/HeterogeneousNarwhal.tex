@@ -1,7 +1,9 @@
 \documentclass[%
-dvipsnames,handout,draft]{article}
+%draft,%
+dvipsnames]{article}
+\usepackage[pro]{./fontawesome5}
 \usepackage{shellesc}%← for luatex to work with shell escape properly 
-\usepackage{manfnt}
+\usepackage{manfnt,xfrac}
 \usepackage[english]{babel}
 \usepackage{flowchart}
 \usepackage{markdown}
@@ -21,7 +23,7 @@ dvipsnames,handout,draft]{article}
 
 \usepackage{xcolor}
 \newcommand{\nb}[1]{%
-  \todo[color=blue!60!black,shadow]{NB:\\ #1}%
+  \todo[color=blue!60!black,shadow]{NB:\raggedright\\ #1}%
 }
 
 \usepackage{newunicodechar}
@@ -55,6 +57,7 @@ dvipsnames,handout,draft]{article}
   ase ledger%
   \ifthenelse{\equal{#1}{ }}{}{#1}\xspace%
 }
+
 
 % \dag is defined to produce † unfortunately
 \newcommand{\DAG}[1][]{\textsc{Dag}#1\xspace}
@@ -102,6 +105,11 @@ dvipsnames,handout,draft]{article}
 }
 \newcommand{\circledX}[1]{\tikz[baseline={(x.south)}]{\node[circle,draw,inner sep=.3pt,outer sep=0pt,very thin](x){\tiny #1};}}
 \usepackage{newunicodechar}
+\newunicodechar{⅔}{\TwoThirds}
+\newcommand{\TwoThirds}{\sfrac{2}{3}}
+\newunicodechar{⅓}{\OneThird}
+\newcommand{\OneThird}{\sfrac{1}{3}}
+
 %\newunicodechar{}{\ensuremath{}}
 \newunicodechar{₁}{\ensuremath{{}_1}}
 \newunicodechar{₂}{\ensuremath{{}_2}}
@@ -293,7 +301,7 @@ dvipsnames,handout,draft]{article}
 
 %\usepackage[textsize=footnotesize]{./luatodonotes}%
 % don't use \todo{...} in floats, i.e., figures etc. 
-\usepackage{todonotes}%
+\usepackage[textsize=tiny]{todonotes}%
 
 \newenvironment{preface}{}{}%think includecomment
 \newenvironment{theendnotes}{}{}%think includecomment
@@ -323,7 +331,23 @@ dvipsnames,handout,draft]{article}
 \tikzexternalize % activate!
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
+\usepackage[autostyle]{csquotes}
+\usepackage% [%
+% backend=biber%
+%,
+% % sortlocale=de_DE,
+% % natbib=true,
+% % url=false, 
+% % doi=true,
+% % eprint=false
+% ]
+[style=authoryear-icomp]{biblatex}
+\addbibresource{HN.bib}
+
 \begin{document}
+
+
+
 % **********************************************************************
 % for testing externalization 
 % **********************************************************************
@@ -344,7 +368,7 @@ dvipsnames,handout,draft]{article}
 \end{center}
 \label{page:firstpage}
 
-\todo[inline, caption={}, color=blue!30!white]{%
+\todo[inline,size=normalsize, caption={}, color=blue!30!white]{%
   Please note the following about this paper:
   \begin{itemize}
   \item it is “merely” a technical report about
@@ -357,7 +381,7 @@ dvipsnames,handout,draft]{article}
   when reading the paper!
 }
 
-\todo[inline,caption={},color=yellow!50!white]{%
+\todo[inline,size=normalsize,caption={},color=yellow!50!white]{%
   high-level plan:\\
   \begin{itemize}
   \item  give an \st{operational} spec in the main part, following an actor
@@ -370,7 +394,7 @@ dvipsnames,handout,draft]{article}
   \end{itemize}%
 }%
 \par
-\todo[inline,caption={},color=green!30!white]{%
+\todo[inline,size=normalsize,caption={},color=green!30!white]{%
   paper plan (list of ingredients):\\
   \begin{itemize}
   \item “review” learner graph
@@ -554,7 +578,7 @@ we shall find out that heterogenization applies differently to questions of avai
 \item[integrity] the protocol is safe, \eg no double spends, equivocation,  \etc. 
 \end{description}
 
-\todo[inline]{main contribs:\\[\baselineskip]
+\todo[inline,size=normalsize]{main contribs:\\[\baselineskip]
   \begin{minipage}{1.0\linewidth}
     - general heterogenization principle ...\\
     - ... by virtue of example: Narwhal-\Dag-rider\\
@@ -566,11 +590,42 @@ we shall find out that heterogenization applies differently to questions of avai
 
 \section{Context}
 \label{sec:context}
-\todo[inline,caption={},color=yellow]{%
-  this section needs to be written after we've narrowed down the audience %
+\todo[inline,size=normalsize,caption={},color=yellow]{%
+  \begin{minipage}{1.0\linewidth}
+     \begin{itemize}
+     \item this section needs to be written after we've narrowed down the
+       audience %
+     \item
+       we need to be able to explain the main issue of integrity, %
+       \ie How can we ``ensure'' that a validator does not produce two different %
+       blocks at a given height, % 
+       getting certificates of integrity from two different learners.  %
+       In pictures,
+       \href{https://excalidraw.com/\#room=cd00e8ac9ff18315b441,9-GTaLH6K3eKoRpbV9m1hg}{the situation}
+       to avoid is illustrated below. 
+        \centerline{%
+          \includegraphics{theIssue.pdf}%
+          % \tikzsetnextfilename{theIssue}
+          % \begin{tikzpicture}
+          %   \node[inner sep=0pt,outer sep=0pt] (header){%
+          %     \faBoxOpen[duotone]
+          %   };
+          %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCert) at (header.north east) {\faFileCertificate[duotone]};
+          %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCert) at (header.north west) {\faFileCertificate[duotone]};
+          %   \node[inner sep=0pt,outer sep=0pt,above left=4ex of header] (left) {\faBoxOpen[duotone]};
+          %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCertLeft) at (left.north west) {\faFileCertificate[duotone]};
+          %   \node[inner sep=0pt,outer sep=0pt,above right=4ex of header] (right) {\faBoxOpen[duotone]};
+          %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCertRight) at (right.north east) {\faFileCertificate[duotone]};
+          %   \draw (left.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+          %   \draw (right.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+          %   % \node[above=1ex of header] (fork)  {\faIcon{fork}}; 
+          % \end{tikzpicture}
+        }
+     \end{itemize}
+   \end{minipage}
   }%
-\color{gray}
-\todo[inline,caption={}]{.. a little bit of story telling, providing enough context and
+\color{gray}%
+\todo[inline,size=normalsize,caption={}]{.. a little bit of story telling, providing enough context and
   examples such that the reader can picture instances of the abstract concepts
   to be described %
   \begin{itemize}
@@ -642,7 +697,7 @@ In technical terms, %
 the person or service that requests to change or read the state of the \base[s]
 is called a \emph{learner}. % 
 One good example of learners are \emph{executor nodes} %
-\cite{anoma_specs}\todo{%
+\cite{anomaSpecs}\todo{%
   check / update link, % 
   \href{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}{execution} %
 }, %
@@ -677,7 +732,7 @@ Moreover,
 we also introduce terminology 
 that will allow us to describe \hnr's salient properties precisely. % 
 
-\todo[inline,caption={}]{%
+\todo[inline,size=normalsize,caption={}]{%
   “copy” relevant parts of %
   the heterogeneous paxos tech report%
   \\
@@ -710,10 +765,10 @@ possible or not.\xspace%
 }%
 Each learner is asked to commit to a set of \emph{quorums}\xspace%
 \todo{define\&explain}%
-such that at least one of the quorums will be live at all times. %
+such that at least one of the quorums will be live at all times.\xspace%
 \endnote{
   this is way too strong as an assumption, no ?
-}
+}%
 \endnote{%
   on corroboration of liveness assumptions: %
   keep tabs on that there is enough progress
@@ -728,9 +783,13 @@ such that at least one of the quorums will be live at all times. %
   by adding absolute limits for latency of responses 
   (which on top requires network synchrony)
 }
-In particular,
-the protocol description takes as input a function
-from learners to sets of (learner-specific) quorums.
+A typical example for a learner-specific set of quorums
+is the collection of all sets of validators that are staking more than
+⅔ of all stake of the respective \base. 
+
+In general,
+the \hnr protocol description takes is parameterized by a function
+from learners to sets of learner-specific quorums.
 Let us mention once more, %
 as protocol designers, % 
 we assume each learner to have commited to a set of quorums, %
@@ -764,13 +823,9 @@ a maximal set of quorums that is compatible with their beliefs; %
 however, %
 for the operational aspects of the protocol,
 all we need is a map from learners to sets of quorums. %
-
-Now, based on quorums systems, 
+Now, with the definition of quorums systems at hand, 
 we can formulate the second core definition. %
-Global weak quorums are important for matters of availability:
-if a global weak quorum is holding a copy of a particular transaction request, %
-then one copy should be available %
-(as a “shared belief” of all learners). %
+
 \begin{definition}[Global weak quorum]
   \label{def:global-weak-quorum}
   A \emph{global weak quorum} is %
@@ -780,6 +835,14 @@ then one copy should be available %
   all learner-specific quorums \(\q{a} ∈ \Q{a}\), %
   we have a non-empty intersection \(X ∩ \q{a} ≠ ∅\). %
 \end{definition}
+Global weak quorums are important for matters of availability:
+if a global weak quorum is holding a copy of a particular transaction request, %
+then one copy should be available %
+(as a “shared belief” of all learners). %
+The archetypal example for global weak quorums are sets of validators that 
+(just) hold more than ⅓ of the stake of \emph{every} \base. %
+
+%%%%%%%%
 Finally, %
 we make the simplifying assumption %
 that learners agree with us on the following two points:
@@ -807,59 +870,73 @@ then in particular the “original” quorum \(\q{a}\) must be live. %
 }
 
 
-\todo[inline,caption={}]{
-  Learner graph assumption
 
-  for every \(a,b \in \Lrnrs\), \\ %
-  for every safe set \(s \in a-b\), \\%
-  for every \(\q{a} \in \Q{a}\), \\ 
-  for every \(\q{b} \in \Q{b}\), \\
-  \(s\cap \q{a} \cap \q{b} \neq \varnothing\) \\
-
-% \begin{verbatim}
-% ASSUME LearnerGraphAssumptionValidity ==
-%     \A E \in TrustSafe : \A Q1, Q2 \in ByzQuorum :
-%         [lr |-> E.from, q |-> Q1] \in TrustLive /\
-%         [lr |-> E.to, q |-> Q2] \in TrustLive =>
-%         \E N \in E.q : N \in Q1 /\ N \in Q2
-% \end{verbatim}
-}
-\subsection{Opinions about safety: single-learner point of view}
+\subsection{Opinions about safety: default or fully parametric}
 \label{sec:asymmetric-safety}
 Besides assumptions about liveness %
-we also ask learners to commit to assumptions about (absence of) Byzantine behavior  %
+we also would like learners to commit to assumptions about (absence of) Byzantine behavior %
 such that we can state conditions under which %
 \Dag properties of the Narwhal protocol will transfer to \hnr. %
 Roughly, %
-we could ask each learner \(a∈\Lrnrs\) %
-to commit to ``safe'' sets of validators that they %
-believe to be “big enough” and consist of %
-“sufficiently trustworthy” validators---%
-w.r.t.\ every other \base \(b\).
-The precise sense of what counts as big enough is rather simple:
-for every pair of learner-specific quorums \(\q{a},\q{b}\), %
-every ``safe'' set must intersect with both learner-specific quorums. %
-In particular, %
-global weak quorums would be big enough. %
+we are looking for  validator sets %
+that are “big enough” and consists of %
+“sufficiently trustworthy” validators % (according to a given learner) %
+such that learners would expect consistency between pairs of \base[s]. %
 
- such that 
-\(a\) and \(b\), for each other \base \(b\); %
-i.e., sets of validators that would aim for consistency between learners “own” \base \(a\) and any other \base \(b\).\footnote{%
-  This includes the case where \(a=b\), %
-  which amounts to asking for sets of non-Byzantine nodes. %
-}
+If we want to be more precise,
+we of course have to take into account that consistency is relative to the choice of pairs of \base[s]. %
+Moreover learners might have different opinions of whether a %
+specific validator (set) is trustworthy enough or %
+even has an intrinsic interest in consistency between a pair of \base[s]. %
+However, %
+before we go through all the details of whose opinions about what in relation to
+pairs of \base[s] we are interested in, %
+let us point out the simple default assumption: %
+a \emph{default safe set} that can ensure consistency of two \base[s] \(a,b∈\Lrnrs\) %
+is a set of validators \(s\subseteq \Accs\) that satisfies \(s \cap \q{a} \cap \q{b} \neq
+\varnothing\)
+for every pair of learner specific quorums \(\q{a} \in \Q{a}\) and \(\q{b} \in
+\Q{b}\). 
+The definition of a learner graph is more general,
+but specializes to the case of default safe sets forming the edges between learners. %
 
-commit to a set of safe sets such that %
-if at least one of its elements consists of correct validators only %
-they expect to see agreement between \base[s] \(a\) and \(b\) %
-provided that it also intersects non-trivially with %
-every pair of qourums \(\q{a}\) and \(\q{b}\). %
+\begin{definition}[Learner graphs, validity of learner graphs]
+  \label{def:learner-graph} %
+  A learner graph for a fixed set of learners \(\Lrnrs\) and
+  validators \(\Accs\) is a pair \((\Q{}, \_–\_)\) where
+  \(\Q{}\) is a quorum system and %
+  \({\_–\_} \colon \Lrnrs \times \Lrnrs \to \wp\Bigl(\wp(\Accs)\Bigr)\)
+  is a function such that the following hold, for all \(a,b \in \Lrnrs\),
+  for all \(s \in a–b\) and \(x \in \Accs\):
+  \begin{enumerate}
+  \item \(a–b = b–a\) %
+  \item \(s \cup \{x\} \in  a–b\). %
+  \end{enumerate}
+  A learner graph is \emph{valid} if %
+  for every \(\q{a} \in \Q{a}\), 
+  for every \(\q{b} \in \Q{b}\), 
+  \(s\cap \q{a} \cap \q{b} \neq \varnothing\). %
+  % % TLA+ code is the following. 
+  % \begin{verbatim} 
+  % ASSUME LearnerGraphAssumptionValidity ==
+  % \A E \in TrustSafe : \A Q1, Q2 \in ByzQuorum :
+  % [lr |-> E.from, q |-> Q1] \in TrustLive /\
+  % [lr |-> E.to, q |-> Q2] \in TrustLive =>
+  % \E N \in E.q : N \in Q1 /\ N \in Q2
+  % \end{verbatim}
+  A \emph{safe set} of a learner graph is an element of \(a–b\), for some \(a,b \in \Lrnrs\). %
+\end{definition}
+Thus a learner graph is an undirected simple graph whose nodes are learners  %
+and whose  edges carry sets of safe sets as weights; %
+nodes are moreover labeled by the set of all learner-specific quorums of the
+respective learner. 
+Further discussion of the learner graph is deferred to
+Appendix~\ref{apx:learner-graph}. 
 
-\end{document}
 \subsection{Discussion of desirable properties}
 \label{sec:property-discussion}
 
-\todo[inline,caption={}]{%
+\todo[inline,size=normalsize,caption={}]{%
   recall/discuss the properties 
   such as chain quality, 
   fair inclusion,
@@ -890,7 +967,7 @@ These simplifying assumptions allow for meaningful illustrations
 of Narwhal's \emph{mempool \Dag}, or \emph{mem-\Dag} for short. 
 \begin{figure}[htb]
   \centering
-  \todo[inline,caption={}]{put beautiful dag}
+  \todo[inline,size=normalsize,caption={}]{put beautiful dag}
   \caption{A mempool-\Dag }
   \label{fig:conceptual-dag}
 \end{figure}
@@ -915,7 +992,7 @@ sub-protocols.
 % each referencing a quorum of previous blocks (of the respective learner);
 
 
-\todo[inline,caption={}]{probably move the below “hidden material” (see \TeX-source)
+\todo[inline,size=normalsize,caption={}]{probably move the below “hidden material” (see \TeX-source)
   to an earlier point (context)}
 % \begin{comment}
 % note that he term global is problematic insofar 
@@ -1009,7 +1086,7 @@ sub-protocols.
 
 \begin{figure}[htb]
   \centering%\footnotesize
-    \tikzsetnextfilename{scale_out_narwhal_architecture}
+    \tikzsetnextfilename{scale-out-narwhal-architecture}
   \begin{tikzpicture}[baseline={(p.south)},xscale=.9]
   \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
     \foreach \i in {1,...,10}{
@@ -1118,12 +1195,12 @@ or other direct signals to their workers.\xspace%
   \\
   double check ‼
 }
-\todo[inline,color=green!80!black]{%
+\todo[inline,size=normalsize,color=green!80!black]{%
   defer all the data structure talk to the section on %
   message dependency management%
   Section/Appendix\ref{sec:mess-depend-manag}%
 }
-\todo[inline,color=yellow!80!white]{
+\todo[inline,size=normalsize,color=yellow!80!white]{
   \# issue:
   we are still missing information about 
   how long data has to be stored.
@@ -1264,7 +1341,7 @@ or other direct signals to their workers.\xspace%
     Transaction request acknowledgment]
     Optionally, %
     one may acknowledge the client's requests. 
-    \todo[inline,color=SkyBlue]{%
+    \todo[inline,size=normalsize,color=SkyBlue]{%
       In the
       \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
       {code},
@@ -1342,7 +1419,7 @@ or other direct signals to their workers.\xspace%
 %     - validator height\\
 %     - ...
 %   }%
-%   \todo[inline,color=red,caption={}]{%
+%   \todo[inline,size=normalsize,color=red,caption={}]{%
 %     here now, we need to
 %     \begin{enumerate}
 %     \item introduce signals from primary to workers,
@@ -1412,7 +1489,7 @@ last and thus becomes {the} final trigger). %
 
 \begin{figure}[htb]
   \centering
-  \todo[inline,caption={}]{%
+  \todo[inline,size=normalsize,caption={}]{%
     \begin{itemize}
     \item need to “fix” the \tx subscripts to be sequence numbers;
       possibly adding also the batch number of the worker hash?
@@ -1556,7 +1633,7 @@ last and thus becomes {the} final trigger). %
 \end{figure}
 
 
-\todo[inline]{%
+\todo[inline,size=normalsize]{%
   so, signed qourums are an “output” of the integrity protocol,
   and need to be made available
   (such that it is possible to create new headers).
@@ -1713,7 +1790,7 @@ but transaction copies are alternative triggers  %
 %       (as pairs of worker-ids and batch numbers)
 %     \item the round number
 %     \end{itemize}
-%     \todo[inline]{it is, isn't it?}
+%     \todo[inline,size=normalsize]{it is, isn't it?}
 %     .
 %   \item[Header collection]
 %     The primary has to collect
@@ -1782,7 +1859,7 @@ but transaction copies are alternative triggers  %
     header. 
   \end{description}
 
-  \todo[inline]{%
+  \todo[inline,size=normalsize]{%
     ideally, a  “flowchart” would get rid of the “code duplication” !!!%
     \\
     also, a dependency graph with “joint” triggering 
@@ -1815,7 +1892,7 @@ but transaction copies are alternative triggers  %
   \end{description}
 
 % \item[optional header distribution]
-%   ~\todo[inline]{%
+%   ~\todo[inline,size=normalsize]{%
 %     Right now,
 %     there seems no reason to add this “safe guard”;
 %     it might be confusing.
@@ -1862,7 +1939,7 @@ action according to the integrity protocol,
 as explained next. 
 
 
-\todo[inline,caption={}]{add flow charts for
+\todo[inline,size=normalsize,caption={}]{add flow charts for
   \begin{enumerate}
   \item workers
   \item primaries
@@ -1895,7 +1972,7 @@ from the creator of the header (for the same round).
   (Recall that the headers at genesis implicitly are of round zero.) %
 }
 
-\todo[inline]{a mess for the poor reader that has never heard of integrity
+\todo[inline,size=normalsize]{a mess for the poor reader that has never heard of integrity
   vs. availability ⁈}
 
 The availability protocol for primaries will use
@@ -2101,7 +2178,7 @@ The only additional message that we have to respond to
 are blocks. 
 All other responses to messages are verbatim the same as at genesis.
 \todo{double check}
-\todo[inline,caption={}]{%
+\todo[inline,size=normalsize,caption={}]{%
     \begin{itemize}
     \item %
       the round number of a block header is one more than the round number
@@ -2188,7 +2265,7 @@ All other responses to messages are verbatim the same as at genesis.
 %   the result is called a \emph{signed quorum}, 
 %   for short.
 %   All these blocks have to be from the same round. 
-%   \todo[color=red,inline]{this is important}
+%   \todo[color=red,inline,size=normalsize]{this is important}
 
   % Under certain conditions,
   % in particular if there is exceptional delay for a specific learner,
@@ -2202,13 +2279,13 @@ All other responses to messages are verbatim the same as at genesis.
   which we describe later in detail ?
 }
 
-\todo[inline]{describe in detail how
+\todo[inline,size=normalsize]{describe in detail how
 
   the checking of the availability of the headers takes place
 }
 
 \subsection{Summary}
-\todo[inline]{probably it makes sense to have two “copies” of the integrity
+\todo[inline,size=normalsize]{probably it makes sense to have two “copies” of the integrity
   protocol
   as it is extremely short ... 
   and we can remove the “forward pointing” defs of signed quorums and blocks
@@ -2441,16 +2518,52 @@ a previous block of the unique learner. %
 
 
 
-\bibliographystyle{alpha}
-\bibliography{HN.bib}
+
 
 \begin{theapx}
 \appendix
 
+\section{Learner graph jazz}
+\ref{apx:learner-graph}
+
+w.r.t.\ some specific other \base \(b\), %
+thus giving rise to a learner-indexed family of collections of sets. %
+
+The precise sense of what counts as big enough is rather simple:
+for every pair of learner-specific quorums \(\q{a},\q{b}\), %
+every ``safe'' set must intersect with both learner-specific quorums. %
+Accordingly, %
+the default setting for safety assumption is that 
+we would suggest that learners use these derived sets that are just big enough
+and thus are least likely to be proven wrong,
+which might lead to all sorts of issues,
+including forking.\xspace%
+\todo{add footnote on how things go wring in detail}
+
+
+: single-learner point of view
+
+In particular, %
+global weak quorums would be big enough. %
+
+ such that 
+\(a\) and \(b\), for each other \base \(b\); %
+i.e., sets of validators that would aim for consistency between learners “own” \base \(a\) and any other \base \(b\).\footnote{%
+  This includes the case where \(a=b\), %
+  which amounts to asking for sets of non-Byzantine nodes. %
+}
+
+commit to a set of safe sets such that %
+if at least one of its elements consists of correct validators only %
+they expect to see agreement between \base[s] \(a\) and \(b\) %
+provided that it also intersects non-trivially with %
+every pair of qourums \(\q{a}\) and \(\q{b}\). %
+
+
 
 \section{Message dependency management for actors}
 
-\todo[inline]{%
+\todo[inline,size=normalsize]{%
   possibly move to the main part of the  paper %
   although it is technically not needed for the high(est)-level spec
 }
@@ -2541,7 +2654,7 @@ the first \(k\).
 
 In general, the situation becomes already a nightmare, %
 if we consider fully general quorum systems. %
-\todo[inline]{%
+\todo[inline,size=normalsize]{%
   probably kick this example out. 
 }
 \begin{ex}[Broadcasting certificates of availability (\textsc{ii/ii})]
@@ -2639,7 +2752,7 @@ there may be a cascade of triggers
 where, at least intuitively,
 the triggered effect result in triggering new effects. %
 
-\todo[inline,caption={}]{%
+\todo[inline,size=normalsize,caption={}]{%
   revise this after going once through the protocol,
   filling descriptions of message dependencies
 }
@@ -2759,6 +2872,7 @@ message synthesizer ref(s)
   Your “PR” here
 }
 
+\printbibliography
 \end{document}
 
 %%% Local Variables:
