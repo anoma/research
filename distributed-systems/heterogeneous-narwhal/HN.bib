@@ -1,16 +1,15 @@
 @inproceedings{podc18Herlihy,
 author = {Herlihy, Maurice},
 title = {Atomic Cross-Chain Swaps},
-year = {2018},
-isbn = {9781450357951},
+year = 2018,
+isbn = 9781450357951,
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
 url = {https://doi.org/10.1145/3212734.3212736},
 doi = {10.1145/3212734.3212736},
-abstract = {An atomic cross-chain swap is a distributed coordination task where multiple parties exchange assets across multiple blockchains, for example, trading bitcoin for ether.An atomic swap protocol guarantees (1) if all parties conform to the protocol, then all swaps take place, (2) if some coalition deviates from the protocol, then no conforming party ends up worse off, and (3) no coalition has an incentive to deviate from the protocol.A cross-chain swap is modeled as a directed graph D, whose vertexes are parties and whose arcs are proposed asset transfers. For any pair (D, L), where D = (V,A) is a strongly-connected directed graph and L ⊂ V a feedback vertex set for D, we give an atomic cross-chain swap protocol for D, using a form of hashed timelock contracts, where the vertexes in L generate the hashlocked secrets. We show that no such protocol is possible if D is not strongly connected, or if D is strongly connected but L is not a feedback vertex set. The protocol has time complexityO(diam(D)) and space complexity (bits stored on all blockchains) O(|A|2).},
 booktitle = {Proceedings of the 2018 ACM Symposium on Principles of Distributed Computing},
 pages = {245–254},
-numpages = {10},
+numpages = 10,
 keywords = {blockchain, atomic swap},
 location = {Egham, United Kingdom},
 series = {PODC '18}
@@ -84,7 +83,6 @@ publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
 url = {https://doi.org/10.1145/3548606.3559361},
 doi = {10.1145/3548606.3559361},
-abstract = {We present Bullshark, the first directed acyclic graph (DAG) based asynchronous Byzantine Atomic Broadcast protocol that is optimized for the common synchronous case. Like previous DAG-based BFT protocols [19, 25], Bullshark requires no extra communication to achieve consensus on top of building the DAG. That is, parties can totally order the vertices of the DAG by interpreting their local view of the DAG edges. Unlike other asynchronous DAG-based protocols, Bullshark provides a practical low latency fast-path that exploits synchronous periods and deprecates the need for notoriously complex view-change and view-synchronization mechanisms. Bullshark achieves this while maintaining all the desired properties of its predecessor DAG-Rider [25]. Namely, it has optimal amortized communication complexity, it provides fairness and asynchronous liveness, and safety is guaranteed even under a quantum adversary.In order to show the practicality and simplicity of our approach, we also introduce a standalone partially synchronous version of Bullshark, which we evaluate against the state of the art. The implemented protocol is embarrassingly simple (200 LOC on top of an existing DAG-based mempool implementation). It is highly efficient, achieving for example, 125,000 transactions per second with a 2 seconds latency for a deployment of 50 parties. In the same setting, the state of the art pays a steep 50% latency increase as it optimizes for asynchrony.},
 booktitle = {Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security},
 pages = {2705–2718},
 numpages = {14},
@@ -96,20 +94,42 @@ series = {CCS '22}
 @inproceedings{DagRider,
 author = {Keidar, Idit and Kokoris-Kogias, Eleftherios and Naor, Oded and Spiegelman, Alexander},
 title = {All You Need is DAG},
-year = {2021},
-isbn = {9781450385480},
+year = 2021,
+isbn = 9781450385480,
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
 url = {https://doi.org/10.1145/3465084.3467905},
 doi = {10.1145/3465084.3467905},
-abstract = {We present DAG-Rider, the first asynchronous Byzantine Atomic Broadcast protocol that achieves optimal resilience, optimal amortized communication complexity, and optimal time complexity. DAG-Rider is post-quantum safe and ensures that all values proposed by correct processes eventually get delivered. We construct DAG-Rider in two layers: In the first layer, processes reliably broadcast their proposals and build a structured Directed Acyclic Graph (DAG) of the communication among them. In the second layer, processes locally observe their DAGs and totally order all proposals with no extra communication.},
 booktitle = {Proceedings of the 2021 ACM Symposium on Principles of Distributed Computing},
 pages = {165–175},
-numpages = {11},
+numpages = 11,
 keywords = {quantum safe, asynchrony, byzantine smr, atomic broadcast},
 location = {Virtual Event, Italy},
 series = {PODC'21}
 }
+                  
 
+@article{charlotte,
+  author       = {Isaac C. Sheff and
+                  Xinwen Wang and
+                  Haobin Ni and
+                  Robbert van Renesse and
+                  Andrew C. Myers},
+  title        = {Charlotte: Composable Authenticated Distributed Data Structures, Technical
+                  Report},
+  journal      = {CoRR},
+  volume       = {abs/1905.03888},
+  year         = {2019},
+  url          = {http://arxiv.org/abs/1905.03888},
+  eprinttype    = {arXiv},
+  eprint       = {1905.03888},
+  timestamp    = {Mon, 27 May 2019 13:15:00 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-1905-03888.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
   
 
+@misc{anomaSpecs,
+                  title={the one and only book of specs},
+                  author={Anoma}
+}
