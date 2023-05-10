@@ -873,41 +873,53 @@ then in particular the “original” quorum \(\q{a}\) must be live. %
 
 \subsection{Opinions about safety: default or fully parametric}
 \label{sec:asymmetric-safety}
-Besides assumptions about liveness %
-we also would like learners to commit to assumptions about (absence of) Byzantine behavior %
-such that we can state conditions under which %
+We now turn to assumptions about safety that %
+complement the assumptions about liveness of quorum systems. %
+For this, %
+we would like learners to commit to assumptions about %
+(absence of) Byzantine behavior. %
+This will allow us to state conditions under which %
 \Dag properties of the Narwhal protocol will transfer to \hnr. %
 Roughly, %
-we are looking for  validator sets %
+we are looking for collections of validator sets %
 that are “big enough” and consists of %
-“sufficiently trustworthy” validators % (according to a given learner) %
-such that learners would expect consistency between pairs of \base[s]. %
+“sufficiently relevant” validators % (according to a given learner) %
+such that learners would expect each of these validators sets sufficiently
+adequate for establishing consistency between pairs of \base[s]. %
+\todo{boy, is it hard to get these intuitions communicated }
 
-If we want to be more precise,
-we of course have to take into account that consistency is relative to the choice of pairs of \base[s]. %
-Moreover learners might have different opinions of whether a %
-specific validator (set) is trustworthy enough or %
-even has an intrinsic interest in consistency between a pair of \base[s]. %
+If we want to be more precise, %
+we have to take into account that %
+consistency is relative to a specific pair of \base[s]. %
+Moreover, different learners may have different opinions concerning
+the trustworthiness of a specific validator (set) or %
+the incentives for working towards consistency of a particular pair of \base[s]. %
 However, %
-before we go through all the details of whose opinions about what in relation to
-pairs of \base[s] we are interested in, %
-let us point out the simple default assumption: %
-a \emph{default safe set} that can ensure consistency of two \base[s] \(a,b∈\Lrnrs\) %
-is a set of validators \(s\subseteq \Accs\) that satisfies \(s \cap \q{a} \cap \q{b} \neq
-\varnothing\)
+before we delve into more details of which kinds of opinions about what in relation to
+all pairs of \base[s] we are interested in, %
+let us point out the simple default assumption that we can derive from quorum systems: %
+a \emph{default safe set} for consistency of two \base[s] \(a,b∈\Lrnrs\) %
+is a set of validators \(s\subseteq \Accs\) that satisfies
+\begin{equation}
+  \label{eq:validity}
+  s \cap \q{a} \cap \q{b} \neq\varnothing
+\end{equation}
 for every pair of learner specific quorums \(\q{a} \in \Q{a}\) and \(\q{b} \in
 \Q{b}\). 
 The definition of a learner graph is more general,
-but specializes to the case of default safe sets forming the edges between learners. %
+but specializes to the case of default safe sets forming the (weighted) edges between learners. %
 
 \begin{definition}[Learner graphs, validity of learner graphs]
   \label{def:learner-graph} %
   A learner graph for a fixed set of learners \(\Lrnrs\) and
-  validators \(\Accs\) is a pair \((\Q{}, \_–\_)\) where
-  \(\Q{}\) is a quorum system and %
-  \({\_–\_} \colon \Lrnrs \times \Lrnrs \to \wp\Bigl(\wp(\Accs)\Bigr)\)
-  is a function such that the following hold, for all \(a,b \in \Lrnrs\),
-  for all \(s \in a–b\) and \(x \in \Accs\):
+  validators \(\Accs\) is a pair \((\Q{}, \_–\_)\) 
+  of a learner-specific a quorum system \(\Q{}\) and %
+  a function \({\_–\_} \colon \Lrnrs \times \Lrnrs \to \wp\bigl(\wp(\Accs)\bigr)\)
+  that maps pairs of learners to sets of validators, %
+  referred to as \emph{safe sets}, %
+  such that the following % 
+  hold, for all pairs of learners \(a,b \in \Lrnrs\),
+  for all safe sets \(s \in a–b\) and all validators \(x \in \Accs\):
   \begin{enumerate}
   \item \(a–b = b–a\) %
   \item \(s \cup \{x\} \in  a–b\). %
@@ -924,14 +936,24 @@ but specializes to the case of default safe sets forming the edges between learn
   % [lr |-> E.to, q |-> Q2] \in TrustLive =>
   % \E N \in E.q : N \in Q1 /\ N \in Q2
   % \end{verbatim}
-  A \emph{safe set} of a learner graph is an element of \(a–b\), for some \(a,b \in \Lrnrs\). %
+  A \emph{safe set} of a learner graph is an element of \(a–b\), for some \(a,b
+  \in \Lrnrs\), %
+  \ie an element of the edge weights. 
 \end{definition}
 Thus a learner graph is an undirected simple graph whose nodes are learners  %
 and whose  edges carry sets of safe sets as weights; %
-nodes are moreover labeled by the set of all learner-specific quorums of the
-respective learner. 
-Further discussion of the learner graph is deferred to
-Appendix~\ref{apx:learner-graph}. 
+moreover, each node is labeled by %
+the set of all learner-specific quorums of the respective learner. %
+
+A simple procedure for ``refining'' any given learner graph, %
+\eg the default learner graph, % 
+consists in asking each learner \(a∈\Lrnrs\) %
+to remove safe sets from edges incident to \(a\) that are ``too small'', %
+\eg too small to be sure that none of the validators is tempted to equivocate; %
+for a concrete example, %
+a learner might want to strengthen the validity requirement such that
+every set of the shape \(s\cap \q{a} \cap \q{b}\) must be holding enough stake of \base \(a\). %
+Further discussion of the learner graph is deferred to Appendix~\ref{apx:learner-graph}. %
 
 \subsection{Discussion of desirable properties}
 \label{sec:property-discussion}
@@ -1086,7 +1108,7 @@ sub-protocols.
 
 \begin{figure}[htb]
   \centering%\footnotesize
-    \tikzsetnextfilename{scale-out-narwhal-architecture}
+  \tikzsetnextfilename{scale-out-narwhal-architecture}
   \begin{tikzpicture}[baseline={(p.south)},xscale=.9]
   \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
     \foreach \i in {1,...,10}{
@@ -1504,6 +1526,7 @@ last and thus becomes {the} final trigger). %
   \newcommand{\workerDistance}{3ex}
   \scalebox{.9}{%
   \footnotesize%
+  \tikzsetnextfilename{availability-protocol-at-genesis}
   \begin{tikzpicture}[scale=1.2]
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % The message passing diagram of the availability protocol at genesis
@@ -2076,6 +2099,7 @@ for the difference between headers at genesis and afterwards).
   \newcommand{\workerDistance}{3ex}
   \scalebox{.8}{%
     \footnotesize%
+    \tikzsetnextfilename{integrity-protocol}
     \begin{tikzpicture}[scale=1,thick]
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % The message passing diagram of the integrity protocol
@@ -2310,9 +2334,9 @@ casting an availability vote / sending a commitment message
 \todo{discuss terminnolgy}
 becomes a recursive commitment
 to storing all blocks until genesis
-(or the last block that some of learners might still want availabl).
+(or the last block that some of learners might still want available).
 
-
+\end{document}
 \section{Data structures}
 
 \begin{figure}[htb]
