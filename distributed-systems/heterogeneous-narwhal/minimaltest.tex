@@ -1,0 +1,395 @@
+% example.tex
+\documentclass[dvisvgm]{minimal}
+\usepackage{tikz}
+\usepackage[pro]{./fontawesome5}
+\usepackage{shellesc}%← for luatex to work with shell escape properly 
+\usepackage{manfnt,xfrac}
+\usepackage[english]{babel}
+\usepackage{flowchart}
+\usepackage{markdown}
+\usepackage{soulutf8}
+%\usepackage{tabularx}
+%\renewcommand{\st}[1]{}
+%\usepackage[scale=.75]{geometry}
+\usepackage{placeins}
+\usepackage{amsthm,amssymb,marginnote}
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+
+\usepackage{xcolor}
+\newcommand{\nb}[1]{%
+  \todo[color=blue!60!black,shadow]{NB:\raggedright\\ #1}%
+}
+
+\usepackage{newunicodechar}
+
+\input{UnicodeReplacements.tex}
+
+\usepackage{microtype}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\usepackage{amsmath}
+
+%\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+% macros
+\newcommand{\xnote}[1]{
+  \marginnote{\footnotesize #1}%
+}
+\newcommand{\rtnote}[1]{%
+  \reversemarginpar%
+  \xnote{#1}%
+  \normalmarginpar%
+}
+
+\newcommand{\base}[1][ ]{%
+  b\ase[#1]%
+}
+\newcommand{\Base}[1][ ]{%
+  B\ase[#1]%
+}
+\newcommand{\ase}[1][ ]{%
+  ase ledger%
+  \ifthenelse{\equal{#1}{ }}{}{#1}\xspace%
+}
+
+
+% \dag is defined to produce † unfortunately
+\newcommand{\DAG}[1][]{\textsc{Dag}#1\xspace}
+\newcommand{\Dag}[1][]{\textsc{dag}#1\xspace}
+\newcommand{\statetright}{\textsf{stateright}}
+\newcommand{\Statetright}{\textsf{Stateright}}
+\newcommand{\tla}[1][]{\textsc{tla}\ensuremath{{}^{+}}\xspace}
+\newcommand{\mev}{\textsc{mev}\xspace}
+\newcommand{\Mev}{\textsc{Mev}\xspace}
+\newcommand{\hnr}{\textsc{hnr}\xspace}
+\newcommand{\Hnr}{\textsc{Hnr}\xspace}
+\newcommand{\ptop}{\textsc{p\oldstylenums{2}p}}
+\newcommand{\Ptop}{\textsc{P\oldstylenums{2}p}}
+\newcommand{\fifo}{\textsc{fifo}}
+
+\newcommand{\Fifo}{\textsc{Fifo}}
+\newcommand{\aka}[1][]{a.k.a.\xspace}
+\newcommand{\ie}[1][, ]{\emph{i.e.}#1}
+\newcommand{\eg}[1][, ]{\emph{e.g.}#1}
+\newcommand{\Eg}[1][, ]{\emph{E.g.}#1}
+\newcommand{\etc}[1][ ]{\emph{etc.}\xspace}
+\newcommand{\fig}[1][]{Fig.~}
+\newcommand{\Accs}{%
+  % the set of acceptors
+  \mathbb{A}
+}
+\newcommand{\Lrnrs}{%
+  % the set of learners
+  \mathbb{L}
+}
+\newcommand{\Q}[1]{%
+  % trust live
+  Q_{#1}%
+}
+\newcommand{\q}[2][]{%
+  % a quorum of learner a
+  q#1_{#2}%
+}
+
+\newcommand{\rough}[1][ ]{%
+  %\fbox{\color{blue!70!black}!!}%
+  \ifthenelse{\equal{#1}{ }}%
+  {{\color{red}{\bf!!}}}%
+  {{\color{blue!70!black}\ul{#1}}}%
+}
+\newcommand{\circledX}[1]{\tikz[baseline={(x.south)}]{\node[circle,draw,inner sep=.3pt,outer sep=0pt,very thin](x){\tiny #1};}}
+\usepackage{newunicodechar}
+\newunicodechar{⅔}{\TwoThirds}
+\newcommand{\TwoThirds}{\sfrac{2}{3}}
+\newunicodechar{⅓}{\OneThird}
+\newcommand{\OneThird}{\sfrac{1}{3}}
+
+%\newunicodechar{}{\ensuremath{}}
+\newunicodechar{₁}{\ensuremath{{}_1}}
+\newunicodechar{₂}{\ensuremath{{}_2}}
+\newunicodechar{₃}{\ensuremath{{}_3}}
+\newunicodechar{₄}{\ensuremath{{}_4}}
+\newunicodechar{₅}{\ensuremath{{}_5}}
+\newunicodechar{★}{\ensuremath{*}~}
+\newunicodechar{ }{~}
+%\newunicodechar{①}{\circledX 1}
+\newunicodechar{“}{``}
+\newunicodechar{”}{''}
+%\newunicodechar{②}{\circledX 2}
+\usepackage{stmaryrd}
+\newunicodechar{↯}{\lightning}
+\newunicodechar{⚠}{\dbend}
+\newunicodechar{ₐ}{\ifmmode_a\else\ensuremath{{}_a}\fi}
+\newunicodechar{ₚ}{\ifmmode_p\else\ensuremath{{}_p}\fi}
+\newunicodechar{‼}{\rough}
+\newunicodechar{‽}{\ensuremath{?!}}
+\newunicodechar{↑}{\ensuremath{\uparrow}}
+\newunicodechar{⇑}{\ensuremath{\Uparrow}}
+\newunicodechar{♯}{\ensuremath{\sharp%\hat\#
+}}
+\newunicodechar{∅}{\ensuremath{\varnothing}}
+\newunicodechar{≠}{\ensuremath{\neq}}
+\newunicodechar{∩}{\ensuremath{\cap}}
+\newunicodechar{≡}{\ensuremath{\equiv}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{ℝ}{\ensuremath{\mathbb{R}}}
+\newunicodechar{↔}{\ensuremath{\leftrightarrows}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{⇝}{\ensuremath{\leadsto}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
+\newunicodechar{∀}{\ensuremath{\forall}}
+\newunicodechar{‌}{\allowbreak }
+\newunicodechar{‍}{{}}% non-breaking zero-width space
+
+\usepackage{tikzpeople}%‼ for evil validators etc.
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes,positioning,fit,backgrounds}
+%\usetikzlibrary{decorations.pathmorphing, decorations.pathreplacing, decorations.shapes, } 
+\usetikzlibrary{decorations}
+\usetikzlibrary {decorations.pathreplacing} % for braces
+\usetikzlibrary{shapes.geometric}
+\newcommand{\warningsign}{%
+  % kudos to 
+  % https://tex.stackexchange.com/questions/
+  % 159669/how-to-print-a-warning-sign-triangle-with-exclamation-point
+  \tikz[baseline=-.75ex] 
+  \node[shape=regular polygon, regular polygon sides=3, inner sep=-1pt, draw, thick] {%
+    \raisebox{2pt}{\textbf{!}}%
+  };
+}
+\usetikzlibrary{patterns,intersections,calc}
+\newcommand{\qs}[1][~]{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[rectangle,
+,double,inner sep=.5pt,outer sep=0pt,fill=black] (theNode){\textcolor{white}{\footnotesize \bf q#1}};}%
+}
+\newcommand{\bk}[1][green!60!black]{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[regular polygon, regular polygon sides=6
+,double,inner sep=.5pt,outer sep=0pt,fill=#1] (theNode){\textcolor{white}{\footnotesize \bf bk}};}}
+\newcommand{\ac}{\tikz[baseline={([yshift=0pt]theNode.base)}]{\node[regular polygon, regular polygon sides=6
+,double,inner sep=.5pt,outer sep=0pt,fill=black] (theNode){\textcolor{white}{\footnotesize \bf a}};}}
+
+\newcommand{\hd}[1][ ]{%
+  \ifthenelse{\equal{#1}{}}%
+  {\tikz[baseline={([yshift=0pt]theNode.base)}]{
+      \node[rectangle,inner sep=1.5pt,outer sep=0pt,double] (theNode){\textcolor{black}{\footnotesize \bf \ul{HD}}};
+    }}%
+  {\tikz[baseline={([yshift=0pt]theNode.base)}]{
+      \node[rectangle,double,inner sep=1.5pt,outer sep=0pt,double,draw] (theNode){\textcolor{black}{\footnotesize \bf HD}};
+    }}%
+}
+\newcommand{\wh}[1][ ]{%
+  \tikz[baseline={([yshift=0pt]theNode.base)}]{%
+    \ifthenelse{\equal{#1}{ }}%
+    {\node[rectangle,fill=black,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{white}{\footnotesize \bf WH}};}%
+    {\node[rectangle,rounded corners=0pt,draw,fill=lightgray,inner sep=1.5pt,outer sep=0pt] (theNode){\textcolor{black}{\footnotesize  WH}};}%
+  }%
+}
+\newcommand{\whs}[1][ ]{%
+  \ensuremath{\text{\wh[#1]s}}%
+}
+
+\newcommand{\anItemInline}[6][theNode]{%
+  % #1 the name of the node (just in case, remember picture is on)
+  % #2 shape (e.g., ellipse)
+  % #3 fill color (e.g., black)
+  % #4 draw color (e.g., green, or none)
+  % #5 text color (e.g., white)
+  % #6 the actual text (e.g., \bf TX)
+  \tikz[baseline={([yshift=0pt]#1.base)},remember picture]{%
+    \node[fill=#3,draw=#4,inner sep=.5pt,outer sep=0pt,#2] %
+    (#1){%
+      \textcolor{#5}{%
+        \small #6%
+      }%
+    };%
+  }%
+  % additional “decorations” via another pic,
+  % (with `remember picture` and `overlay`)
+  \xspace%
+}
+
+\newcommand{\onetx}[1][oneTX]{%
+  \anItemInline[#1]%
+  {rectangle}%
+  {white}%
+  {none}%
+  {black}%
+  {\ul{tx}}%
+}
+
+\newcommand{\tx}[1][theTX]{%
+  \anItemInline[#1]%
+  {rectangle,rounded corners=2pt,inner sep=1pt}%
+  {gray}%
+  {none}%
+  {white}%
+  {\textsc{tx}}%
+}
+\newcommand{\txs}[1][theTX]{%
+  \tx[#1]{}\ensuremath{\mathrm{s}}\xspace%
+}
+\newcommand{\TXS}[1][theTX]{%
+  \ensuremath{\overrightarrow{\tx[#1]}}%
+}
+
+% \newcommand{\tx}[1][]{%
+%   \tikz[baseline={([yshift=0pt]theNode.base)}]{%
+%     \node[ellipse,fill=black,inner sep=.5pt,outer sep=0pt] %
+%     (theNode){%
+%       \textcolor{white}{\footnotesize \bf TX\makebox[0pt][l]{\ensuremath{{}_{#1}}}}};%
+%   }%
+% }
+
+% \newcommand{\es}{%
+%   \tikz[baseline={([yshift=0pt]theNode.base)}]{\node[ellipse,fill=white,draw,thick,inner
+%     sep=.5pt,outer sep=0pt] (theNode){\textcolor{black}{\textsc{tx}}};}
+% }
+\newcommand{\es}[1][theES]{%
+  \anItemInline[#1]%
+  {rectangle,rounded corners=2pt,inner sep=1pt}%
+  {white}%
+  {black}%
+  {black}%
+  {\textsc{tx}}%
+}
+\newcommand{\rnd}{\ensuremath{\mathrm{rnd}}}
+\newcommand{\bn}{\ensuremath{\mathrm{bn}}}
+\newcommand{\cnt}{\ensuremath{\mathrm{cnt}}}
+% \usepackage{ebgaramond}
+% \usepackage[cmintegrals,cmbraces]{newtxmath}
+% \usepackage{ebgaramond-maths}
+% \usepackage{amssymb}
+%\usepackage{unicode-math} // buggy ⁈
+%\setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
+
+%https://tex.stackexchange.com/questions/425098/which-opentype-math-fonts-are-available
+% \usepackage{comment}
+% \includecomment{comment}
+
+
+\newcommand{\code}[2][ ]{%
+  \makebox[0pt][r]{\tiny%
+    \href{%
+      https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal%
+    }%
+    {\color{gray}\texttt{#2}}%
+    ~~%
+  }%
+}
+%\renewcommand{\todo}[2][]{}
+%\renewcommand{\endnote}[1]{#1}
+\usepackage{enotez}
+\setenotez{counter-format=Alph,backref=true}
+
+\let\oldendnote\endnote
+\renewcommand{\endnote}[2][ ]{%
+  \ifthenelse{\equal{#1}{ }}%
+  {\marginnote{\oldendnote{#2}}}%
+  {\marginnote{\oldendnote[#1]{#2}}}%
+}
+\newcommand{\hn}{Heterogeneous Narwhal\xspace}
+
+%\usepackage[textsize=footnotesize]{./luatodonotes}%
+% don't use \todo{...} in floats, i.e., figures etc. 
+\usepackage[textsize=tiny]{todonotes}%
+
+\newenvironment{preface}{}{}%think includecomment
+\newenvironment{theendnotes}{}{}%think includecomment
+\newenvironment{theapx}{}{}%think includecomment
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% the following four lines yield the reader's version
+% \excludecomment{preface}
+% \excludecomment{theendnotes}
+% \excludecomment{theapx}
+% \renewcommand{\todo}[2][]{}
+% \renewcommand{\endnote}[2][]{}
+
+
+\title{%
+  Heterogenizing \Dag-based consensus (1/\(n\)):%
+  \\%
+  heterogeneous narwhal-rider
+}
+\author{Typhon Team Heliax}
+\date{\today}
+
+
+% \tikzset{external/export=false}
+% \usetikzlibrary{external}
+% \tikzexternalize % activate!
+% \tikzset{external/only named=true}%important for todonote
+% \tikzset{external/force remake}
+% \tikzset{external/system call={lualatex \tikzexternalcheckshellescape
+%       -halt-on-error -interaction=batchmode -output-format=dvi -jobname "\image" "\texsource"}}
+% 
+
+\usepackage[autostyle]{csquotes}
+\usepackage% [%
+% backend=biber%
+%,
+% % sortlocale=de_DE,
+% % natbib=true,
+% % url=false, 
+% % doi=true,
+% % eprint=false
+% ]
+[style=authoryear-icomp]{biblatex}
+\addbibresource{HN.bib}
+\usepackage{fontspec}
+\setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
+\addfontfeatures{Numbers=OldStyle}
+
+\begin{document}
+  \begin{tikzpicture}[baseline={(p.south)},xscale=.9]
+  \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
+    \foreach \i in {1,...,10}{
+      \coordinate (p_\i) at  (p.160+20*\i);
+    }
+    \foreach \i in {1,...,10}{
+      \node[rectangle,fill=lightgray](w_\i) at (\i,0){\(w_{\i}\)};
+      \draw[->] (w_\i.north) .. controls +(0,.2) .. (p_\i);
+    }
+    \begin{pgfonlayer}{background}
+      \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(w_1.south west)(w_10.south east)(p)] {};
+      \draw[decorate,decoration={brace},thick] (background.north east)   -- node[anchor=base west] {~validator}(background.south east);
+    \end{pgfonlayer}
+    %%% 
+    \begin{scope}[shift={(0,-2)},yscale=-1]
+      \node[circle,draw,inner sep=1.5ex] (q) at (5.5,1.2) {q};
+      \foreach \i in {1,...,10}{
+        \coordinate (q_\i) at  (q.200-20*\i);
+      }
+      \foreach \i in {1,...,10}{
+        \node[rectangle,fill=lightgray](v_\i) at (\i,0){\(v_{\i}\)};
+        \draw[->] (v_\i.south) .. controls +(0,.2) .. (q_\i);
+      }
+      \begin{pgfonlayer}{background}
+        \node[rounded corners,fill=blue!30!white,inner sep=2ex] (background) [fit=(v_1.north west)(v_10.north east)(q)] {};
+        \draw[decorate,decoration={brace},thick] (background.north east)   -- node[anchor=base west] {~validator}(background.south east);
+      \end{pgfonlayer}
+    \end{scope}
+    \path (w_1) -- (v_1) coordinate[pos=.5](zzz);
+    \node[rectangle,fill=gray,draw,anchor=east] (c) at ([xshift=-7ex]zzz) {client};
+    \begin{scope}[thick]
+      \foreach \j in {1,...,10}
+      \draw[<->] (v_\j) -- (w_\j);
+
+      \draw[<->,dashed] (c.-15) .. controls +(2,0) and +(-1,1) .. (v_5.north west);
+      \draw[<->,dashed] (c.15) .. controls +(2,0) and +(-1,-1).. (w_7.south west);
+      \draw[<->,double] (p) -- (q);
+    \end{scope}
+   \end{tikzpicture}%
+
+ \end{document}
+
+ %%% Local Variables:
+ %%% mode: latex
+ %%% TeX-master: t
+ %%% TeX-engine: luatex
+ %%% TeX-command-extra-options: "-shell-escape -output-format=dvi"
+ %%% End:
