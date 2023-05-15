@@ -1,6 +1,8 @@
 \documentclass[%
 %draft,%
-dvipsnames]{article}
+dvipsnames
+%,dvi% ← for externalizing dvis instead of pdfs
+]{article}
 \usepackage[pro]{./fontawesome5}
 \usepackage{shellesc}%← for luatex to work with shell escape properly 
 \usepackage{manfnt,xfrac}
@@ -266,9 +268,6 @@ dvipsnames]{article}
 % \usepackage[cmintegrals,cmbraces]{newtxmath}
 % \usepackage{ebgaramond-maths}
 % \usepackage{amssymb}
-\usepackage{fontspec}
-\setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
-\addfontfeatures{Numbers=OldStyle}
 %\usepackage{unicode-math} // buggy ⁈
 %\setmathfont[math-style=ISO,bold-style=ISO,vargreek-shape=TeX]{Latin Modern Math}
 
@@ -331,6 +330,13 @@ dvipsnames]{article}
 \tikzexternalize % activate!
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
+% \tikzset{external/system call={lualatex \tikzexternalcheckshellescape
+%       -halt-on-error -interaction=batchmode -output-format=dvi -jobname "\image" "\texsource"}}
+%       ↑ for externalizing dvis instead of pdfs
+
+
+
+
 \usepackage[autostyle]{csquotes}
 \usepackage% [%
 % backend=biber%
@@ -343,9 +349,11 @@ dvipsnames]{article}
 % ]
 [style=authoryear-icomp]{biblatex}
 \addbibresource{HN.bib}
+\usepackage{fontspec}
+\setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
+\addfontfeatures{Numbers=OldStyle}
 
 \begin{document}
-
 
 
 % **********************************************************************
@@ -355,7 +363,7 @@ dvipsnames]{article}
 %   \centering
 %   \tikzsetnextfilename{test-this}
 %   \begin{tikzpicture}
-%     \node{testthis};
+%     \node{test this feature};
 %   \end{tikzpicture}
 % \end{figure}
 % **********************************************************************
@@ -548,28 +556,55 @@ dvipsnames]{article}
 
 \tableofcontents
 
+\section{todos up front}
+
+\begin{itemize}
+\item %
+  \href{https://excalidraw.com/\#room=2b53f36b346860e3761b,xL9Gkq_OfPCwUVjXDkHQmw}
+  {anchor blocks}
+  make clear that
+  \begin{enumerate}
+  \item we do chose anchors in \emph{the} global heterogeneous \Dag 
+  \item this might lead to single color blocks being selected
+  \item explain that this is fine due to additional functionality of
+    heterogeneous paxos, %
+    which allows to catch up on old consensuses %
+  \item which poses a severe issue for garbage collection though %
+  \end{enumerate}
+\item %
+  garbage collection issues for (sub-)chains: %
+  \begin{itemize}
+  \item workers will stop providing worker hashes if they are full?
+  \item blue transactions then will have to be taken care of red validators?
+  \item do we have expiration dates that need to be refreshed?
+  \end{itemize}
+\end{itemize}
+
 \section{Introduction}
-Directed acyclic graphs feature in % 
+Directed acyclic graphs feature in %
 several recently proposed consensus protocols
 \cite{NT,DagRider,Bullshark}.\xspace%
 \todo{→isaac?: 
   which ones should I add here?
 } 
-So, do we want to add just yet another \Dag-based consensus protocol?
+So, do we want to add yet another \Dag-based consensus protocol?
 
 The authors' answer is a crisp \emph{No!} %
 The research field being extremely active,
 chances are somebody is in the very process of writing a new \Dag-based
 consensus protocol.
-The present paper rather explains how to heterogenize existing protocols,
-starting with one paradigmatic example.\footnote{
-  We are confident that the heterogenization process applies to the whole family of \Dag-based mempools.
+The present paper is rather about \emph{heterogenizing} existing protocols, %
+choosing \Dag-based consensus as an example that %
+goes together with heterogeneous Paxos~\cite{opodis20HPaxos}.\xspace%
+\footnote{%
+  We are confident that heterogenization applies to %
+  the whole family of \Dag-based mempools. %
   %which we shall dub \Dag-pools. 
 }
-So,
-for the sake of specificity,
-we use a mix of Narwhal and \Dag-rider as a first guinea pig, %
-experimenting with the general principle of heterogenization.
+Roughly, %
+we use a mix of Narwhal and \Dag-rider and we might want to think of this 
+as an experiment that gathers evidence for how the general principle of
+heterogenization.
 
 Along the way,
 we shall find out that heterogenization applies differently to questions of availability and integrity \cite{charlotte}:
@@ -605,25 +640,25 @@ we shall find out that heterogenization applies differently to questions of avai
        to avoid is illustrated below. 
         \centerline{%
           \includegraphics{theIssue.pdf}%
-          % \tikzsetnextfilename{theIssue}
-          % \begin{tikzpicture}
-          %   \node[inner sep=0pt,outer sep=0pt] (header){%
-          %     \faBoxOpen[duotone]
-          %   };
-          %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCert) at (header.north east) {\faFileCertificate[duotone]};
-          %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCert) at (header.north west) {\faFileCertificate[duotone]};
-          %   \node[inner sep=0pt,outer sep=0pt,above left=4ex of header] (left) {\faBoxOpen[duotone]};
-          %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCertLeft) at (left.north west) {\faFileCertificate[duotone]};
-          %   \node[inner sep=0pt,outer sep=0pt,above right=4ex of header] (right) {\faBoxOpen[duotone]};
-          %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCertRight) at (right.north east) {\faFileCertificate[duotone]};
-          %   \draw (left.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
-          %   \draw (right.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
-          %   % \node[above=1ex of header] (fork)  {\faIcon{fork}}; 
-          % \end{tikzpicture}
         }
      \end{itemize}
    \end{minipage}
   }%
+  % \tikzsetnextfilename{theIssue}
+  % \begin{tikzpicture}
+  %   \node[inner sep=0pt,outer sep=0pt] (header){%
+  %   \faBoxOpen[duotone]
+  % };
+  %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCert) at (header.north east) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCert) at (header.north west) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,above left=4ex of header] (left) {\faBoxOpen[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCertLeft) at (left.north west) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,above right=4ex of header] (right) {\faBoxOpen[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCertRight) at (right.north east) {\faFileCertificate[duotone]};
+  %   \draw (left.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+  %   \draw (right.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+  %   %   \node[above=1ex of header] (fork)  {\faIcon{fork}}; 
+  % \end{tikzpicture}
 \color{gray}%
 \todo[inline,size=normalsize,caption={}]{.. a little bit of story telling, providing enough context and
   examples such that the reader can picture instances of the abstract concepts
@@ -743,7 +778,7 @@ that will allow us to describe \hnr's salient properties precisely. %
   \end{itemize}
 }
 
-We fix a finite set of \emph{learners} \(\Lrnrs\). %
+We fix a finite set of \emph{learners} \(𝕃\). %
 
 \subsection{Opinions about quorums: learner-specific and global}
 \label{sec:quorum-sets}
@@ -784,8 +819,7 @@ such that at least one of the quorums will be live at all times.\xspace%
   (which on top requires network synchrony)
 }
 A typical example for a learner-specific set of quorums
-is the collection of all sets of validators that are staking more than
-⅔ of all stake of the respective \base. 
+is the collection of all sets of validators that are staking more than ⅔ of all stake of the respective \base. 
 
 In general,
 the \hnr protocol description takes is parameterized by a function
@@ -797,12 +831,10 @@ such that one of these quorums is live at all times %
 (and that this is compatible with the learner's beliefs).\xspace%
 \footnote{%
   This is formalized as
-  \href%
-  {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
-  {\texttt{Trust Live}}
+  \href{https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}
+  {\texttt{TrustLive}}
   in the
-  \href%
-  {https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}%
+  \href{https://github.com/anoma/typhon/blob/main/tla/HPaxos.tla\#L34}
   {\tla-specification}.%
 }
 
@@ -831,7 +863,7 @@ we can formulate the second core definition. %
   A \emph{global weak quorum} is %
   a set of validators \(X\) that is a weak quorum for each learner, %
   i.e., 
-  for every learner~\(a ∈ \Lrnrs\) and %
+  for every learner~\(a ∈ 𝕃\) and %
   all learner-specific quorums \(\q{a} ∈ \Q{a}\), %
   we have a non-empty intersection \(X ∩ \q{a} ≠ ∅\). %
 \end{definition}
@@ -847,11 +879,11 @@ Finally, %
 we make the simplifying assumption %
 that learners agree with us on the following two points:
 \begin{enumerate}
-\item there is a common set of acceptors \(\Accs\),
+\item there is a common set of acceptors \(𝔸\),
   obtained as the union of the (unions of the) learner-specific quorums that  
 \item 
   we can assume that %
-  \(\q{a} ∈ \Q{a}\) and \(x ∈ \Accs\) %
+  \(\q{a} ∈ \Q{a}\) and \(x ∈ 𝔸\) %
   imply \(\q{a} \cup \{x\} ∈ \Q{a}\), w.l.o.g. %
 \end{enumerate}
 For the second point, %
@@ -870,21 +902,21 @@ then in particular the “original” quorum \(\q{a}\) must be live. %
 }
 
 
-
+\newpage
 \subsection{Opinions about safety: default or fully parametric}
 \label{sec:asymmetric-safety}
 We now turn to assumptions about safety that %
 complement the assumptions about liveness of quorum systems. %
 For this, %
 we would like learners to commit to assumptions about %
-(absence of) Byzantine behavior. %
+absence of Byzantine behavior and/or incentives for correct behavior. %
 This will allow us to state conditions under which %
 \Dag properties of the Narwhal protocol will transfer to \hnr. %
 Roughly, %
 we are looking for collections of validator sets %
 that are “big enough” and consists of %
 “sufficiently relevant” validators % (according to a given learner) %
-such that learners would expect each of these validators sets sufficiently
+such that learners would expect each of these validators sets %
 adequate for establishing consistency between pairs of \base[s]. %
 \todo{boy, is it hard to get these intuitions communicated }
 
@@ -898,31 +930,37 @@ However, %
 before we delve into more details of which kinds of opinions about what in relation to
 all pairs of \base[s] we are interested in, %
 let us point out the simple default assumption that we can derive from quorum systems: %
-a \emph{default safe set} for consistency of two \base[s] \(a,b∈\Lrnrs\) %
-is a set of validators \(s\subseteq \Accs\) that satisfies
+a \emph{default safe set} for consistency of two \base[s] \(a,b∈𝕃\) %
+is a set of validators \(s\subseteq 𝔸\) that satisfies
 \begin{equation}
   \label{eq:validity}
   s \cap \q{a} \cap \q{b} \neq\varnothing
 \end{equation}
 for every pair of learner specific quorums \(\q{a} \in \Q{a}\) and \(\q{b} \in
 \Q{b}\). 
+If all these validators are correct, %
+then they can jointly make sure that the two base ledgers stay consistent.\xspace%
+\footnote{%
+  In fact, %
+  such a safe set is both a weak \(a\)-quorum and a weak \(b\)-quorum. %
+}
 The definition of a learner graph is more general,
 but specializes to the case of default safe sets forming the (weighted) edges between learners. %
 
 \begin{definition}[Learner graphs, validity of learner graphs]
   \label{def:learner-graph} %
-  A learner graph for a fixed set of learners \(\Lrnrs\) and
-  validators \(\Accs\) is a pair \((\Q{}, \_–\_)\) 
+  A learner graph for a fixed set of learners \(𝕃\) and
+  validators \(𝔸\) is a pair \((\Q{}, \_–\_)\) 
   of a learner-specific a quorum system \(\Q{}\) and %
-  a function \({\_–\_} \colon \Lrnrs \times \Lrnrs \to \wp\bigl(\wp(\Accs)\bigr)\)
+  a function \({\_–\_} \colon 𝕃 \times 𝕃 \to \wp\bigl(\wp(𝔸)\bigr)\)
   that maps pairs of learners to sets of validators, %
   referred to as \emph{safe sets}, %
   such that the following % 
-  hold, for all pairs of learners \(a,b \in \Lrnrs\),
-  for all safe sets \(s \in a–b\) and all validators \(x \in \Accs\):
+  hold, for all pairs of learners \(a,b \in 𝕃\),
+  for all safe sets \(s \in a–b\) and all validators \(x \in 𝔸\):
   \begin{enumerate}
-  \item \(a–b = b–a\) %
-  \item \(s \cup \{x\} \in  a–b\). %
+  \item \(a–b = b–a\), \ie edges are undirected; %
+  \item \(s \cup \{x\} \in  a–b\), \ie edge weights are upward closed. %
   \end{enumerate}
   A learner graph is \emph{valid} if %
   for every \(\q{a} \in \Q{a}\), 
@@ -937,7 +975,7 @@ but specializes to the case of default safe sets forming the (weighted) edges be
   % \E N \in E.q : N \in Q1 /\ N \in Q2
   % \end{verbatim}
   A \emph{safe set} of a learner graph is an element of \(a–b\), for some \(a,b
-  \in \Lrnrs\), %
+  \in 𝕃\), %
   \ie an element of the edge weights. 
 \end{definition}
 Thus a learner graph is an undirected simple graph whose nodes are learners  %
@@ -947,16 +985,64 @@ the set of all learner-specific quorums of the respective learner. %
 
 A simple procedure for ``refining'' any given learner graph, %
 \eg the default learner graph, % 
-consists in asking each learner \(a∈\Lrnrs\) %
+consists in asking each learner \(a∈𝕃\) %
 to remove safe sets from edges incident to \(a\) that are ``too small'', %
 \eg too small to be sure that none of the validators is tempted to equivocate; %
 for a concrete example, %
 a learner might want to strengthen the validity requirement such that
 every set of the shape \(s\cap \q{a} \cap \q{b}\) must be holding enough stake of \base \(a\). %
 Further discussion of the learner graph is deferred to Appendix~\ref{apx:learner-graph}. %
-
+\newpage
 \subsection{Discussion of desirable properties}
 \label{sec:property-discussion}
+
+
+Narwhal and Tusk~\cite{NT} lists the following main properties:\xspace%
+\footnote{%
+  We have omitted the chain quality rule as it seems of sub-ordinate interest. %
+}
+\begin{description}
+\item[integrity] ensures that there is at most one of a certain kind, %
+  \eg blocks of a validators at a certain height
+\item [availability] ensures that hash-referenced data is retrievable, %
+  \eg the transaction requests of a batch referenced in a worker hash
+\item [\smash{\(\boldsymbol{\frac{2}{3}}\)}-causality] ensures that each node in the dag has a full quorum of %
+  direct causal predecessors.
+\end{description}
+We shall speak \emph{wide causality} instead of ⅔-causality %
+as we are working with more general quorum systems. %
+ The above properties ensure that it is enough to choose a 
+ ``chain'' of anchor\xspace%
+ \footnote{%
+   We shall speak of anchor blocks as %
+   they need not necessarily be proposed by a
+   leader. %
+ }\todo{add citation to footnote to \emph{anchor block}}
+ blocks. %
+
+ \todo[inline,caption={}]{%
+   add illustration of superimposed dags with chosen anchor block
+ }
+
+% The Narwhal Mempool satisfies the following properties:
+% • Integrity: For any certified digest 𝑑 every two invoca-
+% tions of read(d) by honest parties that return a value,
+% return the same value.
+% • Block-Availability: If a read operation read(d) is in-
+% voked by an honest party after write(𝑑, 𝑏) succeeds for
+% an honest party, the read(d) eventually completes and
+% returns 𝑏.
+% • Containment: Let 𝐵 be the set returned by a read_cau-
+% sal(d) operation, then for every 𝑏 ′ ∈ 𝐵, the set 𝐵 ′ re-
+% turned by read_causal(d’), 𝐵 ′ ⊆ 𝐵.
+% • 2/3-Causality: A successful read_causal(d) returns a
+% set 𝐵 that contains at least 2/3 of the blocks written
+% successfully before write(𝑑, 𝑏) was invoked.
+% • 1/2-Chain Quality At least 1/2 of the blocks in the
+% returned set 𝐵 of a successful read_causal(d) invocation
+% were written by honest parties.
+
+
 
 \todo[inline,size=normalsize,caption={}]{%
   recall/discuss the properties 
@@ -2336,7 +2422,7 @@ becomes a recursive commitment
 to storing all blocks until genesis
 (or the last block that some of learners might still want available).
 
-\end{document}
+
 \section{Data structures}
 
 \begin{figure}[htb]
@@ -2598,8 +2684,8 @@ sending a message according to some protocol %
 is a reaction to having received one or several messages.\xspace%
 \footnote{%
   Elapsing timers act very much like “local messages” %
-  (cf.\ \statetright's \href%
-  {docs.rs/stateright/latest/stateright/actor/trait.Actor.html}%
+  (cf.\ \statetright's %
+  \href{docs.rs/stateright/latest/stateright/actor/trait.Actor.html}%
   {\texttt{on\_tiemeout}}%
   ). 
 }
@@ -2704,8 +2790,7 @@ if we consider fully general quorum systems. %
   }
   of the Venn diagram of all quorums. 
   Based on the
-  \href%
-  {https://en.wikipedia.org/wiki/Inclusion\%E2\%80\%93exclusion_principle}%
+  \href{https://en.wikipedia.org/wiki/Inclusion\%E2\%80\%93exclusion_principle}%
   {inclusion exclusion principle}, %
   we can organize the regions of the Venn diagram (of a set of subsets of a set)
   into a tree in which
@@ -2832,8 +2917,7 @@ the triggered effect result in triggering new effects. %
 \end{figure}
 
 In the accompanying %
-\href%
-{https://github.com/anoma/typhon/tree/hnarwhal-stateright}%
+\href{https://github.com/anoma/typhon/tree/hnarwhal-stateright}%
 {prototype implementation}, %
 these tasks are accomplished %
 inside \statetright's \texttt{on\_msg}-functions. %
@@ -2899,14 +2983,10 @@ message synthesizer ref(s)
 \printbibliography
 \end{document}
 
+%%% -output-format=dvi ← for externalizing dvis instead of pdfs
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: t
 %%% TeX-engine: luatex
 %%% TeX-command-extra-options: "-shell-escape"
 %%% End:
-
-
-
-
-
