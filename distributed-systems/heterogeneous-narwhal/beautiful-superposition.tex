@@ -1,0 +1,81 @@
+\newcounter{fvalue}\setcounter{fvalue}{1}%{2}
+\newcounter{theN}\setcounter{theN}{4}%{7}
+\newcounter{theQ}\setcounter{theQ}{3}%{5}
+\newcounter{theW}\setcounter{theW}{2}%{3}
+\newcounter{maxrnd}\setcounter{maxrnd}{6}%{10}% must be even (bug)
+\newcounter{doTests}%
+\setcounter{doTests}{0}% no tests
+% \setcounter{doTests}{1}% do the tests
+\input{%
+  preparation.lua
+}
+\foreach \r in {1,...,\value{maxrnd}}{
+  \foreach \v in {1,...,\value{theN}}{
+    \newcounter{commited\v,\r}\setcounter{commited\v,\r}{0}%
+    \newcounter{old\v,\r}\setcounter{old\v,\r}{0}%
+  }
+}
+\scriptsize
+\begin{tikzpicture}[scale=1.5]
+\foreach \colour/\flip/\sh in {red/1/0,blue/-1/6} {
+  \begin{scope}[opacity=.4,shift={(\sh,0)},xscale=\flip]
+          % create blocks round by round ... 
+          \foreach \rr in {1,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
+              % \uncover<\showon->
+              {%
+                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox[duotone]\phantom{m}};% %{\(b_{\v,\rr}\)};%
+                \ifthenelse{\equal{\rr}{1}}%
+                {%
+                  \node[color=\colour,anchor=north,inner sep=1ex] (srv_\v-\rr) at ([yshift=-2ex]b\v-\rr.south) {\large\color{black}\faServer};
+
+                  \pgfmathtruncatemacro{\rednumber}{\v}
+                  \pgfmathtruncatemacro{\bluenumber}{6-\v}
+                  \ifthenelse{\equal{\colour}{red}}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {%
+                      \makebox[0pt][r]{\color{red}%
+                        \Large\(\bullet\)}\ensuremath{\rednumber}%
+                    };}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {\ensuremath{\bluenumber}%
+                      \makebox[0pt][l]{%
+                        \Large{\color{blue}\(\bullet\)}%
+                      }%
+                    };}
+                }%
+                {}%
+              }
+            }
+          } % end of first \rr 
+    %       % ... and the links of certificates of availability "CoA-links" / cf. signed quorums
+          \foreach[remember=\rrr as \lastr (initially 1)] \rrr in {2,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+\lastr*\value{theN}}
+              \foreach \l in {1,...,\value{theQ}}{
+    %             % \uncover<\showon->
+                 {%
+                  \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-.5ex]b\v-\rrr.south) {\tiny\,};
+                  \draw[thick,color=\colour,double,opacity=.4]
+                  (b\v-\rrr_\l.center) 
+                  .. controls ++(0,-.5) and ++(0,.5) .. %
+                  (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
+                  % node[pos=.5]{
+                  % \l
+                  % }
+                  ;
+                 }
+               }
+             }
+           }
+           \end{scope}
+         }
+       \end{tikzpicture}
+
+
+%%% -output-format=dvi ← for externalizing dvis instead of pdfs
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "HeterogeneousNarwhal"
+%%% TeX-engine: luatex
+%%% TeX-command-extra-options: "-shell-escape"
+%%% End:
