@@ -1,7 +1,7 @@
-all: pdf refs
+all: pdf refs pdf
 
 refs: pdf
-	bibtex HeterogeneousNarwhal.aux
+	biber HeterogeneousNarwhal
 
 pdf:
-	lualatex HeterogeneousNarwhal.tex
+	lualatex HeterogeneousNarwhal
