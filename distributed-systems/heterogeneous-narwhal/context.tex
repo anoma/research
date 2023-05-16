@@ -1,0 +1,111 @@
+  % \tikzsetnextfilename{theIssue}
+  % \begin{tikzpicture}
+  %   \node[inner sep=0pt,outer sep=0pt] (header){%
+  %   \faBoxOpen[duotone]
+  % };
+  %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCert) at (header.north east) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCert) at (header.north west) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,above left=4ex of header] (left) {\faBoxOpen[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,red,anchor=east] (RedCertLeft) at (left.north west) {\faFileCertificate[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,above right=4ex of header] (right) {\faBoxOpen[duotone]};
+  %   \node[inner sep=0pt,outer sep=0pt,blue,anchor=west] (BlueCertRight) at (right.north east) {\faFileCertificate[duotone]};
+  %   \draw (left.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+  %   \draw (right.south) .. controls +(0,-.5) and +(0,+.8) .. (header);
+  %   %   \node[above=1ex of header] (fork)  {\faIcon{fork}}; 
+  % \end{tikzpicture}
+\color{gray}%
+\todo[inline,size=normalsize,caption={}]{.. a little bit of story telling, providing enough context and
+  examples such that the reader can picture instances of the abstract concepts
+  to be described %
+  \begin{itemize}
+  \item integrity vs.\ availability  (Some quotes from Charlotte in the endnotes.)
+    \endnote{
+      Some quotes from Charlotte:
+      \begin{quote}
+        different observers have their own
+        beliefs about who might fail, and how
+        \\…\\
+        Blockchain applications implemented on Charlotte can
+        refer to each other’s blocks
+        \\…\\
+        new mechanisms for \emph{entanglement} of different block histories
+        \\…\\
+        least
+        ordering principle: only that which must be ordered, should be ordered
+        \\…\\
+        Authenticated Distributed Data Structure (ADDSs)
+        \\…\\
+        Charlotte ADDSs form the \emph{blockweb}
+        \\…\\
+        any \emph{observer} can specify their own threat model: %
+        the failures they believe the system should securely tolerate. %
+        \\…\\
+        As a new abstraction layer, Charlotte specifies rules for formatting blocks, referencing
+        blocks, and transmitting blocks across the network, and it also offers a formal model for reasoning
+        about data integrity and availability.
+        \\…\\
+        Users can express their assumptions about server behavior (including possible failures)
+        \\…\\
+        Charlotte to serve as a […] general ADDS framework
+        \\…\\
+        Charlotte ADDSs can \emph{intersect}, or share blocks
+        \\…\\
+        “what is the least ordering we actually need?”
+        \\…\\
+        Charlotte provides a common framework for data structures from separate
+        services to \ul{reference each other}.
+        \\…\\
+        Charlotte data structures are naturally composable: the \emph{union} of two data structures is itself a
+        data structure
+        \\…\\
+        the \emph{intersection} of two data
+        structures comprises the data that is part of both structures. We can think of \ul{cross-shard} transactions
+        appended to a sharded blockchain ADDS as data in the intersection of multiple shard ADDSs.
+      \end{quote}
+    }%
+  \item “learner-graph” jazz
+  \end{itemize}
+  The full details are deferred,
+  \eg to the preliminaries. 
+}
+
+
+We want to overcome the seemingly opposing views on multi-chain vs.\ cross-chain worlds. %
+We want to argue that there is a whole spectrum of ``worlds'' of which they are
+but the extremes. %
+Besides this general idea, %
+we also pursue some specific \emph{qualitative} goals: %
+\begin{itemize} %
+\item every validator or user should be able to interact with any number of \base[s] of the ecosystems, %
+  and %
+\item there is a unique definitive state of every \base.
+\end{itemize}
+In technical terms, %
+the person or service that requests to change or read the state of the \base[s]
+is called a \emph{learner}. % 
+One good example of learners are \emph{executor nodes} %
+\cite{anomaSpecs}\todo{%
+  check / update link, % 
+  \href{https://specs.anoma.net/main/components/typhon/execution.html?highlight=exe\#execution}{execution} %
+}, %
+which are in charge of updating the state of one or several \base[s] %
+according to a block of transactions that have been ordered by consensus. % 
+
+For technical considerations,
+the main points for validators are the following:
+\begin{itemize}
+\item %
+  they can participate in the production of blocks for %
+  as many \base[s] as they want %
+\item %
+  as long as they keep a record of relevant %
+  transaction data or the ensuing state changes. %
+\end{itemize}
+The latter point roughly corresponds to the availability protocol %
+while the former is mainly features in the integrity layer. %
+\todo{discuss the general set up of the execution engine / executor nodes:
+  these are the prime examples of learners we “have to” care about
+}
+Let us now look at turn to a concise recapitulation of the involved concepts. %
+
+\color{black}
