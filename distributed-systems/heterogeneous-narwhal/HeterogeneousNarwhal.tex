@@ -508,12 +508,12 @@ we shall find out that heterogenization applies differently to questions of avai
 }
 
 
-\section{Context}
-\label{sec:context}
+% \section{Context}
+% \label{sec:context}
 \todo[inline,size=normalsize,caption={},color=yellow]{%
   \begin{minipage}{1.0\linewidth}
     \begin{itemize}
-    \item this section needs to be written after we've narrowed down the
+    \item the context section needs to be written after we've narrowed down the
       audience %
     \item
       we need to be able to explain the main issue of integrity, %
@@ -522,7 +522,7 @@ we shall find out that heterogenization applies differently to questions of avai
       getting certificates of integrity from two different learners.  %
       In pictures,
       \href{https://excalidraw.com/\#room=cd00e8ac9ff18315b441,9-GTaLH6K3eKoRpbV9m1hg}{the situation}
-      to avoid is illustrated below. 
+      to avoid is illustrated below.
       \centerline{%
         \includegraphics{theIssue.pdf}%
       }
@@ -2269,7 +2269,7 @@ to storing all blocks until genesis
     % \end{tikzpicture}
 }
   % \qquad
-  % \subfloat[Worker \(y\) is commiting to the hash of~\(x\)]{
+  % \subfloat[Worker \(y\) is committing to the hash of~\(x\)]{
   %   \(y♯x\): \([\#(x)]_{\sim y}\)
   % }%‼
 
@@ -2417,6 +2417,48 @@ this means that every new header must contain a signed quorum;
 moreover,
 the signed quorum is a quorum of signatures for %
 a previous block of the unique learner. %
+
+
+\section{The chain of anchor blocks}
+\label{sec:anchor-blocks}
+
+A block can be proposed as anchor block if the following conditions are all met:
+\begin{description}
+\item[non-triviality] %
+  the underlying header must include at least one signed quorum
+  (unless the block is at genesis);
+\item[succession] %
+  the previously chosen anchor block must be reachable via references
+  in the form of signed quorums or availability certificates %
+  (unless the block is at genesis);
+\item[connectivity] %
+  for each signed quorum of the underlying header, %
+  the anchor block is referenced by a weak quorum of the respective learner %
+  by direct causal successors; %
+\item[readiness] there is no pending consensus. %
+\end{description}
+
+\paragraph{On pending consensus} %
+Consensus on anchor blocks is via Heterogeneous Paxos, abbreviated as P*.\xspace%
+\todo{hope this is still good to go.}%
+Note that P* may reach consensus relative to each learner %
+in such a way that as soon one of the learners has reached consensus %
+all connected learners will eventually have to come to the same consensus
+(albeit ``delayed'', in theory indefinitely). %
+To avoid global delays, %
+new proposals for anchors are possible
+if, for every signed quorum of the proposed block, %
+the respective learner has reached consensus for the previous anchor block %
+(unless the block is at genesis). %
+
+\paragraph{Inclusion fairness} %
+Typically, %
+there are reward systems such that, %
+as long as new blocks are added to the \Dag, %
+the rewards for committing an anchor block for a given learner will grow %
+as the ``backlog'' of block headers for the respective learner grow %
+such that eventually incentives will grow to add anchor blocks for the
+respective learner. %
 
 \printbibliography
 \end{document}
