@@ -5,6 +5,7 @@ dvipsnames
 ]{article}
 \usepackage[pro]{./fontawesome5}
 \usepackage{shellesc}%← for luatex to work with shell escape properly 
+\usepackage{luacode}
 \usepackage{manfnt,xfrac}
 \usepackage[english]{babel}
 \usepackage{flowchart}
@@ -993,36 +994,44 @@ a learner might want to strengthen the validity requirement such that
 every set of the shape \(s\cap \q{a} \cap \q{b}\) must be holding enough stake of \base \(a\). %
 Further discussion of the learner graph is deferred to Appendix~\ref{apx:learner-graph}. %
 \newpage
-\subsection{Discussion of desirable properties}
+\subsection{Discussion of desirable properties of the Narwhal DAG}
 \label{sec:property-discussion}
 
-
-Narwhal and Tusk~\cite{NT} lists the following main properties:\xspace%
+We shall focus on the following properties of the Narwhal \Dag \cite{NT}:\xspace%
 \footnote{%
-  We have omitted the chain quality rule as it seems of sub-ordinate interest. %
+  We have omitted the chain quality rule as %
+  it seems to fall into a different category: %
+  in Anoma, %
+  there is just no incentive to introduce spurious transactions or even blocks %
+  as this would incur substantial costs with no apparent benefit. %
 }
 \begin{description}
-\item[integrity] ensures that there is at most one of a certain kind, %
-  \eg blocks of a validators at a certain height
-\item [availability] ensures that hash-referenced data is retrievable, %
-  \eg the transaction requests of a batch referenced in a worker hash
-\item [\smash{\(\boldsymbol{\frac{2}{3}}\)}-causality] ensures that each node in the dag has a full quorum of %
-  direct causal predecessors.
+\item[integrity] %
+  ensures that there is at most one of a certain kind (and no ``forgeries''), %
+  \eg a unique block of a validator at a certain height; %
+\item [availability] %
+  ensures that hash-referenced data is retrievable, %
+  \eg the transaction data of a batch referenced in a worker hash; %
+\item [\smash{\(\boldsymbol{\frac{2}{3}}\)}-causality] %
+  ensures that each node in the Narwhal \Dag has %
+  a quorum of direct causal predecessors, %
+  \eg each block has to reference three out of four blocks if %
+  four blocks have been produced. %
 \end{description}
 We shall speak \emph{wide causality} instead of ⅔-causality %
 as we are working with more general quorum systems. %
- The above properties ensure that it is enough to choose a 
- ``chain'' of anchor\xspace%
- \footnote{%
-   We shall speak of anchor blocks as %
-   they need not necessarily be proposed by a
-   leader. %
- }\todo{add citation to footnote to \emph{anchor block}}
- blocks. %
-
- \todo[inline,caption={}]{%
-   add illustration of superimposed dags with chosen anchor block
- }
+The above properties ensure that it is enough to choose a 
+``chain'' of anchors\xspace%
+\footnote{%
+  We shall speak of anchor blocks as %
+  they need not necessarily be proposed by a
+  leader. %
+}\todo{add citation to footnote to \emph{anchor block}} 
+in the Narwhal \Dag %
+where anchors are nodes have a weak quorum of causal successors.
+\todo[inline,caption={}]{%
+  add illustration of superimposed dags with chosen anchor block
+}
 
 % The Narwhal Mempool satisfies the following properties:
 % • Integrity: For any certified digest 𝑑 every two invoca-
@@ -1051,10 +1060,8 @@ as we are working with more general quorum systems. %
   \etc
 }
 
-
-
 \section{Synopsis: %
-  how to heterogenize  “global” DAGs
+  heterogenizing the “global” DAG
 }
 \label{sec:overview}
 Running  Narwhal \cite{NT} leads to a continuously growing “global” \Dag of blocks that %
@@ -1065,7 +1072,8 @@ we
 \begin{enumerate}
 \item
   put ourselves into the seat of the omniscient observer
-  (such that it makes sense to talk about the “global” \Dag although it cannot be known) %
+  such that it makes sense to talk about the “global” \Dag %
+  (although it cannot be known) %
   and
 \item
   we disregard the hash referencing mechanism for transaction data
@@ -1073,19 +1081,33 @@ we
 \end{enumerate}
 These simplifying assumptions allow for meaningful illustrations 
 of Narwhal's \emph{mempool \Dag}, or \emph{mem-\Dag} for short. 
-\begin{figure}[htb]
-  \centering
-  \todo[inline,size=normalsize,caption={}]{put beautiful dag}
-  \caption{A mempool-\Dag }
-  \label{fig:conceptual-dag}
-\end{figure}
-An example of such a mem-\Dag is 
-depicted in Figure~\ref{fig:conceptual-dag}. %
+
 The two central features of protocol heterogenization are the following:
 \begin{enumerate}
 \item there is one instance of the original protocol for each learner;
 \item one overarching protocol interweaves the learner-specific instances.
 \end{enumerate}
+A simplistic way of connecting two Narwhal \Dag[s] is illustrated
+in Figure~\ref{fig:superposition-dag}. %
+We simply superimpose the \Dag[s] of the blue and red learner, %
+requiring that the validators that hold both blue and red stake to %
+reference both blue and red blocks. %
+If we choose anchor blocks only from the red and blue kind %
+all the results from Narwhal transfer to the superposition. %
+However there is one main issues with this approach: %
+the system is live only if the liveness assumptions of \emph{both} learners
+are correct. %
+\begin{figure}[htb]
+  \centering
+  \input{beautiful-superposition}
+  \caption{Superposition of two Narwhal \Dag[s]}
+  \label{fig:superposition-dag}
+\end{figure}
+\todo[caption={},inline]{%
+  To be discussed with isaac: %
+  we can use heterogeneous Paxos to keep growing a Narwhal \Dag for each learner.
+}
+
 The challenge is that we must allow for the possibility that %
 the overarching protocol is only running the instance of one single learner %
 under the assumption that %
@@ -1093,7 +1115,7 @@ all other learner-specific sub-protocols will catch up. %
 Thus, %
 we are aiming for a maximally asynchronous collaboration of the learner-specific
 sub-protocols. 
-
+% 
 % In heterogeneous Narwhal \Dag, 
 
 % Recall that we aim to build “global” \Dag[s] of blocks, one for each leaner, 
@@ -1189,8 +1211,15 @@ sub-protocols.
  each validator has a unique \emph{primary} and %
  a number of \emph{workers} %
  (see \fig\ref{fig:validators}).
-
-
+ Every validator has the same number of workers.
+ Thus,
+ each worker can be assigned a unique \emph{mirror worker}
+ on every other validator.
+ We shall adopt the convention
+ that  identifiers of mirror workers share the same subscript.
+ For example,
+ in \fig\ref{fig:validators},
+ workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
 
 \begin{figure}[htb]
   \centering%\footnotesize
@@ -1241,15 +1270,7 @@ sub-protocols.
 
 \section{Worker actions (availability and executability)}
 \label{sec:worker-actions}
-Every validator has the same number of workers.
-Thus,
-each worker can be assigned a unique \emph{mirror worker}
-on every other validator.
-We shall adopt the convention
-that  identifiers of mirror workers share the same subscript.
-For example,
-in \fig\ref{fig:validators},
-workers~\(w_2\) and~\(v_2\) are mirror workers of each other.
+
 Workers are mainly featuring in the availability protocol, %
 which keeps the transaction available until execution. % 
 Specifically,
