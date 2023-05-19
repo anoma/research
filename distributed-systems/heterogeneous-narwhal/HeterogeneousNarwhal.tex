@@ -2419,46 +2419,77 @@ the signed quorum is a quorum of signatures for %
 a previous block of the unique learner. %
 
 
-\section{The chain of anchor blocks}
+\section{The anchor block sequence}
 \label{sec:anchor-blocks}
 
-A block can be proposed as anchor block if the following conditions are all met:
+Anchor block selection for \hnr is analogous to %
+anchor block selection in the Narwhal \Dag. %
+In particular, for the case of connected learner graphs,
+\begin{enumerate}
+\item we chose a sequence of anchor blocks in %
+  the heterogeneous block \Dag and %
+\item %
+  each choice of anchor block results in committing %
+  it with all its causal predecessors that were not committed yet. %
+\end{enumerate}
+However, %
+as learners are heterogeneous, %
+they might (want to) progress at different ``speeds''. %
+In particular, %
+the commitment to a specific anchor block need not be synchronous. %
+In other words, %
+the current height at which learners commit anchor blocks might differ %
+(in the eyes of the omniscient observer). %
+
+An anchor block is \emph{proposable} if all of
+the following conditions hold: %
 \begin{description}
 \item[non-triviality] %
   the underlying header must include at least one signed quorum
   (unless the block is at genesis);
-\item[succession] %
-  the previously chosen anchor block must be reachable via references
+\item[progression] %
+  the chosen anchor block must \emph{not} be reachable via references %
   in the form of signed quorums or availability certificates %
-  (unless the block is at genesis);
+  from previous anchor blocks;%
+  \endnote{%
+    A safe way to make sure we know this is storing for each validator %
+    the last anchor block that has been committed. %
+    This is constant storage or linear in the number of validators. %
+    One might consider adding additional weak links to blocks. %
+  }
 \item[connectivity] %
   for each signed quorum of the underlying header, %
   the anchor block is referenced by a weak quorum of the respective learner %
   by direct causal successors; %
-\item[readiness] there is no pending consensus. %
+\item[readiness] there is at least one learner for which %
+  \begin{itemize}
+  \item the underlying header contains a signed quorum and %
+  \item the previous anchor block has been committed %
+    / ordered (unless it is the first anchor block). % 
+  \end{itemize}
 \end{description}
 
-\paragraph{On pending consensus} %
+\paragraph{On readiness} %
 Consensus on anchor blocks is via Heterogeneous Paxos, abbreviated as P*.\xspace%
-\todo{hope this is still good to go.}%
+\todo{or any better abbreviation...}%
 Note that P* may reach consensus relative to each learner %
 in such a way that as soon one of the learners has reached consensus %
 all connected learners will eventually have to come to the same consensus
 (albeit ``delayed'', in theory indefinitely). %
 To avoid global delays, %
 new proposals for anchors are possible
-if, for every signed quorum of the proposed block, %
+if, for at least one signed quorum of the proposed block, %
 the respective learner has reached consensus for the previous anchor block %
-(unless the block is at genesis). %
+(unless it is the first anchor block). %
 
-\paragraph{Inclusion fairness} %
+\paragraph{On inclusion fairness} %
 Typically, %
 there are reward systems such that, %
 as long as new blocks are added to the \Dag, %
-the rewards for committing an anchor block for a given learner will grow %
-as the ``backlog'' of block headers for the respective learner grow %
-such that eventually incentives will grow to add anchor blocks for the
-respective learner. %
+the (expected) rewards for committing an anchor block for a given learner will grow %
+with the size of the ``backlog'' of block headers for the respective learner %
+such that eventually incentives will reach a point where %
+adding anchor blocks for the respective learner is most rewarding. %
 
 \printbibliography
 \end{document}
