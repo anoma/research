@@ -4,4 +4,4 @@ refs: pdf
 	biber HeterogeneousNarwhal
 
 pdf:
-	lualatex HeterogeneousNarwhal
+	lualatex -shell-escape HeterogeneousNarwhal
