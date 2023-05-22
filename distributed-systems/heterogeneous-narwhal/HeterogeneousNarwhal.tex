@@ -2423,23 +2423,27 @@ a previous block of the unique learner. %
 \label{sec:anchor-blocks}
 
 Anchor block selection for \hnr is analogous to %
-anchor block selection in the Narwhal \Dag. %
+leader block selection in the Narwhal \Dag. %
 In particular, for the case of connected learner graphs,
 \begin{enumerate}
 \item we chose a sequence of anchor blocks in %
   the heterogeneous block \Dag and %
 \item %
   each choice of anchor block results in committing %
-  it with all its causal predecessors that were not committed yet. %
+  it together with all its causal predecessors that were not committed yet. %
 \end{enumerate}
-However, %
-as learners are heterogeneous, %
-they might (want to) progress at different ``speeds''. %
-In particular, %
+The difference is that learners are possibly heterogeneous, %
+\eg they might progress at different ``speeds'' %
+for reasons such as latency/throughput trade-off. %
+As a consequence, %
 the commitment to a specific anchor block need not be synchronous. %
 In other words, %
 the current height at which learners commit anchor blocks might differ %
-(in the eyes of the omniscient observer). %
+(in the eyes of the omniscient observer) %
+and some instances\xspace%
+\todo{check istances terminology with issac+specs}%
+of consensus might be \emph{pending}, %
+but with the expectations that learners will eventually ``catch up''. %
 
 An anchor block is \emph{proposable} if all of
 the following conditions hold: %
@@ -2448,7 +2452,7 @@ the following conditions hold: %
   the underlying header must include at least one signed quorum
   (unless the block is at genesis);
 \item[progression] %
-  the chosen anchor block must \emph{not} be reachable via references %
+  the anchor block must \emph{not} be reachable via references %
   in the form of signed quorums or availability certificates %
   from previous anchor blocks;%
   \endnote{%
@@ -2457,15 +2461,18 @@ the following conditions hold: %
     This is constant storage or linear in the number of validators. %
     One might consider adding additional weak links to blocks. %
   }
-\item[connectivity] %
+\item[coverage\footnotemark]\footnotetext{%
+    The terminology is based on the covering relation %
+    as exhibited in Hasse diagrams. %
+  } %
   for each signed quorum of the underlying header, %
-  the anchor block is referenced by a weak quorum of the respective learner %
-  by direct causal successors; %
-\item[readiness] there is at least one learner for which %
+  the anchor block is referenced by a weak quorum of the respective learner; %
+  %by direct causal successors; %
+\item[readiness] if consensus for a previous anchor block has been initiated, %
+  there is at least one learner for which %
   \begin{itemize}
   \item the underlying header contains a signed quorum and %
-  \item the previous anchor block has been committed %
-    / ordered (unless it is the first anchor block). % 
+  \item all previous anchor blocks have been committed. %
   \end{itemize}
 \end{description}
 
