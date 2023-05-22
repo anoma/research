@@ -1144,7 +1144,7 @@ or other direct signals to their workers.\xspace%
   }
   \begin{description}
   \item[%
-    \code{???}%
+    %\code{???}%
     {Transaction batching (\(\txs:= \txs:\tx\))}%
     ]%
     \xnote{[worker]}%
@@ -1951,7 +1951,7 @@ learner-specific quorum of signatures,
     \footnote{%
       Signed quorums will be used as references to previous blocks in %
       the learner-specific \Dag[s],
-      as detailed in Section/Appendix\ref{???}. %FIXME reference.
+      as detailed in Section \ref{sec:integr-gener-case}. %
     }
     \todo{fill in reference}
   \end{description}
@@ -2389,15 +2389,15 @@ is as follows: %
   eventually,\xspace%
   \footnote{%
     In fact, %
-    this is the crucial point (see also \ref{??}). %
+    this is the crucial point (see also Section \ref{sec:anchor-blocks}). %
     % 
   } 
   the block gets commited,
   \begin{itemize}
   \item either if the signed quorum makes it into a leader block, 
-  \item or by indirect reference
-    (see \ref{...} for more detail)
-    \todo{how do we do weak links anyway ... }
+  \item or by transitive reference
+    %(see \ref{...} for more detail)
+    \todo{do we do weak links  anyway / and if how ... }
   \end{itemize}
 \item
   the block containing the transaction gets executed. 
@@ -2499,13 +2499,17 @@ such that eventually incentives will reach a point where %
 adding anchor blocks for the respective learner is most rewarding. %
 
 \printbibliography
-\end{document}
 
-\begin{theapx}
+
+
 \appendix
 
-\section{Learner graph jazz}
-\ref{apx:learner-graph}
+\section{On the learner graph}
+\label{apx:learner-graph}
+
+See \cite{opodis20HPaxos} for more details. 
+
+\end{document}
 
 w.r.t.\ some specific other \base \(b\), %
 thus giving rise to a learner-indexed family of collections of sets. %
@@ -2837,8 +2841,6 @@ message synthesizer ref(s)
 
 
 
-  
-\end{theapx}
 \begin{theendnotes}
 
 \section{Endnotes}
