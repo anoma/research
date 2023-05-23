@@ -1,0 +1,26 @@
+% very minimal example veryminimal.tex (based on pgf docs https://ctan.org/pkg/pgf?lang=en)
+\documentclass[dvi]{minimal}
+% \usepackage{fontspec}
+\usepackage[hypertex]{hyperref}
+\usepackage{tikz}
+\begin{document}
+\begin{verbatim}
+$ latex veryminimal.tex
+$ dvisvgm --font-format=woff2 --linkmark=box:Melon veryminimal.dvi
+$ firefox veryminimal.svg
+\end{verbatim}
+\begin{center}
+  \begin{tikzpicture}
+    \node (a) at (0,0) {a};
+    \node (b) at (1,0) {b};
+    \href{https://specs.anoma.net}{\draw[->] (a) -- (b);}
+    % \node (c) at (3,0){c};
+  \end{tikzpicture}
+\end{center}
+Hello \tikz [baseline] \fill [fill=blue!80!black] (0,.75ex)
+circle[radius=.75ex]; \href{https://specs.anoma.net}{x}
+
+\end{document}
+
+
+
