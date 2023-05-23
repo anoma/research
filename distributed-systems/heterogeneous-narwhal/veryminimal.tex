@@ -1,12 +1,13 @@
 % very minimal example veryminimal.tex (based on pgf docs https://ctan.org/pkg/pgf?lang=en)
 \documentclass[dvi]{minimal}
-% \usepackage{fontspec}
+\usepackage{fontspec}
 \usepackage[hypertex]{hyperref}
 \usepackage{tikz}
 \begin{document}
 \begin{verbatim}
-$ latex veryminimal.tex
-$ dvisvgm --font-format=woff2 --linkmark=box:Melon veryminimal.dvi
+$ dvilualatex veryminimal.tex
+$ ./dvisvgm --font-format=ttf,ah --linkmark=box:Melon veryminimal.dvi
+$ dvisvgm --font-format=ttf --linkmark=box:Melon veryminimal.dvi
 $ firefox veryminimal.svg
 \end{verbatim}
 \begin{center}
