@@ -1,5 +1,5 @@
 % example.tex
-\documentclass[dvisvgm]{minimal}
+\documentclass[dvi]{minimal}
 \usepackage{tikz}
 \usepackage[pro]{./fontawesome5}
 \usepackage{shellesc}%← for luatex to work with shell escape properly 
@@ -320,13 +320,11 @@
 
 
 % \tikzset{external/export=false}
-% \usetikzlibrary{external}
-% \tikzexternalize % activate!
-% \tikzset{external/only named=true}%important for todonote
-% \tikzset{external/force remake}
-% \tikzset{external/system call={lualatex \tikzexternalcheckshellescape
-%       -halt-on-error -interaction=batchmode -output-format=dvi -jobname "\image" "\texsource"}}
-% 
+\usetikzlibrary{external}
+\tikzexternalize % activate!
+\tikzset{external/only named=true}%important for todonote
+\tikzset{external/force remake}
+\tikzset{external/system call={lualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -output-format=dvi -jobname "\image" "\texsource"}}
 
 \usepackage[autostyle]{csquotes}
 \usepackage% [%
@@ -345,6 +343,7 @@
 \addfontfeatures{Numbers=OldStyle}
 
 \begin{document}
+  \tikzsetnextfilename{theMinimalExample}
   \begin{tikzpicture}[baseline={(p.south)},xscale=.9]
   \node[circle,draw,inner sep=1.5ex] (p) at (5.5,1.2) {p};
     \foreach \i in {1,...,10}{
