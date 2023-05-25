@@ -1,46 +1,48 @@
 \documentclass[%
 %draft,%
-dvipsnames
-%,dvi% ← for externalizing dvis instead of pdfs
+dvipsnames%
+%,dvi% ← for externalizing dvis instead of pdfs / also needs dvilualatex
 ]{article}
 \usepackage[pro]{./fontawesome5}
-\usepackage{shellesc}%← for luatex to work with shell escape properly 
+\usepackage{shellesc}%← makes shell escape work for lualatex/dvilualatex
 \usepackage{luacode}
 \usepackage{manfnt,xfrac}
 \usepackage[english]{babel}
 \usepackage{flowchart}
 \usepackage{markdown}
 \usepackage{soulutf8}
-%\usepackage{tabularx}
-%\renewcommand{\st}[1]{}
-%\usepackage[scale=.75]{geometry}
-\usepackage{placeins}
-\usepackage{amsthm,amssymb,marginnote}
-\usepackage{hyperref}
+\usepackage{placeins}% for \FloatBarrier
+\usepackage{marginnote}
+\usepackage[%
+%hypertex% ← add this option for dvisvgm
+]{hyperref} 
 \hypersetup{breaklinks=true}
-
-\newtheorem{ex}{Example}[section]
-
 \usepackage{subfig}
-
-
 \usepackage{xcolor}
+
+\usepackage{microtype}
+\usepackage{amsthm}
+\newtheorem{ex}{Example}[section]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\usepackage{amsmath,amssymb}
+\usepackage{xspace}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes,positioning,fit,backgrounds}
+% \usetikzlibrary{decorations.pathmorphing, decorations.pathreplacing, decorations.shapes, } 
+\usetikzlibrary{decorations}
+\usetikzlibrary {decorations.pathreplacing} % for braces
+\usetikzlibrary{shapes.geometric}
+\usepackage{tikzpeople}%‼ for evil validators etc.
+\usepackage{newunicodechar}
+\input{UnicodeReplacements.tex}
+
+% macros
 \newcommand{\nb}[1]{%
   \todo[color=blue!60!black,shadow]{NB:\raggedright\\ #1}%
 }
 
-\usepackage{newunicodechar}
-
-\input{UnicodeReplacements.tex}
-
-\usepackage{microtype}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\usepackage{amsmath}
-
-%\usepackage[utf8]{inputenc}
-\usepackage{xspace}
-% macros
 \newcommand{\xnote}[1]{
   \marginnote{\footnotesize #1}%
 }
@@ -60,7 +62,6 @@ dvipsnames
   ase ledger%
   \ifthenelse{\equal{#1}{ }}{}{#1}\xspace%
 }
-
 
 % \dag is defined to produce † unfortunately
 \newcommand{\DAG}[1][]{\textsc{Dag}#1\xspace}
@@ -151,15 +152,9 @@ dvipsnames
 \newunicodechar{‌}{\allowbreak }
 \newunicodechar{‍}{{}}% non-breaking zero-width space
 
-\usepackage{tikzpeople}%‼ for evil validators etc.
 
-\usepackage{tikz}
-\usetikzlibrary{arrows}
-\usetikzlibrary{shapes,positioning,fit,backgrounds}
-%\usetikzlibrary{decorations.pathmorphing, decorations.pathreplacing, decorations.shapes, } 
-\usetikzlibrary{decorations}
-\usetikzlibrary {decorations.pathreplacing} % for braces
-\usetikzlibrary{shapes.geometric}
+
+
 \newcommand{\warningsign}{%
   % kudos to 
   % https://tex.stackexchange.com/questions/
@@ -314,26 +309,14 @@ dvipsnames
 \renewcommand{\endnote}[2][]{}
 
 
-\title{%
-  Heterogenizing \Dag-based consensus (1/\(n\)):%
-  \\%
-  heterogeneous narwhal-rider
-}
-\author{Typhon Team Heliax}
-\date{\today}
-
 
 % \tikzset{external/export=false}
 \usetikzlibrary{external}
 \tikzexternalize % activate!
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
-% \tikzset{external/system call={lualatex \tikzexternalcheckshellescape
-%       -halt-on-error -interaction=batchmode -output-format=dvi -jobname "\image" "\texsource"}}
-%       ↑ for externalizing dvis instead of pdfs
-
-
-
+% \tikzset{external/system call={dvilualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode  -jobname "\image" "\texsource"}}
+% ↑ for externalizing dvis instead of pdfs
 
 \usepackage[autostyle]{csquotes}
 \usepackage% [%
@@ -346,13 +329,13 @@ dvipsnames
 % % eprint=false
 % ]
 [style=authoryear-icomp]{biblatex}
-\addbibresource{HN.bib}
+
 \usepackage{fontspec}
 \setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
 \addfontfeatures{Numbers=OldStyle}
 
 
-%%%%%%%% "stuff" for the Narwhal dags
+%%%%%%%% "luacounters for the luacode" for the Narwhal dags
 \newcounter{fvalue}\setcounter{fvalue}{1}%{2}
 \newcounter{theN}\setcounter{theN}{4}%{7}
 \newcounter{theQ}\setcounter{theQ}{3}%{5}
@@ -371,20 +354,21 @@ dvipsnames
   }
 }
 
-\begin{document}
-% **********************************************************************
-% for testing externalization 
-% **********************************************************************
-% \begin{figure}
-%   \centering
-%   \tikzsetnextfilename{test-this}
-%   \begin{tikzpicture}
-%     \node{test this feature};
-%   \end{tikzpicture}
-% \end{figure}
-% **********************************************************************
 
-%\input{preface}
+\title{%
+  Heterogenizing \Dag-based consensus (1/\(n\)):%
+  \\%
+  heterogeneous narwhal-rider
+}
+\author{Typhon Team Heliax}
+\date{\today}
+
+\addbibresource{HN.bib}
+
+\begin{document}
+
+% \input{externalizationTesting}
+% \input{preface}
 
 \maketitle
 
@@ -433,19 +417,6 @@ dvipsnames
   \hnr is a heterogeneous version of   the Narwhal mempool, %
   extended with a variation of \Dag-rider's weak links%
   ---whence the name.\xspace%
-  \todo[caption={}]{%
-    Add to the conclusion sth. like : 
-    \itshape In a follow up paper,
-    we will cover how heterogeneous Narwhal is \\
-    1. an alternative to bridges    \\
-    2. which benefits / drawback we have, in general\\
-    3. which parts are “implementation detail”.\\
-    4. and also add {
-      what exactly we mean by \emph{eventual finality} of the mem-\Dag[s].
-    }
-    cf. (on page~\pageref{page:firstpage}):
-    \textsc{not} part of this paper ...
-  }
   We conclude with a discussion of how heterogenization is %
   a suitable tool for building essentially any eco-system on %
   the spectrum that interpolates between %
@@ -466,7 +437,7 @@ dvipsnames
 %\input{todos-up-front.tex}
 
 \section{Introduction}
-Directed acyclic graphs feature in %
+Directed acyclic graphs (\Dag[s]) feature in %
 several recently proposed consensus protocols
 \cite{NT,DagRider,Bullshark}.\xspace%
 \todo{→isaac?: 
@@ -487,12 +458,12 @@ goes together with heterogeneous Paxos~\cite{opodis20HPaxos}.\xspace%
   %which we shall dub \Dag-pools. 
 }
 Roughly, %
-we use a mix of Narwhal and \Dag-rider and we might want to think of this 
-as an experiment that gathers evidence for how the general principle of
-heterogenization.
+we combine techniques from Narwhal and \Dag-rider
+to obtain a paradigmatic example of a heterogeneous \Dag-based mempool, %
+or \emph{\Dag-pool}, for short. 
 
 Along the way,
-we shall find out that heterogenization applies differently to questions of availability and integrity \cite{charlotte}:
+we shall describe how heterogenization applies differently to matters of availability and integrity \cite{charlotte}:
 \begin{description}
 \item[availability] all relevant transaction data is promised to be available
 \item[integrity] the protocol is safe, \eg no double spends, equivocation,  \etc. 
@@ -508,8 +479,165 @@ we shall find out that heterogenization applies differently to questions of avai
 }
 
 
-% \section{Context}
-% \label{sec:context}
+\section{The running example}
+\label{sec:context}
+%
+The Narwhal mempool protocol, conceptually, %
+builds a ``global'' \Dag of blocks %
+as illustrated in Figure~\ref{fig:global-narwhal-DAG}. % 
+The central properties are the following three: %
+\begin{itemize}
+\item %
+  each validator can propose at most one block at each height; %
+\item %
+  each block after genesis must reference a quorum %
+  \ie at least \(2f+1\),  of blocks of the \emph{previous} round; %
+\item %
+  a block needs to be referenced from a weak quorum %
+  (\ie at least \(f+1\)) of blocks the \emph{next} round, %
+  to be a potential leader block (\aka as anchor). %
+\end{itemize}
+
+\begin{figure}[htb]
+  \centering
+  \scriptsize
+  \tikzsetnextfilename{narwhal-dag}
+\begin{tikzpicture}[scale=1.5]
+\foreach \colour/\flip/\sh in {black/1/0} {
+  \begin{scope}[opacity=.8,shift={(\sh,0)},xscale=\flip]
+          % create blocks round by round ... 
+          \foreach \rr in {1,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
+              % \uncover<\showon->
+              {%
+                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox[duotone]\phantom{m}};% %{\(b_{\v,\rr}\)};%
+                \ifthenelse{\equal{\rr}{1}}%
+                {%
+                  \node[color=\colour,anchor=north,inner sep=1ex] (srv_\v-\rr) at ([yshift=-2ex]b\v-\rr.south) {\large\color{black}\faServer};
+
+                  \pgfmathtruncatemacro{\rednumber}{\v}
+                  % \pgfmathtruncatemacro{\bluenumber}{6-\v}
+                  \ifthenelse{\equal{\colour}{red}}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {%
+                      \makebox[0pt][r]{\color{red}%
+                        \Large\(\bullet\)}\ensuremath{\rednumber}%
+                    };}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {\ensuremath{\rednumber}%
+                      \makebox[0pt][l]{%
+                        %\Large{\color{blue}\(\bullet\)}%
+                      }%
+                    };}
+                }%
+                {}%
+              }
+            }
+          } % end of first \rr 
+    %       % ... and the links of certificates of availability "CoA-links" / cf. signed quorums
+          \foreach[remember=\rrr as \lastr (initially 1)] \rrr in {2,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+\lastr*\value{theN}}
+              \foreach \l in {1,...,\value{theQ}}{
+    %             % \uncover<\showon->
+                 {%
+                  \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-2ex]b\v-\rrr.south) {\tiny\,};
+                  \draw[thick,color=\colour,double,opacity=.8]
+                  (b\v-\rrr_\l.center) 
+                  .. controls ++(0,-.5) and ++(0,.5) .. %
+                  (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
+                  % node[pos=.5]{
+                  % \l
+                  % }
+                  ;
+                 }
+               }
+             }
+           }
+           \end{scope}
+         }
+       \end{tikzpicture}
+  \caption{Illustration of a “global” Narwhal \Dag of four validators}
+  \label{fig:global-narwhal-DAG}
+\end{figure}
+
+As running example, %
+let us consider two  \base[s] with proof-of-stake, % 
+which want to have a shared Narwhal \Dag %
+such that block contain atomic cross-chain transactions. %
+The want to build a ``super-imposed'' \Dag %
+(see Figure~\ref{fig:superposition-dag}). % 
+\begin{figure}[htb]
+  \centering
+  \scriptsize
+  %\tikzsetnextfilename{narwhal-dag}
+\scriptsize
+\quad\foreach \colour/\flip/\sh in {red/1/0,blue/-1/6} {
+  \tikzsetnextfilename{narwhal-dag-\colour}
+\begin{tikzpicture}[scale=1.5]
+  \begin{scope}[opacity=.4,shift={(\sh,0)},xscale=\flip]
+          % create blocks round by round ... 
+          \foreach \rr in {1,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
+              % \uncover<\showon->
+              {%
+                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox[duotone]\phantom{m}};% %{\(b_{\v,\rr}\)};%
+                \ifthenelse{\equal{\rr}{1}}%
+                {%
+                  \node[color=\colour,anchor=north,inner sep=1ex] (srv_\v-\rr) at ([yshift=-2ex]b\v-\rr.south) {\large\color{black}\faServer};
+
+                  \pgfmathtruncatemacro{\rednumber}{\v}
+                  \pgfmathtruncatemacro{\bluenumber}{6-\v}
+                  \ifthenelse{\equal{\colour}{red}}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {%
+                      \makebox[0pt][r]{\color{red}%
+                        \Large\(\bullet\)}\ensuremath{\rednumber}%
+                    };}
+                  {\node[anchor=north,inner sep=0pt,outer sep=0pt] at (srv_\v-\rr.south) {\ensuremath{\bluenumber}%
+                      \makebox[0pt][l]{%
+                        \Large{\color{blue}\(\bullet\)}%
+                      }%
+                    };}
+                }%
+                {}%
+              }
+            }
+          } % end of first \rr 
+    %       % ... and the links of certificates of availability "CoA-links" / cf. signed quorums
+          \foreach[remember=\rrr as \lastr (initially 1)] \rrr in {2,...,4}{
+            \foreach \v in {1,...,\value{theN}}{
+              \pgfmathtruncatemacro{\showon}{\v+\lastr*\value{theN}}
+              \foreach \l in {1,...,\value{theQ}}{
+    %             % \uncover<\showon->
+                 {%
+                  \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-.5ex]b\v-\rrr.south) {\tiny\,};
+                  \draw[thick,color=\colour,double,opacity=.4]
+                  (b\v-\rrr_\l.center) 
+                  .. controls ++(0,-.5) and ++(0,.5) .. %
+                  (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
+                  % node[pos=.5]{
+                  % \l
+                  % }
+                  ;
+                 }
+               }
+             }
+           }
+           \end{scope}
+       \end{tikzpicture}\quad
+     }
+  \caption{Two “global” Narwhal \Dag of five validators with stakes}
+  \label{fig:two-global-narwhal-DAGS}
+\end{figure}
+
+\begin{figure}[htb]
+  \centering
+  
+  \input{beautiful-superposition}
+  \caption{Superposition of two Narwhal \Dag[s]}
+  \label{fig:superposition-dag}
+\end{figure}
+
 \todo[inline,size=normalsize,caption={},color=yellow]{%
   \begin{minipage}{1.0\linewidth}
     \begin{itemize}
@@ -869,12 +997,6 @@ all the results from Narwhal transfer to the superposition. %
 However there is one main issues with this approach: %
 the system is live only if the liveness assumptions of \emph{both} learners
 are correct. %
-\begin{figure}[htb]
-  \centering
-  \input{beautiful-superposition}
-  \caption{Superposition of two Narwhal \Dag[s]}
-  \label{fig:superposition-dag}
-\end{figure}
 \todo[caption={},inline]{%
   To be discussed with isaac: %
   we can use heterogeneous Paxos to keep growing a Narwhal \Dag for each learner.
@@ -2497,6 +2619,23 @@ the (expected) rewards for committing an anchor block for a given learner will g
 with the size of the ``backlog'' of block headers for the respective learner %
 such that eventually incentives will reach a point where %
 adding anchor blocks for the respective learner is most rewarding. %
+
+\section{Conclusion}
+\label{sec:conclusion}
+\todo[caption={}]{%
+  Add to the conclusion sth. like : 
+  \itshape In a follow up paper,
+  we will cover how heterogeneous Narwhal is \\
+  1. an alternative to bridges    \\
+  2. which benefits / drawback we have, in general\\
+  3. which parts are “implementation detail”.\\
+  4. and also add {
+    what exactly we mean by \emph{eventual finality} of the mem-\Dag[s].
+  }
+  cf. (on page~\pageref{page:firstpage}):
+  \textsc{not} part of this paper ...
+}
+
 
 \printbibliography
 
