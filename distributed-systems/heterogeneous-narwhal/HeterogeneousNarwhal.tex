@@ -1,10 +1,10 @@
 \documentclass[%
-%draft,%
+%draft,% faster compilation, omitting externalized TikZ pictures 
 dvipsnames%
-%,dvi% ← for externalizing dvis instead of pdfs / also needs dvilualatex
+%‼%,dvi% ← externalizing to dvi instead of pdf, cf. dvilualatex
 ]{article}
 \usepackage[pro]{./fontawesome5}
-\usepackage{shellesc}%← makes shell escape work for lualatex/dvilualatex
+%‼%\usepackage{shellesc}%← makes shell escape work for lualatex/dvilualatex
 \usepackage{luacode}
 \usepackage{manfnt,xfrac}
 \usepackage[english]{babel}
@@ -14,7 +14,7 @@ dvipsnames%
 \usepackage{placeins}% for \FloatBarrier
 \usepackage{marginnote}
 \usepackage[%
-%hypertex% ← add this option for dvisvgm
+%‼%hypertex% ← add this option for dvisvgm, converting from dvi to svg
 ]{hyperref} 
 \hypersetup{breaklinks=true}
 \usepackage{subfig}
@@ -315,20 +315,11 @@ dvipsnames%
 \tikzexternalize % activate!
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
-% \tikzset{external/system call={dvilualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode  -jobname "\image" "\texsource"}}
-% ↑ for externalizing dvis instead of pdfs
+%‼%\tikzset{external/system call={dvilualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"; dvips -o "\image".ps "\image".dvi}} % ← for dvi externalization
+% ↑ externalize will create dvi files instead of pdfs
 
 \usepackage[autostyle]{csquotes}
-\usepackage% [%
-% backend=biber%
-%,
-% % sortlocale=de_DE,
-% % natbib=true,
-% % url=false, 
-% % doi=true,
-% % eprint=false
-% ]
-[style=authoryear-icomp]{biblatex}
+
 
 \usepackage{fontspec}
 \setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
@@ -363,11 +354,22 @@ dvipsnames%
 \author{Typhon Team Heliax}
 \date{\today}
 
+\usepackage% [%
+% backend=biber%
+% ,
+% % sortlocale=de_DE,
+% % natbib=true,
+% % url=false, 
+% % doi=true,
+% % eprint=false
+% ]
+[style=authoryear-icomp]{biblatex}
 \addbibresource{HN.bib}
 
 \begin{document}
 
-% \input{externalizationTesting}
+\input{externalizationTesting}
+
 % \input{preface}
 
 \maketitle
@@ -440,9 +442,9 @@ dvipsnames%
 Directed acyclic graphs (\Dag[s]) feature in %
 several recently proposed consensus protocols
 \cite{NT,DagRider,Bullshark}.\xspace%
-\todo{→isaac?: 
+\todo{→isaac?:
   which ones should I add here?
-} 
+}
 So, do we want to add yet another \Dag-based consensus protocol?
 
 The authors' answer is a crisp \emph{No!} %
@@ -465,8 +467,10 @@ or \emph{\Dag-pool}, for short.
 Along the way,
 we shall describe how heterogenization applies differently to matters of availability and integrity \cite{charlotte}:
 \begin{description}
-\item[availability] all relevant transaction data is promised to be available
-\item[integrity] the protocol is safe, \eg no double spends, equivocation,  \etc. 
+\item[availability] %
+  all relevant transaction data is certified to be available %
+\item[integrity] %
+  the available data is unaltered, \eg no double spends, equivocation, \etc. %
 \end{description}
 
 \todo[inline,size=normalsize]{main contribs:\\[\baselineskip]
@@ -2998,7 +3002,6 @@ message synthesizer ref(s)
 
 \end{document}
 
-%%% -output-format=dvi ← for externalizing dvis instead of pdfs
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: t
