@@ -3,23 +3,31 @@
 dvipsnames%
 %‼%,dvi% ← externalizing to dvi instead of pdf, cf. dvilualatex
 ]{article}
-\usepackage[pro]{./fontawesome5}
+\usepackage{fontspec}
+\usepackage{luaotfload}
+\usepackage[pro]{fontawesome5}
 %‼%\usepackage{shellesc}%← makes shell escape work for lualatex/dvilualatex
 \usepackage{luacode}
-\usepackage{manfnt,xfrac}
+\usepackage{manfnt}
+\usepackage{xfrac}
+\usepackage{pgfsys}
 \usepackage[english]{babel}
 \usepackage{flowchart}
 \usepackage{markdown}
 \usepackage{soulutf8}
+
 \usepackage{placeins}% for \FloatBarrier
 \usepackage{marginnote}
+
+
 \usepackage[%
 %‼%hypertex% ← add this option for dvisvgm, converting from dvi to svg
 ]{hyperref} 
+%\def\pgfsysdriver{pgfsys-dvips.def}
 \hypersetup{breaklinks=true}
 \usepackage{subfig}
 \usepackage{xcolor}
-
+\usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{amsthm}
 \newtheorem{ex}{Example}[section]
@@ -315,13 +323,14 @@ dvipsnames%
 \tikzexternalize % activate!
 \tikzset{external/only named=true}%important for todonote
 %\tikzset{external/force remake}
-%‼%\tikzset{external/system call={dvilualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"; dvips -o "\image".ps "\image".dvi}} % ← for dvi externalization
+%‼%\tikzset{external/system call={dvilualatex \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"; pdf2ps "\image".pdf}} % ← for dvi externalization
 % ↑ externalize will create dvi files instead of pdfs
+% ; dvips -o "\image".ps "\image".dvi 
 
 \usepackage[autostyle]{csquotes}
 
 
-\usepackage{fontspec}
+
 \setmainfont[SmallCapsFont={Latin Modern Roman Caps}]{Latin Modern Roman}
 \addfontfeatures{Numbers=OldStyle}
 
@@ -366,11 +375,12 @@ dvipsnames%
 [style=authoryear-icomp]{biblatex}
 \addbibresource{HN.bib}
 
+
 \begin{document}
 
-\input{externalizationTesting}
+%\input{externalizationTesting}
 
-% \input{preface}
+%\input{preface}
 
 \maketitle
 
@@ -515,7 +525,8 @@ The central properties are the following three: %
               \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
               % \uncover<\showon->
               {%
-                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox[duotone]\phantom{m}};% %{\(b_{\v,\rr}\)};%
+                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox%[duotone]
+                  \phantom{m}};% %{\(b_{\v,\rr}\)};%
                 \ifthenelse{\equal{\rr}{1}}%
                 {%
                   \node[color=\colour,anchor=north,inner sep=1ex] (srv_\v-\rr) at ([yshift=-2ex]b\v-\rr.south) {\large\color{black}\faServer};
@@ -588,7 +599,8 @@ the stake they hold, either blue, red or both. %
               \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
               % \uncover<\showon->
               {%
-                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox[duotone]\phantom{m}};% %{\(b_{\v,\rr}\)};%
+                \node[draw,rectangle,color=\colour,inner sep=1pt] (b\v-\rr) at (\v,\rr) {\phantom{m}\faBox%[duotone]
+                  \phantom{m}};% %{\(b_{\v,\rr}\)};%
                 \ifthenelse{\equal{\rr}{1}}%
                 {%
                   \node[color=\colour,anchor=north,inner sep=1ex] (srv_\v-\rr) at ([yshift=-2ex]b\v-\rr.south) {\large\color{black}\faServer};
