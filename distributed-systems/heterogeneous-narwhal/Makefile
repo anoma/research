@@ -9,3 +9,8 @@ pdf:
 veryminimal:
 	dvilualatex veryminimal.tex
 	./dvisvgm --font-format=ttf,ah --linkmark=box:Melon veryminimal.dvi
+
+dvis:
+	sed 's/%‼%/%‼%\n/g' HeterogeneousNarwhal.tex > HeterogeneousNarwhalDVI.tex
+	dvilualatex -shell-escape HeterogeneousNarwhalDVI
+	rm HeterogeneousNarwhalDVI.*
