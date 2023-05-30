@@ -493,8 +493,9 @@ we shall describe how heterogenization applies differently to matters of availab
 }
 
 
-\section{The running example}
-\label{sec:context}
+\section{{How to superimpose two Narwhal DAGs?}}
+\label{sec:context}%
+\label{sec:running-example}%
 %
 The Narwhal mempool protocol, conceptually, %
 builds a ``global'' \Dag of blocks %
@@ -502,14 +503,16 @@ as illustrated in Figure~\ref{fig:global-narwhal-DAG}. %
 The central properties are the following three: %
 \begin{itemize}
 \item %
-  each validator can propose at most one block at each height; %
+  each validator can propose %
+  at most one block at each height; %
 \item %
   each block after genesis must reference a quorum %
-  \ie at least \(2f+1\),  of blocks of the \emph{previous} round; %
+  (\ie at least \(2f+1\)) %
+  of blocks of the \emph{previous} round; %
 \item %
   a block needs to be referenced from a weak quorum %
-  (\ie at least \(f+1\)) of blocks the \emph{next} round, %
-  to be a potential leader block (\aka as anchor). %
+  (\ie at least \(f+1\)) of blocks the \emph{next} round %
+  to be a leader block (\aka anchor). %
 \end{itemize}
 
 \begin{figure}[htb]
@@ -576,13 +579,34 @@ The central properties are the following three: %
 \end{figure}
 
 As running example, %
-let us consider two  \base[s] with proof-of-stake, % 
-which want to have a shared Narwhal \Dag %
-such that block contain atomic cross-chain transactions. %
-The want to build a ``super-imposed'' \Dag %
-(see Figure~\ref{fig:superposition-dag}). % 
-The colored circles under the validators represent %
-the stake they hold, either blue, red or both. %
+let us consider two  \base[s] with proof-of-stake. % 
+The validators agree to build a single shared Narwhal \Dag that comprises %
+the information of \emph{two} separate Narwhal \Dag[s] %
+such that blocks contain cross-chain transactions that can be executed atomically. %
+
+A first idea of %
+what such a ``super-imposed'' \Dag looks like is %
+illustrated in Figure~\ref{fig:superposition-dag}); % 
+the colored circles under the validators, %
+rendered as server icons ({\tiny\faServer}), %
+represent the stake they hold, either blue, red or both. %
+Now, %
+as a first thought, %
+we can restrict anchor blocks to those that %
+satisfy the conditions for both \base[s]; %
+in fact, %
+we obtain a safe implementation of a combined Narwhal mempool. %
+However, %
+apart from obvious questions about skewed incentives for %
+the validators that only hold stake of one of the \base[s], %
+the additional safety guarantees come at the price of %
+risks for liveness: %
+roughly, this naïve superposition of Narwhal \Dag[s] tends to be %
+``less live'' than each of the \base[s]. %
+We shall describe how one can do better for this specific example %
+and, in general, %
+the whole spectrum of trade-offs for building a shared mem-\Dag %
+for a pair of \base[s]. % 
 
 \begin{figure}[htb]
   \centering
@@ -653,7 +677,7 @@ the stake they hold, either blue, red or both. %
   \centering
   
   \input{beautiful-superposition}
-  \caption{Superposition of two Narwhal \Dag[s]}
+  \caption{Naïve Superposition of two Narwhal \Dag[s]}
   \label{fig:superposition-dag}
 \end{figure}
 
