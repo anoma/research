@@ -1,10 +1,10 @@
 \scriptsize
 \begin{tikzpicture}[scale=1.5]
-\foreach \colour/\flip/\sh in {red/1/0,blue/-1/6} {
-  \begin{scope}[opacity=.4,shift={(\sh,0)},xscale=\flip]
+  \foreach \colour/\flip/\sh in {red/1/0,blue/-1/6,red/1/0,blue/-1/6,red/1/0,blue/-1/6,red/1/0,blue/-1/6,red/1/0,blue/-1/6} {
+  \begin{scope}[opacity=.25,shift={(\sh,0)},xscale=\flip]
           % create blocks round by round ... 
-          \foreach \rr in {1,...,4}{
-            \foreach \v in {1,...,\value{theN}}{
+          \foreach \rr in {1,...,4}{%
+            \foreach \v in {1,...,\value{theN}}{%
               \pgfmathtruncatemacro{\showon}{\v+(\rr-1)*\value{theN}}
               % \uncover<\showon->
               {%
@@ -38,7 +38,7 @@
     %             % \uncover<\showon->
                  {%
                   \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-.5ex]b\v-\rrr.south) {\tiny\,};
-                  \draw[thick,color=\colour,double,opacity=.4]
+                  \draw[thick,color=\colour,double,opacity=.25]
                   (b\v-\rrr_\l.center) 
                   .. controls ++(0,-.5) and ++(0,.5) .. %
                   (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
