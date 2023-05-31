@@ -375,7 +375,7 @@ dvipsnames%
 [style=authoryear-icomp]{biblatex}
 \addbibresource{HN.bib}
 
-
+\renewcommand{\code}[2][]{}
 \begin{document}
 
 %\input{externalizationTesting}
@@ -497,10 +497,10 @@ we shall describe how heterogenization applies differently to matters of availab
 \label{sec:context}%
 \label{sec:running-example}%
 %
-The Narwhal mempool protocol, conceptually, %
+Recall that the Narwhal mempool protocol, conceptually, %
 builds a ``global'' \Dag of blocks %
 as illustrated in Figure~\ref{fig:global-narwhal-DAG}. % 
-The central properties are the following three: %
+The central properties are the following: % three: %
 \begin{itemize}
 \item %
   each validator can propose %
@@ -521,7 +521,7 @@ The central properties are the following three: %
   \tikzsetnextfilename{narwhal-dag}
 \begin{tikzpicture}[scale=1.5]
 \foreach \colour/\flip/\sh in {black/1/0} {
-  \begin{scope}[opacity=.8,shift={(\sh,0)},xscale=\flip]
+  \begin{scope}[opacity=1,shift={(\sh,0)},xscale=\flip]
           % create blocks round by round ... 
           \foreach \rr in {1,...,4}{
             \foreach \v in {1,...,\value{theN}}{
@@ -559,7 +559,7 @@ The central properties are the following three: %
     %             % \uncover<\showon->
                  {%
                   \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-2ex]b\v-\rrr.south) {\tiny\,};
-                  \draw[thick,color=\colour,double,opacity=.8]
+                  \draw[thick,color=\colour,double,opacity=1]
                   (b\v-\rrr_\l.center) 
                   .. controls ++(0,-.5) and ++(0,.5) .. %
                   (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
@@ -580,9 +580,10 @@ The central properties are the following three: %
 
 As running example, %
 let us consider two  \base[s] with proof-of-stake. % 
-The validators agree to build a single shared Narwhal \Dag that comprises %
-the information of \emph{two} separate Narwhal \Dag[s] %
-such that blocks contain cross-chain transactions that can be executed atomically. %
+The validators set out to build a single shared Narwhal \Dag that comprises %
+the information of \emph{two} separate ``native'' Narwhal \Dag[s]. %
+The rationale is that then blocks may contain cross-chain transactions %
+that can be executed atomically. %
 
 A first idea of %
 what such a ``super-imposed'' \Dag looks like is %
@@ -599,14 +600,17 @@ we obtain a safe implementation of a combined Narwhal mempool. %
 However, %
 apart from obvious questions about skewed incentives for %
 the validators that only hold stake of one of the \base[s], %
-the additional safety guarantees come at the price of %
-risks for liveness: %
-roughly, this naïve superposition of Narwhal \Dag[s] tends to be %
-``less live'' than each of the \base[s]. %
-We shall describe how one can do better for this specific example %
-and, in general, %
-the whole spectrum of trade-offs for building a shared mem-\Dag %
-for a pair of \base[s]. % 
+the ``perfect'' safety guarantees of the naïve superposition %
+come at the price of risks for liveness: %
+roughly, superimposing Narwhal \Dag[s] leads to a %
+``less live'' \Dag, relative to \emph{each one} of the \base[s]. %
+We shall describe how we can do better,
+not only for this specific example,
+but more generally for any system based on a valid learner graph.\footnote{%
+  In fact, %
+  there is a whole spectrum of trade-offs for building a shared mem-\Dag, %
+  as discussed in Section~\ref{sec:discussion}. %
+} %
 
 \begin{figure}[htb]
   \centering
@@ -616,7 +620,7 @@ for a pair of \base[s]. %
 \quad\foreach \colour/\flip/\sh in {red/1/0,blue/-1/6} {
   \tikzsetnextfilename{narwhal-dag-\colour}
 \begin{tikzpicture}[scale=1.5]
-  \begin{scope}[opacity=.4,shift={(\sh,0)},xscale=\flip]
+  \begin{scope}[opacity=1,shift={(\sh,0)},xscale=\flip]
           % create blocks round by round ... 
           \foreach \rr in {1,...,4}{
             \foreach \v in {1,...,\value{theN}}{
@@ -654,7 +658,7 @@ for a pair of \base[s]. %
     %             % \uncover<\showon->
                  {%
                   \node[circle,fill=\colour,inner sep=-1pt] (b\v-\rrr_\l) at ([xshift=\l ex-.5ex]b\v-\rrr.south) {\tiny\,};
-                  \draw[thick,color=\colour,double,opacity=.4]
+                  \draw[thick,color=\colour,double,opacity=1]
                   (b\v-\rrr_\l.center) 
                   .. controls ++(0,-.5) and ++(0,.5) .. %
                   (b\arabic{linkToBlockFrom\v,\rrr,\l}-\lastr.north) %
@@ -675,7 +679,6 @@ for a pair of \base[s]. %
 
 \begin{figure}[htb]
   \centering
-  
   \input{beautiful-superposition}
   \caption{Naïve Superposition of two Narwhal \Dag[s]}
   \label{fig:superposition-dag}
@@ -684,9 +687,10 @@ for a pair of \base[s]. %
 \todo[inline,size=normalsize,caption={},color=yellow]{%
   \begin{minipage}{1.0\linewidth}
     \begin{itemize}
-    \item the context section needs to be written after we've narrowed down the
-      audience %
-    \item
+    \item %
+      the context section needs to be written after %
+      we've narrowed down the audience %
+    \item %
       we need to be able to explain the main issue of integrity, %
       \ie How can we ``ensure'' that a validator does not produce two different %
       blocks at a given height, % 
@@ -702,7 +706,7 @@ for a pair of \base[s]. %
 }%
 
 
-\section{Preliminaries}
+\section{Learner-graphs, quorums, and all that} 
 \label{sec:preliminaries}
 We now describe the central concepts %
 that we rely on in our description of the \hnr protocol %
@@ -712,14 +716,15 @@ we also introduce terminology
 that will allow us to describe \hnr's salient properties precisely. % 
 
 \todo[inline,size=normalsize,caption={}]{%
-  “copy” relevant parts of %
-  the heterogeneous paxos tech report%
-  \\
-  this can be split up into
-  \begin{itemize}
-  \item (liveness) qourums -- in the main part
-  \item entanglement (for safety) -- in the appendix
-  \end{itemize}
+  % “copy” relevant parts of %
+  % the heterogeneous paxos tech report%
+  % \\
+  % this can be split up into
+  % \begin{itemize}
+  % \item (liveness) qourums -- in the main part
+  % \item entanglement (for safety) -- in the appendix
+  % \end{itemize}
+  condensed learner graph 
 }
 
 We fix a finite set of \emph{learners} \(𝕃\). %
@@ -862,7 +867,7 @@ that are “big enough” and consists of %
 “sufficiently relevant” validators % (according to a given learner) %
 such that learners would expect each of these validators sets %
 adequate for establishing consistency between pairs of \base[s]. %
-\todo{boy, is it hard to get these intuitions communicated }
+\todo{check again if this makes sense to the average person}
 
 If we want to be more precise, %
 we have to take into account that %
@@ -1216,7 +1221,7 @@ whose hashes will be included in blocks. %
 Availability will be achieved using a trivial erasure coding scheme, %
 along the lines of the Narwhal \Dag \cite{NT}. %
 The core information that workers provide to their primaries  %
-are hash references to transaction requests, 
+are hash references to batches of transaction requests, 
 accompanied with consecutive batch numbers and %
 signatures of (other) workers that commit to keeping the data available. %
 In this way,
@@ -1310,14 +1315,14 @@ or other direct signals to their workers.\xspace%
   \begin{description}
   \item[%
     %\code{???}%
-    {Transaction batching (\(\txs:= \txs:\tx\))}%
+    {Batching (\(\txs:= \txs:\tx\))}%
     ]%
     \xnote{[worker]}%
     Every worker stores the received transaction request to %
     \emph{the} current batch \txs, %
-    which is list of transaction requests. %
+    which is a list of transaction requests (initially empty). %
     % The worker adds the transaction request \tx to the current batch \txs. %
-    This happens unconditionally,
+    Batching happens unconditionally, % 
     \ie there is always a unique current transaction batch 
     and every transaction request has to be added to the current batch. %
     New batches may be created over time, %
@@ -1327,14 +1332,15 @@ or other direct signals to their workers.\xspace%
     the \emph{sequence number} of a transaction is 
     the position in the current batch. %
     Thus,
-    each transaction request by identified by
-    its \emph{batch}, \emph{sequence number} and the worker \textsc{id};
-    we shall refer to this as the \emph{fingerprint} of the transaction
-    request.\xspace%
+    each transaction request can be identified by %
+    its \emph{batch number}, %
+    \emph{sequence number} and %
+    the worker \textsc{id} %
+    of the worker that received the transaction request; %
+    we call this triple the \emph{fingerprint} of the transaction request.\xspace%
     \footnote{%
       The order of transactions within a batch %
-      might be permuted before execution %
-      to avoid potential \mev. 
+      might be permuted before execution to avoid \mev potential. %
     }
   \item[%
     \code{TxToAll}%
@@ -1344,8 +1350,11 @@ or other direct signals to their workers.\xspace%
       worker\\
       ⇒worker
     }%
-    If a worker receives a transaction request, % 
-    it will broadcast a copy to all mirror workers.
+    If a worker receives a transaction request, %
+    it will broadcast a copy to all mirror workers, %
+    unconditionally; % 
+    the copy of the received transaction request is broadcast together with its fingerprint.
+
     In principle,
     we could use arbitrary erasure coding schemes.
     However,
@@ -1355,8 +1364,6 @@ or other direct signals to their workers.\xspace%
     we visually distinguish the “copy” of a transaction
     from the “original” transaction supplied by the client, 
     using two different symbols, namely \tx\ and \es, respectively. %
-    When broadcasting copies of received transaction requests,
-    the message also includes the fingerprint of the transaction request.
     \todo{and possibly time stamping information}
   \item[%
     \code{WHxToAll,WorkerHx}%
@@ -1369,18 +1376,6 @@ or other direct signals to their workers.\xspace%
     When a worker receives a transaction request,
     this might trigger a new worker hash to be produced. %
     %(if it is “time”    to do so).
-    In principle,
-    the decision for when to send it is for the worker to decide %  
-    (as long as each worker hash contains at least one transaction %
-    and does not exceed a potential maximum size).\xspace%
-    \footnote{%
-      \label{fn:time}
-      At which exact moment worker hashes are compiled can depend on several
-      factors, 
-      \eg on a maximum number of transaction requests per worker hash 
-      or a maximum delay between the first and the last transaction request within a worker hash.
-    } %
-
     {}\code{WorkerHashData,WorkerHashSignature}%
     The new worker hash consists of
     \begin{itemize}
@@ -1403,11 +1398,23 @@ or other direct signals to their workers.\xspace%
       }
     \end{enumerate}%
 
+    In principle, %
+    the decision for %
+    when to produce and send a new worker hash is made by the worker %
+    (as long as each worker hash contains at least one transaction %
+    and does not exceed a potential maximum size).\xspace%
+    At which exact moment worker hashes are compiled can depend on %
+    several factors, %
+    \eg on a maximum number of transaction requests per worker hash  %
+    or a maximum delay between %
+    the first and the last transaction request within a worker hash. %
+
   \item[\code{MessageEnum::TxAck}
     Transaction request acknowledgment]
     Optionally, %
-    one may acknowledge the client's requests. 
-    \todo[inline,size=normalsize,color=SkyBlue]{%
+    one may acknowledge the client's requests, %
+    say by a signature of the transaction data and a worker local time stamp. %
+    \endnote{%
       In the
       \href{https://github.com/anoma/typhon/tree/hnarwhal-stateright/hn-stateright/heterogeneous_narwhal}%
       {code},
@@ -1449,31 +1456,32 @@ or other direct signals to their workers.\xspace%
     \item the batch number of the batch to which it belongs, and
     \item the sequence number within the batch to which it belongs.
     \end{itemize}
-    Note that copies of transactions are \emph{not} signed by the worker. %
-    Signatures are deferred to worker hash broadcast. % 
-    Storing transaction copies as above will be useful %
-    for handling “foreign” worker hashes, %
-    \ie worker hashes that refer to transactions that are collected at other
-    workers. 
-    \begin{description}
 
-  \item[\code{WHxFwd}{Worker hash forwarding (\es!\wh[]↑)}] 
+    Note that copies of transactions are unsigned. %
+    Signatures are deferred to the corresponding worker hash. %
+    Moreover,
+    storing transaction copies to be retrievable via their fingerprint %
+    will be useful for handling “foreign” worker hashes, %
+    \ie worker hashes that refer to transactions that are collected by mirror workers.%
+    \begin{description}
+    \item[\code{WHxFwd}{Worker hash forwarding ({\es!\wh[]↑})}] 
     \xnote{%
       worker\\
       →primary%
     }
-    In case, %
-    the transaction was the last missing one to match a previously received worker hash, %
-    the worker hash is send to its primary.
-    The (pre-)condition\xspace%
+    If the received transaction copy was %
+    the last missing one to match a previously received worker hash, %
+    the receiving worker sends the worker hash to its primary. %
+    The \mbox{(pre-)}\allowbreak condition\xspace%
     \todo{%
       This terminology clashes. What else? 
       “triggering condition” ?!
-    } is that all transactions that are referenced in the worker
+    }%
+    is that all transactions that are referenced in the worker
     hash have already been received and stored.\xspace%
     \footnote{%
-      This might be unexpected order of events,
-      but the sending of transaction data might be “delayed”. 
+      This might be an unexpected order of events, %
+      but the sending of transaction data might be “delayed”. %
     } 
   \end{description}
 
@@ -1522,13 +1530,14 @@ or other direct signals to their workers.\xspace%
     worker\\%
     ← worker%
   }
-  When a worker receives a worker hash from a mirror worker %
-  there are two cases:
-  either it has already has received all the referenced transaction copies
-  (and can forward the worker hash to its primary) 
+  When a worker receives a worker hash from a mirror worker, %
+  it first checks the signature and then responds %
+  according to the following two cases: %
+  either it has already has received all the referenced transaction copies %
+  (and can forward the worker hash to its primary) %
   or it has to store the worker hash
-  (and the worker hash forwarding will be triggered by the last transaction
-  copy).\endnote{%
+  (and the worker hash forwarding will be triggered by the last transaction copy).%
+  \endnote{%
     Well, and how long are we gonna wait for missing transactions of worker hashes?
   }
   \begin{description}
@@ -1547,11 +1556,29 @@ or other direct signals to their workers.\xspace%
 
 We have described the protocol in terms of %
 what workers do in reaction to \emph{receiving} messages. %
-This emphasizes that sending a message might be due to several, slightly
-different types of scenarios %
-(depending of which message from a \emph{set} of triggering messages arrives
-last and thus becomes {the} final trigger). %
-
+Thus, %
+sending a message might be due to several, slightly different types of scenarios %
+(depending on which message from %
+a \emph{set} of triggering messages arrives last and %
+thus becomes {the} trigger). %
+Note that there is a duplication in actions to be taken in response to %
+a received message, %
+which can be avoided by collecting all potential triggers of a message; %
+we shall combine %
+\((\es)\)!\wh↑ and \((\wh[])\)!\wh↑) into \((\wh[] / \es)\)!\wh↑. %
+Thus, the forwarding of worker hashes is then described succinctly as follows. 
+\begin{description}
+\item[%
+  \code{MessageEnum::WHxFwd}%
+  Worker hash forwarding {(\((\wh[] / \es)\))}%
+  ]
+  \xnote{worker\\ → primary} 
+  If a worker has already stored the transactions of a received worker hash, %
+  it sends the worker hash to its primary.\footnote{%
+    Validators will use this information
+    to send availability commitments to block headers of other primaries.
+  }
+\end{description}
 
 \begin{figure}[htb]
   \centering
@@ -1736,13 +1763,10 @@ last and thus becomes {the} final trigger). %
   on a “first come, first served” basis
 }
 
+\endnote{
+  we might want a section on {Execution support} eventually
+}
 
-
-
-\subsection{Execution support protocol}
-\label{sec:exe-supp-protocol}
-
-\todo{todo!}
 \section{Primary actions}
 \label{sec:primary-actions}
 
@@ -1767,15 +1791,12 @@ In the protocol description for validators, %
 we avoid copying text if a message has several triggers
 by simply listing the alternative triggers of a message
 (after the “default” trigger).
-For the pure availability protocol for workers,
-this would lead to a single heading
-for worker hash forwarding.
-\begin{center}
-  \bf{Worker hash forwarding (\((\wh[] / \es)\)!\wh↑)}
-\end{center}
-So,
-the primary trigger for worker hash forwarding are worker hashes,
-but transaction copies are alternative triggers  %
+% For the pure availability protocol for workers,
+% this would lead to a single heading
+% for worker hash forwarding.
+We have seen this already in the worker protocol, %
+where the primary trigger for worker hash forwarding are worker hashes, %
+but transaction copies are alternative triggers %
 (in cases of message delay irregularities). %
 
 
@@ -1792,7 +1813,8 @@ but transaction copies are alternative triggers  %
     ←worker
   }%
   When a worker hash (that was compiled by a local worker) is received,
-  the primary adds the worker hash to the current list of worker hashes \whs.
+  the primary adds the worker hash to the current list of worker hashes \whs
+  (initially empty). 
 
   \begin{description}
   \item[\code{NextHeader}{Header announcement (\wh!\hd[]⇒)}]%
@@ -1800,13 +1822,15 @@ but transaction copies are alternative triggers  %
       primary \\
       ⇒primary
     }
-    The primary may announce the next header %
-    (if the primary considers it is “time” to do so---cf.\ Footnote~\ref{fn:time}).
+    The primary may\footnote{%
+      This depends on when the primary considers it is “time” to do so. %
+    }
+    announce the next header %
     The genesis header consists of
     the current list of worker hashes,
     tagged with the identifier of the primary;
     the round number zero is implicit.
-    The message of the batch announcement only contains
+    The message of the header announcement only contains
     the \emph{fingerprint} of a header, namely 
     \begin{itemize}
     \item the identifier of the primary
@@ -1870,16 +1894,17 @@ but transaction copies are alternative triggers  %
     ←worker
   }%
   When a worker hash that stems from a worker on a different validator is received, %
-  the primary adds the worker hash to the current list of known worker hashes. %
+  the primary adds the worker hash to the current set of known worker hashes %
+  (initially empty).
   % Primaries keep a set of \emph{active} worker hashes for each validator %
   % and also a set of worker hash fingerprints. %
 
   \begin{description}
-  \item[{Header signature commitment (\wh[]!\(\hd_{\sim}\)→)}] %
+  \item[{Header commitment (\wh[]!\(\hd_{\sim}\)→)}] %
     \xnote{primary\\
       →primary
     }
-    If the received worker hash completes the list of known worker hashes
+    If the received worker hash completes the set of known worker hashes
     to match a previously received header fingerprint, %
     the primary commits to the header by 
     signing the header
@@ -1904,7 +1929,7 @@ but transaction copies are alternative triggers  %
 %   and sending the signed header to the creator
 %   (for the purpose of aggregation into availability certificates).
 
-\item[{Header announcement (\(\hd[]^*\)←)}] %
+\item[{Header reception (\(\hd[]^*\)←)}] %
   \xnote{%
     primary\\
     ←primary
@@ -1916,7 +1941,7 @@ but transaction copies are alternative triggers  %
   received data are consistent with the local observations. 
 
   \begin{description}
-  \item[{Header signature commitment (\(\hd[]^*!\hd_{\sim}\)→)}] %
+  \item[{Header commitment (\(\hd[]^*!\hd_{\sim}\)→)}] %
     \xnote{%
       primary\\
       →primary
@@ -1941,10 +1966,7 @@ but transaction copies are alternative triggers  %
   The signature of a received availability commitment
   is either stored or added to the aggregated signature “under construction”,
   leading towards a certificate of availability. %
-  If the received signature completes a global quorum, %
-  it triggers the broadcasting of %
-  the completed aggregated signature, %
-  \ie the certificate of availability. % 
+
 
   \begin{description}
   \item[{Availability certificate broadcast %
@@ -1953,9 +1975,10 @@ but transaction copies are alternative triggers  %
     \xnote{primary\\
       ⇒primary
     }
-    If the received commitment completes a global weak quorum for
-    its genesis header,
-    it broadcasts the certificate of availability. 
+    If the received signature completes a global weak quorum, %
+    it triggers the broadcasting of %
+    the completed aggregated signature, %
+    \ie the certificate of availability. % 
   \end{description}
 
 % \item[optional header distribution]
@@ -2000,7 +2023,7 @@ but transaction copies are alternative triggers  %
 A (partial) execution of the availability protocol at genesis is
 illustrated in \fig\ref{fig:availability-protocol}.
 Also, %
-note that in some exceptional circumstances,
+note that in some circumstances,
 a received header signature \(\hdₚ\) might also need 
 action according to the integrity protocol,
 as explained next. 
@@ -2026,7 +2049,7 @@ the integrity-protocol re-uses the sending of signed headers~\(\hdₚ\) to the c
 (from the availability-protocol)
 as a commitment of the signer to
 one unique header for the  validator (and round),
-namely the first one signed and sent.
+typically the first one sent. %
 Thus,
 correct validators will not sign and send any other header
 from the creator of the header (for the same round).
@@ -2044,11 +2067,12 @@ from the creator of the header (for the same round).
 
 The availability protocol for primaries will use
 counterparts to blocks in Narwhal~\cite{NT}, %
-which come with  references to a quorum of blocks,   
-namely \emph{learner-specific blocks} 
-and \emph{signed block quorums}, defined as follows:  
+which include  references to a quorum of blocks. %
+We have \emph{learner-specific blocks}, %
+which contain \emph{signed block quorums}, %
+defined as follows:  
 a \emph{learner-specific block} is a block header signed by a learner-specific quorum
-and a \emph{signed quorum} is a quorum of blocks signed by a primary.
+and a \emph{signed quorum} is a quorum of blocks signed by a primary. %
 Finally,
 a \emph{typical header},
 \ie one after genesis,
@@ -2058,11 +2082,13 @@ consists of
 \item a list of worker hashes
 \item an availability certificate for the previous header of the same primary
 \item the round number 
-\item a non-empty\todo{discuss with isaac} list of signed quorums,
+\item a list of signed quorums,\endnote{%
+    how can we ensure in theory that we make progress ?
+  }
   at most one per learner. 
 \end{itemize}
 The first two items were already present in genesis block headers
-while the remaining three only come into play in later rounds. 
+while the remaining three come into play in later rounds. 
 With these definitions in place,
 we can describe the primary actions in the availability protocol. 
 
@@ -2270,7 +2296,7 @@ All other responses to messages are verbatim the same as at genesis.
     primary\\%
     ←primary%
   }
-  If a received learner-specific blocks completes a quorum of block
+  If a received learner-specific blocks completes a quorum of blocks
   (for the same learner)
   and they all carry the same round number, 
   the primary signs and broadcasts the quorum 
@@ -2287,7 +2313,7 @@ All other responses to messages are verbatim the same as at genesis.
     }
     Under the stated conditions,
     the primary signs a list of quorums
-    (in the order that they were received)
+    (\eg in the order that they were received)
     and broadcasts them to all primaries. % 
     \todo{do we have to “throw in ” the round number (?)
       wouldn't hurt a lot, but if we don't need it, we don't need it ... 
@@ -2296,8 +2322,8 @@ All other responses to messages are verbatim the same as at genesis.
       What exactly is the connection to reliable broadcast here?
     }
   \item[Header announcement (\((\bk/\wh/\ac)\)!\(\hd^*\)⇒)]
-    If the primary has already enough worker hashes for a new block header, 
-    it has an availability certificate of its previous header
+    If the primary has already enough worker hashes for a new block header, %
+    it has an availability certificate of its previous header%
     \todo{this should be the trigger for increasing the primaries round number}, 
     and the produced signed quorum the first one it knows of,
     a new block header is announced by broadcasting its fingerprint. 
@@ -2306,7 +2332,7 @@ All other responses to messages are verbatim the same as at genesis.
     \begin{itemize}
     \item
       the availability certificate of the previous header
-      (collected by the same primary)
+      (announced by the same primary)
     \item
       a non-empty list of hashes of signed quorums sent by the same primary,
       but at most one per learner
@@ -2322,7 +2348,7 @@ All other responses to messages are verbatim the same as at genesis.
     \item the availability certificate being the missing data,
       which then leads to all
       signed quorums (of maximal learner-specific heights),
-      and as many worker hashes as possible. 
+      and as many worker hashes as allowed to be included in the header. %
     \end{itemize}
   \end{description}
 % \item[Generating and broadcasting signed quorums]
@@ -2376,7 +2402,7 @@ blocks from the previous round—in a learner-specific \Dag).
 As a consequence,
 casting an availability vote / sending a commitment message
 \todo{discuss terminnolgy}
-becomes a recursive commitment
+becomes a chain of commitments
 to storing all blocks until genesis
 (or the last block that some of learners might still want available).
 
@@ -2571,17 +2597,17 @@ is as follows: %
   ... once we have that fixed
 }
 
-\section{Comparison with Narwhal}
-\label{sec:comp-narwhal}
-Let us see how the special case of a single learner amounts to %
-a slightly more complicated version of Narwhal.
-For workers nothing really chances.
-Note that due to the restriction that a new block header %
-has to contain at least one signed quorum (and at most one),
-this means that every new header must contain a signed quorum;
-moreover,
-the signed quorum is a quorum of signatures for %
-a previous block of the unique learner. %
+% \section{Comparison with Narwhal}
+% \label{sec:comp-narwhal}
+% Let us see how the special case of a single learner amounts to %
+% a slightly more complicated version of Narwhal.
+% For workers nothing really chances.
+% Note that due to the restriction that a new block header %
+% has to contain at least one signed quorum (and at most one),
+% this means that every new header must contain a signed quorum;
+% moreover,
+% the signed quorum is a quorum of signatures for %
+% a previous block of the unique learner. %
 
 
 \section{The anchor block sequence}
@@ -2665,6 +2691,7 @@ adding anchor blocks for the respective learner is most rewarding. %
 
 \section{Conclusion}
 \label{sec:conclusion}
+\label{sec:discussion}
 \todo[caption={}]{%
   Add to the conclusion sth. like : 
   \itshape In a follow up paper,
@@ -2678,7 +2705,6 @@ adding anchor blocks for the respective learner is most rewarding. %
   cf. (on page~\pageref{page:firstpage}):
   \textsc{not} part of this paper ...
 }
-
 
 \printbibliography
 
